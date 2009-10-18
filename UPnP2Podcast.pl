@@ -18,126 +18,70 @@
 ##---------------------------------------------------------------------------##
 #! /user/bin/perl
 #
-use strict;
+  use strict;
 ##### Import libraries
-    use Encode qw(encode decode);
-    use utf8;
-    use Net::UPnP::ControlPoint;
-    use Net::UPnP::AV::MediaServer;
-    
-    my @months = qw(Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec);
-    my @weekDays = qw(Sun Mon Tue Wed Thu Fri Sat Sun);
-    
-    # Get the directory the script is being called from
-    my $executable = $0;
-    $executable =~ m#(\\|\/)(([^\\/]*)\.([a-zA-Z0-9]{2,}))$#;;
-    my $executablePath = $`;
-    my $executableEXE  = $3; 
+  use Encode qw(encode decode);
+  use utf8;
+  use LWP::Simple;
+  use MD5;
+  use Net::UPnP::ControlPoint;
+  use Net::UPnP::AV::MediaServer;
 
-    # Code version
-    my $codeVersion = "$executableEXE v1.2";
-    
-    my $invalidMsg .= "\n$codeVersion\n";
-    $invalidMsg .= "\tUSAGE:";
-    $invalidMsg .= "\t$executableEXE.exe (UPnP Search String)\n\n";
-
-    
-my $feed_begin = <<FEED_BEGIN;
-<rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd"
-  xmlns:content="http://purl.org/rss/1.0/modules/content/">
-  <channel> 
-    <title>%%FEED_TITLE%%</title> 
-    <description>$codeVersion @ARGV</description> 
-    <language>en-us</language> 
-    <itunes:summary>%%FEED_DESCRIPTION%%</itunes:summary> 
-    <itunes:subtitle>%%FEED_DESCRIPTION%%</itunes:subtitle> 
-FEED_BEGIN
-#		<image> 
-#			<title>%%FEED_IMAGE%%</title> 
-#			<url>%%FEED_IMAGE_URL%%</url> 
-#		</image> 
-
-my $item = <<'PODCAST_ITEM';
-    <item> 
-      <title>%%ITEM_TITLE%%</title> 
-      <description>%%ITEM_DESCRIPTION%%</description> 
-      <pubDate>%%ITEM_DATE%%</pubDate> 
-      <itunes:subtitle>%%ITEM_DESCRIPTION%%</itunes:subtitle>
-      <itunes:duration>%%ITEM_DUR%%</itunes:duration>
-      <enclosure url="%%ITEM_URL%%" length="%%ITEM_SIZE%%" type="video/mpeg2" /> 
-      <media:content duration="%%ITEM_DUR_SEC%%" medium="video" fileSize="%%ITEM_SIZE%%" url="%%ITEM_URL%%" type="video/mpeg2"> 
-       <media:title>%%ITEM_TITLE%%</media:title> 
-        <media:description>%%ITEM_DESCRIPTION%%</media:description> 
-        <media:thumbnail url="%%ITEM_PICTURE%%"/> 
-      </media:content> 
-    </item> 
-PODCAST_ITEM
-
-my $noItemFoundDescription = "There were no videos found with the search string ($ARGV[0]).  Since online videos are constantly being removed and added this probably indicates that there are none available at this time.";
-if ($ARGV[0] !~ /playon:(hulu|netflix|cbs|cnn|espn|amazon|youtube)/i)
-{
-    $noItemFoundDescription .= "  This item also doesn't appears to be looking for content from PlayOn's built in sources (hulu|netflix|cbs|cnn|espn|amazon|youtube) and might require a plug-in that you don't have installed (http://www.playonplugins.com/)."    
-}
-my $noItemFound = <<PODCAST_NO_ITEM;
-    <item> 
-      <title>No Videos Found</title> 
-      <description>$noItemFoundDescription</description> 
-      <itunes:subtitle>No Videos Found</itunes:subtitle>
-      <itunes:duration>00:01:00</itunes:duration>
-      <enclosure url="http://127.0.0.1/fake.mpg" length="10000" type="video/mpeg2" /> 
-      <media:content duration="60" medium="video" fileSize="10000" url="http://127.0.0.1/fake.mpg" type="video/mpeg2"> 
-        <media:title>No Videos Found</media:title> 
-        <media:description>No Videos Found</media:description>
-        <media:thumbnail url="http://127.0.0.1/fake.jpg"/>  
-      </media:content> 
-    </item> 
-PODCAST_NO_ITEM
-
-my $noItemFail= <<PODCAST_FAIL_ITEM;
-    <item> 
-      <title>No Videos Found</title> 
-      <description>%%ITEM_DESCRIPTION%%</description> 
-      <itunes:subtitle>%%ITEM_DESCRIPTION%%</itunes:subtitle>
-      <itunes:duration>00:00:00/itunes:duration>
-      <enclosure url="http://127.0.0.1/fake.mpg" length="0" type="video/mpeg2" /> 
-      <media:content duration="0" medium="video" fileSize="0" url="http://127.0.0.1/fake.mpg" type="video/mpeg2"> 
-       <media:title>No Videos Found</media:title> 
-      <media:description>%%ITEM_DESCRIPTION%%</media:description> 
-      </media:content> 
-    </item> 
-PODCAST_FAIL_ITEM
-
-my $feed_end = <<'FEED_END';
-  </channel> 
-</rss> 
-FEED_END
-
-    
-    # Move arguments into user array so we can modify it
-    my @parameters = @ARGV;
-    my $obj = Net::UPnP::ControlPoint->new();
-    my $mediaServer = Net::UPnP::AV::MediaServer->new();    
+  # Get the directory the script is being called from
+  my $executable = $0;
+  $executable =~ m#(\\|\/)(([^\\/]*)\.([a-zA-Z0-9]{2,}))$#;
+  my $executablePath = $`;
+  my $executableEXE  = $3; 
   
-    my $podcastFeed  = "";
-    my %podcastItems = ();
-    my $opening      = ""; 
-      
-    if (@parameters > 2 || @parameters < 1)
-    {
-        print stderr $invalidMsg;
-        my $errorDescription = "UPnP2Podcast Usage Error (@ARGV)";
-        $noItemFail =~ s/%%ITEM_DESCRIPTION%%/$errorDescription/g;
-        print $feed_begin . $noItemFail . $feed_end;
-        exit;
-    }
- 
-    my $userInput = $parameters[0]; 
-    my @searchStrings = split("&&",$userInput);
-    my @dev_list = $obj->search();
+  open(LOGFILE,">$executablePath\\$executableEXE.log");
+
+  # Code version
+  my $codeVersion = "$executableEXE v1.5dev";
+  
+  my $invalidMsg .= "\n$codeVersion\n";
+  $invalidMsg .= "\tUSAGE:";
+  $invalidMsg .= "\t$executableEXE.exe (UPnP Search String)\n\n";
+
+  # Move arguments into user array so we can modify it
+  my @parameters = @ARGV;
+
+  my ($feed_begin, $item, $fakeItem, $feed_end) = populateFeedStrings();
+    
+  if (!(-e 'tinFoilHat.txt') && (@parameters == 0 || int(rand(10)) >= 5))
+  {
+      print LOGFILE "  + Checking for feed updates\n";
+      my $updateSuccess =  updateFeedFiles($executablePath);
+      if (@parameters == 0)
+      {
+          if ($updateSuccess)
+          {
+              $fakeItem =~ s/%%ITEM_TITLE%%/Feeds Updated/g;
+              $fakeItem =~ s/%%ITEM_DESCRIPTION%%/Updated feed files.  Exit and re-enter the Online Services Menu to refres/g;     
+          }
+          else
+          {
+              $fakeItem =~ s/%%ITEM_TITLE%%/No Updates Found/g;
+              $fakeItem =~ s/%%ITEM_DESCRIPTION%%/There were no feed updates available at this time/g;           
+          }
+          print $feed_begin . $fakeItem . $feed_end;
+          exit
+      }
+  }
+
+  my $obj = Net::UPnP::ControlPoint->new();
+  my $mediaServer = Net::UPnP::AV::MediaServer->new();    
+
+  my $podcastFeed  = "";
+  my %podcastItems = ();
+  my $opening      = ""; 
+
+  my $userInput = $parameters[0]; 
+  my @searchStrings = split("&&",$userInput);
+  my @dev_list = $obj->search();
              
     foreach (@searchStrings)    
     {
-        print stderr "  + Search String: $_\n"; 
+        print LOGFILE "  + Search String: $_\n"; 
         my @splitString = split(":",$_);   
         
         my %contents = {};
@@ -147,16 +91,16 @@ FEED_END
         my $lookingFor = shift(@splitString);
         my $foundDevice = 0;
         
-        print stderr "    - Looking for UPnP Server: $lookingFor\n";
+        print LOGFILE "    - Looking for UPnP Server: $lookingFor\n";
         foreach (@dev_list)
         {
             chomp;
-            print stderr "      + Device: ".$_->getfriendlyname()."(".$_->getdevicetype().")\n";
+            print LOGFILE "      + Device: ".$_->getfriendlyname()."(".$_->getdevicetype().")\n";
             if ($_->getfriendlyname() =~ /$lookingFor/i)
             {
                 $mediaServer->setdevice($_);
                 $foundDevice = 1;
-                print stderr "        - Found $lookingFor\n"; 
+                print LOGFILE "        - Found $lookingFor\n"; 
                 my $dirPath = $_->getfriendlyname()."\\";
                 last;
             }
@@ -165,7 +109,7 @@ FEED_END
         
         if (!$foundDevice)
         {
-            print stderr "  ! Error! Couldn't find UPnP Device: ($lookingFor)\n";
+            print LOGFILE "  ! Error! Couldn't find UPnP Device: ($lookingFor)\n";
             next;
         }
         
@@ -183,7 +127,7 @@ FEED_END
             
             if ($lastContent)
             {
-                print stderr "GetContent from: ".$lastContent->gettitle()." ($id)\n";
+                print LOGFILE "GetContent from: ".$lastContent->gettitle()." ($id)\n";
             }
             my @content_list = $mediaServer->getcontentlist(ObjectID => $id);
             
@@ -200,15 +144,15 @@ FEED_END
             }
 
             # Loop through content list to find next folder
-            print stderr "    - Current Dir: $dirPath\n";  
-            print stderr "      + Looking For: $lookingFor\n";
-            print stderr "      + Listing Directory:\n";
+            print LOGFILE "    - Current Dir: $dirPath\n";  
+            print LOGFILE "      + Looking For: $lookingFor\n";
+            print LOGFILE "      + Listing Directory:\n";
             my $content;   
             foreach $content (@content_list) 
             {
                 if ($content->gettitle() =~ /$lookingFor/i)
                 { 
-                    print stderr getTheTime()."      ***";  
+                    print LOGFILE getTheTime()."      ***";  
                     $newId = $content->getid();
                     $lastContent = $content;
                     $dirPath .= $content->gettitle()."\\";
@@ -216,15 +160,15 @@ FEED_END
                 }   
                 else
                 {
-                    print stderr getTheTime()."        -";    
+                    print LOGFILE getTheTime()."        -";    
                 }          
-                print stderr " \\".$content->gettitle();
-                print stderr "\n";
+                print LOGFILE " \\".$content->gettitle();
+                print LOGFILE "\n";
             }
             
             if ($newId eq $id)
             {
-                print stderr getTheTime()."      ! Fail couldn't find ($lookingFor)\n";
+                print LOGFILE getTheTime()."      ! Fail couldn't find ($lookingFor)\n";
                 $error    = 1;
                 last;
             }
@@ -242,12 +186,12 @@ FEED_END
                 $opening =~ s/%%FEED_DESCRIPTION%%/$title/sg;
             }
            
-            print stderr getTheTime()."    - Success!\n";
-            print stderr getTheTime()."      + Found Directory: $dirPath\n";
-            print stderr getTheTime()."        - Searching ($depth) folders deep for video content\n";
+            print LOGFILE getTheTime()."    - Success!\n";
+            print LOGFILE getTheTime()."      + Found Directory: $dirPath\n";
+            print LOGFILE getTheTime()."        - Searching ($depth) folders deep for video content\n";
             if (!($filter eq ""))
             {
-                print stderr getTheTime()."        - Filtering results: ($filter)\n";
+                print LOGFILE getTheTime()."        - Filtering results: ($filter)\n";
             }
             print_content($mediaServer, $lastContent, 1, $depth, $filter);
         }
@@ -268,20 +212,24 @@ FEED_END
         {  # sort hashes alphabetically
             $podcastFeed .= $podcastItems{$_};
         }
+        updateRecentPodcasts($executablePath,$parameters[0]);
     }
     else
     {   # If no videos were found
-        $podcastFeed .= $noItemFound;    
+        my $failureDescription = "No videos found for UPnP search string ($parameters[0]).  Since online videos are constantly being added and removed this could mean that there are just no videos available at this time. (This message is from the UPnP2Podcast Plug-in)";
+        $fakeItem =~ s/%%ITEM_TITLE%%/No Videos Found/g;
+        $fakeItem =~ s/%%ITEM_DESCRIPTION%%/$failureDescription/g;   
+        $podcastFeed .= $fakeItem;    
     }
 
     $podcastFeed .= $feed_end;
 
-    print $podcastFeed;  
+    print encode("utf8", $podcastFeed);  
  
      sub addItem {
         my ($content) = @_;
         my $id    = $content->getid();
-        my $title = $content->gettitle();
+        my $title = decode('utf8' ,$content->gettitle());
         my $url   = $content->geturl();
         my $size  = $content->getSize();
         my $date  = $content->getdate();
@@ -289,7 +237,7 @@ FEED_END
         my $userRating  = $content->getUserRating();
         my $dur  = $content->getDur();
         my $screenShot  = $content->getPicture();
-        my $desc = $content->getDesc();
+        my $desc = decode('utf8' ,$content->getDesc());
         my $newItem = $item;
 
         if ($title =~ /s([0-9]+)e([0-9]+): (.*)/)
@@ -361,47 +309,47 @@ FEED_END
             return;
         }
 
-        #print stderr getTheTime()."  ! Depth($depth), Title ($title), Filter ($filter)\n";
+        #print LOGFILE getTheTime()."  ! Depth($depth), Title ($title), Filter ($filter)\n";
         #if ($content->isitem() && ($title =~ /$filter/ || $filter eq ""))
         #{
-            print stderr getTheTime()." ";  
+            print LOGFILE getTheTime()." ";  
             for (my $n=0; $n<$indent; $n++) {
-                print stderr getTheTime()."  ";
+                print LOGFILE getTheTime()."  ";
             }
             if ($n % 2)
             {
-                print stderr getTheTime()." +";
+                print LOGFILE getTheTime()." +";
             }
             else
             {
-                print stderr getTheTime()." -";
+                print LOGFILE getTheTime()." -";
             }        
             
-            print stderr getTheTime()." \\$title";
+            print LOGFILE getTheTime()." \\$title";
             if ($content->isitem()) {
-                print stderr getTheTime()." (" . $content->geturl();
+                print LOGFILE getTheTime()." (" . $content->geturl();
                 if (length($content->getdate())) {
-                    print stderr getTheTime()." - " . $content->getdate();
+                    print LOGFILE getTheTime()." - " . $content->getdate();
                 }
-                print stderr getTheTime()." - " . $content->getcontenttype() . ")";
+                print LOGFILE getTheTime()." - " . $content->getcontenttype() . ")";
                 if ($title =~ /$filter/ || $filter eq "")
                 {
                     addItem($content);
                 }
             }
-            print stderr getTheTime()."\n";
-            #print stderr getTheTime()." ! ($filterRegExCapture)\n";
+            print LOGFILE getTheTime()."\n";
+            #print LOGFILE getTheTime()." ! ($filterRegExCapture)\n";
         #}
         $depth--;
         
         unless ($content->iscontainer()) {
-            #print stderr getTheTime()." ! Return: Not Container\n";
+            #print LOGFILE getTheTime()." ! Return: Not Container\n";
             return;
         }
         #print "GetContent from: $title ($id)\n";
         my @child_content_list = $mediaServer->getcontentlist(ObjectID => $id );
         if (@child_content_list <= 0) {
-            print stderr getTheTime()." ! Return: no children (@child_content_list)($id)\n";
+            print LOGFILE getTheTime()." ! Return: no children (@child_content_list)($id)\n";
             return;
         }
         $indent++;
@@ -417,4 +365,289 @@ FEED_END
         #$theTime = "$hour:$minute:$second: ";
         return "";#$theTime;
     }
+
+  sub updateFeedFiles()
+  {
+    my ($executablePath) = @_;
+    my $rv = 0;  
+    # URL of file containing feed versions
+    my $feedPath       = "$executablePath\\STVs\\SageTV3\\OnlineVideos\\";
+    my $feedVersionURL = 'http://upnp2podcast.googlecode.com/svn/trunk/FeedVersions.txt';
+    my ($updateFile, $propFileName, $propFileVersion, 
+        $propFileMD5, $propFileURL, $topLine, $currentVersion,
+        $updatedMD5);
+    $feedVersionURL    =~ /http:\/\/[^\/]/;
+    my $feedBaseURL    = $&;
+
+    my $content = get $feedVersionURL;
+    if (defined $content)
+    {
+        print LOGFILE "  + Downloaded FeedVersions.txt (".MD5->hexhash($content)."), checking for updates\n";
+        my @content = split(/\n/,$content);
+        foreach (@content)
+        {
+            $updateFile      = 0;
+            if (/(.*),(.*),(.*),(.*)/)
+            {
+                ($propFileName, $propFileVersion, $propFileMD5, $propFileURL) = ($1,$2,$3,$4);
+                print LOGFILE "    - File      : $propFileName\n";
+                print LOGFILE "      - Version : $propFileVersion\n";
+                print LOGFILE "      - URL     : $propFileURL\n";
+                print LOGFILE "      - MD5     : $propFileMD5\n";
+                
+                if ($propFileURL =~ /\Q^$feedBaseURL\E/ || 1)
+                {   # Make sure it comes from my google code account
+                    if (-e "$feedPath\\$propFileName")
+                    {
+                        open(FEED,"$feedPath\\$propFileName");
+                        $topLine = <FEED>;
+                        chomp($topLine);
+                        close(FEED);
+                        $currentVersion = "";
+                        if ($topLine =~ /Version=([0-9]+)/i)
+                        {
+                            $currentVersion = $1;
+                        }
+                        print LOGFILE "      - Local Version : $currentVersion\n";
+                        if ($propFileVersion > $currentVersion)
+                        {
+                            $updateFile = 1;    
+                        }
+                    }
+                    else
+                    {
+                        $updateFile = 1;
+                    }
+                }
+                if ($updateFile)
+                {
+                    print LOGFILE "      - Updating File!\n";             
+                    $content = get $propFileURL;
+                    if (!($content eq ""))
+                    {
+                        $content =~ s/\r//g;
+                        $updatedMD5 = MD5->hexhash($content);
+                        print LOGFILE "        + MD5 URL : $updatedMD5 ($propFileMD5)\n";
+                        if ($updatedMD5 eq $propFileMD5)
+                        {
+                            open(FEED,">$feedPath\\$propFileName");
+                            print FEED $content;
+                            close(FEED);
+                            $rv++;
+                        }
+                        else
+                        {
+                            print LOGFILE "        - MD5 check failed, skipping!\n";    
+                        }
+                    }
+                } 
+            }
+        }  
+    }
+    else
+    {
+        print LOGFILE "  ! Failed to get FeedVersions.txt, skipping updates\n";
+    } 
+    return $rv;   
+  }
+
+  sub populateFeedStrings()
+  {
+    my $feed_begin = <<FEED_BEGIN;
+<rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd"
+  xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel> 
+    <title>%%FEED_TITLE%%</title> 
+    <description>$codeVersion @ARGV</description> 
+    <language>en-us</language> 
+    <itunes:summary>%%FEED_DESCRIPTION%%</itunes:summary> 
+    <itunes:subtitle>%%FEED_DESCRIPTION%%</itunes:subtitle> 
+FEED_BEGIN
+#		<image> 
+#			<title>%%FEED_IMAGE%%</title> 
+#			<url>%%FEED_IMAGE_URL%%</url> 
+#		</image> 
+
+    my $item = <<'PODCAST_ITEM';
+    <item> 
+      <title>%%ITEM_TITLE%%</title> 
+      <description>%%ITEM_DESCRIPTION%%</description> 
+      <pubDate>%%ITEM_DATE%%</pubDate> 
+      <itunes:subtitle>%%ITEM_DESCRIPTION%%</itunes:subtitle>
+      <itunes:duration>%%ITEM_DUR%%</itunes:duration>
+      <enclosure url="%%ITEM_URL%%" length="%%ITEM_SIZE%%" type="video/mpeg2" /> 
+      <media:content duration="%%ITEM_DUR_SEC%%" medium="video" fileSize="%%ITEM_SIZE%%" url="%%ITEM_URL%%" type="video/mpeg2"> 
+       <media:title>%%ITEM_TITLE%%</media:title> 
+        <media:description>%%ITEM_DESCRIPTION%%</media:description> 
+        <media:thumbnail url="%%ITEM_PICTURE%%"/> 
+      </media:content> 
+    </item> 
+PODCAST_ITEM
+
+    my $fakeItem = <<PODCAST_FAKE_ITEM;
+    <item> 
+      <title>%%ITEM_TITLE%%</title> 
+      <description>%%ITEM_DESCRIPTION%%</description> 
+      <itunes:subtitle>%%ITEM_DESCRIPTION%%</itunes:subtitle>
+      <itunes:duration>00:01:00</itunes:duration>
+      <enclosure url="http://127.0.0.1/fake.mpg" length="10000" type="video/mpeg2" /> 
+      <media:content duration="60" medium="video" fileSize="10000" url="http://127.0.0.1/fake.mpg" type="video/mpeg2"> 
+        <media:title>%%ITEM_TITLE%%</media:title> 
+        <media:description>%%ITEM_DESCRIPTION%%<</media:description>
+        <media:thumbnail url="http://127.0.0.1/fake.jpg"/>  
+      </media:content> 
+    </item> 
+PODCAST_FAKE_ITEM
+
+    my $feed_end = <<'FEED_END';
+  </channel> 
+</rss> 
+FEED_END
+
+    return ($feed_begin, $item, $fakeItem, $feed_end);
+  }
+    
+  sub updateRecentPodcasts()
+  {
+    my ($executablePath,$searchString) = @_;
+    my $feedPath       = "$executablePath\\STVs\\SageTV3\\OnlineVideos\\";
+    my $fileContents;
+    my $searchToRemove;
+    my $updateFile;
+    my $foundNewOne;
+    my $file;
+    my $seachesToCheck;
+    my $line;
+    my $notInList;
+    
+    print LOGFILE "  + Adding to recent: ($searchString)\n";
+    
+    open(RECENT,"UPnP2Podcast.recent");
+    my @recentSearches = <RECENT>;
+    close(RECENT);
+    
+    foreach (@recentSearches)
+    {
+        chomp;
+        if ($searchString eq $_)
+        {
+            print LOGFILE "    + Already in list! ($searchString)($_)\n";
+            return;
+        }
+    }
+    
+    push(@recentSearches,$searchString);
+
+    opendir(SCANDIR,"$feedPath");
+    my @filesInDir = readdir(SCANDIR);
+    close(SCANDIR);
+    $updateFile = 0;
+    foreach $file (@filesInDir)
+    {
+        if ($file =~ /.properties$/)
+        {
+            print LOGFILE "    - Checking file: ($file)\n";
+            open(PROPFILE,$feedPath.$file);
+            $fileContents = "";
+            $updateFile   = 0;
+            while (<PROPFILE>)
+            { 
+                chomp;
+                $line = $_;
+                foreach $seachesToCheck (@recentSearches)
+                {   #$searchString
+                    if ($line =~ /\Q$seachesToCheck\E/i && $line !~ /xPodcastUPnP_Recent/)
+                    {
+                        print LOGFILE "      + Found: $line\n";
+                        $line =~ s/=/=xPodcastUPnP_Recent,/;
+                        $updateFile = 1;
+                        print LOGFILE "        - Updated: $line\n";
+                        if ($seachesToCheck eq $searchString)
+                        {
+                            $foundNewOne = 1;
+                        }
+                        last;
+                    }
+                                    
+                }
+                $fileContents .= $line . "\n"; 
+            }
+            close(PROPFILE);
+            if ($updateFile)
+            {
+                print LOGFILE "        -  Updating file (".$feedPath.$file.")\n";
+                open(PROPFILE,">".$feedPath.$file);
+                print PROPFILE $fileContents; 
+                close(PROPFILE);
+            }    
+        }
+    }
+    
+    if (!$foundNewOne)
+    {   # Didn't find new one
+        print LOGFILE "  + Couldn't find ($searchString)\n";
+        pop(@recentSearches);    
+    }
+    
+    if (@recentSearches > 10)
+    {
+        $searchToRemove = shift(@recentSearches);
+        print LOGFILE "    - Removing : ($searchToRemove)\n";
+    }
+    
+    print LOGFILE "  + Removing expired recent searches\n";
+    foreach $file (@filesInDir)
+    {
+        if ($file =~ /^CustomOnlineVideoLinks.*\.properties$/)
+        {
+            print LOGFILE "    - Checking file: ($file)\n";
+            $fileContents = "";
+            $updateFile   = 0;
+            open(PROPFILE,$feedPath.$file);
+            while (<PROPFILE>)
+            {
+                chomp;
+                $line      = $_;
+                if ($line =~ /xPodcastUPnP_Recent/i && $line !~ /CustomSources/i)
+                {
+                    $notInList = 1;
+                    print LOGFILE "      + Checking Line ($line)\n"; 
+                    foreach $seachesToCheck (@recentSearches)
+                    {   #$searchString
+                        if ($line =~ /\Q$seachesToCheck\E/i) 
+                        {
+                        
+                            print LOGFILE "          + MATCH: ($seachesToCheck)\n"; 
+                            $notInList = 0;
+                            last;   
+                        }
+                    }
+                    
+                    if ($notInList)
+                    {
+                        $line =~ s/xPodcastUPnP_Recent,//g;
+                        $updateFile = 1;
+                        print LOGFILE "          + Removed: ($line)\n";
+                    }
+                }
+                $fileContents .= $line."\n";
+            }
+            close(PROPFILE);
+            if ($updateFile)
+            {
+                open(PROPFILE,">".$feedPath.$file);
+                print PROPFILE $fileContents; 
+                close(PROPFILE); 
+            }    
+        }
+    }
+        
+    open(RECENT,">UPnP2Podcast.recent");
+    foreach (@recentSearches)
+    {
+        chomp;
+        print RECENT $_."\n";
+    }
+    close(RECENT);
+}
     
