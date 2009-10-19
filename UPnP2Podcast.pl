@@ -49,7 +49,7 @@
     
   if (!(-e 'tinFoilHat.txt') && (@parameters == 0 || int(rand(10)) >= 5))
   {
-      print LOGFILE "  + Checking for feed updates\n";
+      print stderr "  + Checking for feed updates\n";
       my $updateSuccess =  updateFeedFiles($executablePath);
       if (@parameters == 0)
       {
@@ -81,7 +81,7 @@
              
     foreach (@searchStrings)    
     {
-        print LOGFILE "  + Search String: $_\n"; 
+        print stderr "  + Search String: $_\n"; 
         my @splitString = split(":",$_);   
         
         my %contents = {};
@@ -91,16 +91,16 @@
         my $lookingFor = shift(@splitString);
         my $foundDevice = 0;
         
-        print LOGFILE "    - Looking for UPnP Server: $lookingFor\n";
+        print stderr "    - Looking for UPnP Server: $lookingFor\n";
         foreach (@dev_list)
         {
             chomp;
-            print LOGFILE "      + Device: ".$_->getfriendlyname()."(".$_->getdevicetype().")\n";
+            print stderr "      + Device: ".$_->getfriendlyname()."(".$_->getdevicetype().")\n";
             if ($_->getfriendlyname() =~ /$lookingFor/i)
             {
                 $mediaServer->setdevice($_);
                 $foundDevice = 1;
-                print LOGFILE "        - Found $lookingFor\n"; 
+                print stderr "        - Found $lookingFor\n"; 
                 my $dirPath = $_->getfriendlyname()."\\";
                 last;
             }
@@ -109,7 +109,7 @@
         
         if (!$foundDevice)
         {
-            print LOGFILE "  ! Error! Couldn't find UPnP Device: ($lookingFor)\n";
+            print stderr "  ! Error! Couldn't find UPnP Device: ($lookingFor)\n";
             next;
         }
         
@@ -119,15 +119,14 @@
         my $depth   = 0;
         my $options = "";
         my $filter  = "";
+        my $first   = 1;
         while (@splitString)
         {
-            $lookingFor = shift(@splitString);
-            
+            $lookingFor = shift(@splitString);            
             # Get the content list at the current level
-            
             if ($lastContent)
             {
-                print LOGFILE "GetContent from: ".$lastContent->gettitle()." ($id)\n";
+                print stderr "GetContent from: ".$lastContent->gettitle()." ($id)\n";
             }
             my @content_list = $mediaServer->getcontentlist(ObjectID => $id);
             
@@ -144,15 +143,15 @@
             }
 
             # Loop through content list to find next folder
-            print LOGFILE "    - Current Dir: $dirPath\n";  
-            print LOGFILE "      + Looking For: $lookingFor\n";
-            print LOGFILE "      + Listing Directory:\n";
+            print stderr "    - Current Dir: $dirPath\n";  
+            print stderr "      + Looking For: $lookingFor\n";
+            print stderr "      + Listing Directory:\n";
             my $content;   
             foreach $content (@content_list) 
             {
                 if ($content->gettitle() =~ /$lookingFor/i)
                 { 
-                    print LOGFILE getTheTime()."      ***";  
+                    print stderr getTheTime()."      ***";  
                     $newId = $content->getid();
                     $lastContent = $content;
                     $dirPath .= $content->gettitle()."\\";
@@ -160,19 +159,30 @@
                 }   
                 else
                 {
-                    print LOGFILE getTheTime()."        -";    
+                    print stderr getTheTime()."        -";    
                 }          
-                print LOGFILE " \\".$content->gettitle();
-                print LOGFILE "\n";
+                print stderr " \\".$content->gettitle();
+                print stderr "\n";
+            }
+            if ($first)
+            {
+                open(PLUGINS,">UPnP2Podcast.plugins");
+                foreach $content (@content_list) 
+                {
+                    chomp;
+                    print PLUGINS $content->gettitle()."\n";
+                }
+                close(PLUGINS);               
             }
             
             if ($newId eq $id)
             {
-                print LOGFILE getTheTime()."      ! Fail couldn't find ($lookingFor)\n";
+                print stderr getTheTime()."      ! Fail couldn't find ($lookingFor)\n";
                 $error    = 1;
                 last;
             }
             $id = $newId;
+            $first = 0;
  
         }
         
@@ -186,12 +196,12 @@
                 $opening =~ s/%%FEED_DESCRIPTION%%/$title/sg;
             }
            
-            print LOGFILE getTheTime()."    - Success!\n";
-            print LOGFILE getTheTime()."      + Found Directory: $dirPath\n";
-            print LOGFILE getTheTime()."        - Searching ($depth) folders deep for video content\n";
+            print stderr getTheTime()."    - Success!\n";
+            print stderr getTheTime()."      + Found Directory: $dirPath\n";
+            print stderr getTheTime()."        - Searching ($depth) folders deep for video content\n";
             if (!($filter eq ""))
             {
-                print LOGFILE getTheTime()."        - Filtering results: ($filter)\n";
+                print stderr getTheTime()."        - Filtering results: ($filter)\n";
             }
             print_content($mediaServer, $lastContent, 1, $depth, $filter);
         }
@@ -224,7 +234,7 @@
 
     $podcastFeed .= $feed_end;
 
-    print encode("utf8", $podcastFeed);  
+    #print encode("utf8", $podcastFeed);  
  
      sub addItem {
         my ($content) = @_;
@@ -309,50 +319,67 @@
             return;
         }
 
-        #print LOGFILE getTheTime()."  ! Depth($depth), Title ($title), Filter ($filter)\n";
+        #print stderr getTheTime()."  ! Depth($depth), Title ($title), Filter ($filter)\n";
         #if ($content->isitem() && ($title =~ /$filter/ || $filter eq ""))
         #{
-            print LOGFILE getTheTime()." ";  
+            print stderr getTheTime()." ";  
             for (my $n=0; $n<$indent; $n++) {
-                print LOGFILE getTheTime()."  ";
+                print stderr getTheTime()."  ";
             }
             if ($n % 2)
             {
-                print LOGFILE getTheTime()." +";
+                print stderr getTheTime()." +";
             }
             else
             {
-                print LOGFILE getTheTime()." -";
+                print stderr getTheTime()." -";
             }        
             
-            print LOGFILE getTheTime()." \\$title";
+            print stderr getTheTime()." \\$title";
             if ($content->isitem()) {
-                print LOGFILE getTheTime()." (" . $content->geturl();
+                print stderr getTheTime()." (" . $content->geturl();
                 if (length($content->getdate())) {
-                    print LOGFILE getTheTime()." - " . $content->getdate();
+                    print stderr getTheTime()." - " . $content->getdate();
                 }
-                print LOGFILE getTheTime()." - " . $content->getcontenttype() . ")";
+                print stderr getTheTime()." - " . $content->getcontenttype() . ")";
                 if ($title =~ /$filter/ || $filter eq "")
                 {
                     addItem($content);
                 }
             }
-            print LOGFILE getTheTime()."\n";
-            #print LOGFILE getTheTime()." ! ($filterRegExCapture)\n";
+            print stderr getTheTime()."\n";
+            #print stderr getTheTime()." ! ($filterRegExCapture)\n";
         #}
         $depth--;
         
         unless ($content->iscontainer()) {
-            #print LOGFILE getTheTime()." ! Return: Not Container\n";
+            #print stderr getTheTime()." ! Return: Not Container\n";
             return;
         }
         #print "GetContent from: $title ($id)\n";
         my @child_content_list = $mediaServer->getcontentlist(ObjectID => $id );
+
+        while (@child_content_list <= 0) {
+            my $counter++;
+            print LOGFILE " !";
+            #print LOGFILE " ! Return: no children (@child_content_list)($id)\n";
+            sleep(5);
+            @child_content_list = $mediaServer->getcontentlist(ObjectID => $id );
+            if ($counter == 5)
+            {
+                last;
+            }
+        }
+
         if (@child_content_list <= 0) {
-            print LOGFILE getTheTime()." ! Return: no children (@child_content_list)($id)\n";
+            print stderr getTheTime()." ! Return: no children (@child_content_list)($id)\n";
             return;
         }
         $indent++;
+        if (@child_content_list == 1 && $depth == 0)
+        {   # Fine, try just *1*  more
+            $depth++;    
+        }
         foreach my $child_content (@child_content_list) {
             print_content($mediaServer, $child_content, $indent,$depth,$filter);
         }
@@ -375,59 +402,72 @@
     my $feedVersionURL = 'http://upnp2podcast.googlecode.com/svn/trunk/FeedVersions.txt';
     my ($updateFile, $propFileName, $propFileVersion, 
         $propFileMD5, $propFileURL, $topLine, $currentVersion,
-        $updatedMD5);
+        $updatedMD5, $propPlugIn);
     $feedVersionURL    =~ /http:\/\/[^\/]/;
     my $feedBaseURL    = $&;
 
     my $content = get $feedVersionURL;
     if (defined $content)
     {
-        print LOGFILE "  + Downloaded FeedVersions.txt (".MD5->hexhash($content)."), checking for updates\n";
+        open(PLUGINS,"UPnP2Podcast.plugins");
+        my @plugIns = <PLUGINS>;
+        close(PLUGINS);  
+                    
+        print stderr "  + Downloaded FeedVersions.txt (".MD5->hexhash($content)."), checking for updates\n";
         my @content = split(/\n/,$content);
         foreach (@content)
         {
             $updateFile      = 0;
-            if (/(.*),(.*),(.*),(.*)/)
+            if (/(.*),(.*),(.*),(.*)(,(.*))?/)
             {
-                ($propFileName, $propFileVersion, $propFileMD5, $propFileURL) = ($1,$2,$3,$4);
-                print LOGFILE "    - File      : $propFileName\n";
-                print LOGFILE "      - Version : $propFileVersion\n";
-                print LOGFILE "      - URL     : $propFileURL\n";
-                print LOGFILE "      - MD5     : $propFileMD5\n";
-                
-                if ($propFileURL =~ /\Q^$feedBaseURL\E/ || 1)
-                {   # Make sure it comes from my google code account
-                    if (-e "$feedPath\\$propFileName")
-                    {
-                        open(FEED,"$feedPath\\$propFileName");
-                        $topLine = <FEED>;
-                        chomp($topLine);
-                        close(FEED);
-                        $currentVersion = "";
-                        if ($topLine =~ /Version=([0-9]+)/i)
+                ($propFileName, $propFileVersion, $propFileMD5, $propFileURL, $propPlugIn) = ($1,$2,$3,$4,$6);
+                print stderr "    - File      : $propFileName\n";
+                print stderr "      - Version : $propFileVersion\n";
+                print stderr "      - URL     : $propFileURL\n";
+                print stderr "      - MD5     : $propFileMD5\n";
+                print stderr "      - Plugin  : $propPlugIn\n";
+                if (grep($propPlugIn eq $_,@plugIns) || $propPlugIn eq "")
+                {
+                    if ($propFileURL =~ /\Q^$feedBaseURL\E/)
+                    {   # Make sure it comes from my google code account
+                        if (-e "$feedPath\\$propFileName")
                         {
-                            $currentVersion = $1;
+                            open(FEED,"$feedPath\\$propFileName");
+                            $topLine = <FEED>;
+                            chomp($topLine);
+                            close(FEED);
+                            $currentVersion = "";
+                            if ($topLine =~ /Version=([0-9]+)/i)
+                            {
+                                $currentVersion = $1;
+                            }
+                            print stderr "      - Local Version : $currentVersion\n";
+                            if ($propFileVersion > $currentVersion)
+                            {
+                                $updateFile = 1;    
+                            }
                         }
-                        print LOGFILE "      - Local Version : $currentVersion\n";
-                        if ($propFileVersion > $currentVersion)
+                        else
                         {
-                            $updateFile = 1;    
+                            $updateFile = 1;
                         }
-                    }
-                    else
-                    {
-                        $updateFile = 1;
                     }
                 }
+                else
+                {
+                    print stderr "        + PlayOn Plug-in ($propPlugIn) not installed, skipping\n";    
+                }
+                
+                
                 if ($updateFile)
                 {
-                    print LOGFILE "      - Updating File!\n";             
+                    print stderr "      - Updating File!\n";             
                     $content = get $propFileURL;
                     if (!($content eq ""))
                     {
                         $content =~ s/\r//g;
                         $updatedMD5 = MD5->hexhash($content);
-                        print LOGFILE "        + MD5 URL : $updatedMD5 ($propFileMD5)\n";
+                        print stderr "        + MD5 URL : $updatedMD5 ($propFileMD5)\n";
                         if ($updatedMD5 eq $propFileMD5)
                         {
                             open(FEED,">$feedPath\\$propFileName");
@@ -437,7 +477,7 @@
                         }
                         else
                         {
-                            print LOGFILE "        - MD5 check failed, skipping!\n";    
+                            print stderr "        - MD5 check failed, skipping!\n";    
                         }
                     }
                 } 
@@ -446,7 +486,7 @@
     }
     else
     {
-        print LOGFILE "  ! Failed to get FeedVersions.txt, skipping updates\n";
+        print stderr "  ! Failed to get FeedVersions.txt, skipping updates\n";
     } 
     return $rv;   
   }
@@ -519,8 +559,10 @@ FEED_END
     my $seachesToCheck;
     my $line;
     my $notInList;
+    my @newList;
+    my $foundInList;
     
-    print LOGFILE "  + Adding to recent: ($searchString)\n";
+    print stderr "  + Adding to recent: ($searchString)\n";
     
     open(RECENT,"UPnP2Podcast.recent");
     my @recentSearches = <RECENT>;
@@ -529,11 +571,29 @@ FEED_END
     foreach (@recentSearches)
     {
         chomp;
+        #print stderr "?  $_ ()\n";
         if ($searchString eq $_)
         {
-            print LOGFILE "    + Already in list! ($searchString)($_)\n";
-            return;
+            print stderr "    + Already in list, moving to top! ($searchString)($_)\n";
+            $foundInList = 1;
         }
+        else
+        {
+            push(@newList,$_);
+        }
+    }
+    
+    if ($foundInList)
+    {   # Move to top
+        push(@newList,$searchString);
+        open(RECENT,">UPnP2Podcast.recent");
+        foreach (@newList)
+        {
+            chomp;
+            print RECENT $_."\n";
+        }
+        close(RECENT); 
+        return;   
     }
     
     push(@recentSearches,$searchString);
@@ -546,7 +606,7 @@ FEED_END
     {
         if ($file =~ /.properties$/)
         {
-            print LOGFILE "    - Checking file: ($file)\n";
+            print stderr "    - Checking file: ($file)\n";
             open(PROPFILE,$feedPath.$file);
             $fileContents = "";
             $updateFile   = 0;
@@ -558,10 +618,10 @@ FEED_END
                 {   #$searchString
                     if ($line =~ /\Q$seachesToCheck\E/i && $line !~ /xPodcastUPnP_Recent/)
                     {
-                        print LOGFILE "      + Found: $line\n";
+                        print stderr "      + Found: $line\n";
                         $line =~ s/=/=xPodcastUPnP_Recent,/;
                         $updateFile = 1;
-                        print LOGFILE "        - Updated: $line\n";
+                        print stderr "        - Updated: $line\n";
                         if ($seachesToCheck eq $searchString)
                         {
                             $foundNewOne = 1;
@@ -575,7 +635,7 @@ FEED_END
             close(PROPFILE);
             if ($updateFile)
             {
-                print LOGFILE "        -  Updating file (".$feedPath.$file.")\n";
+                print stderr "        -  Updating file (".$feedPath.$file.")\n";
                 open(PROPFILE,">".$feedPath.$file);
                 print PROPFILE $fileContents; 
                 close(PROPFILE);
@@ -585,22 +645,22 @@ FEED_END
     
     if (!$foundNewOne)
     {   # Didn't find new one
-        print LOGFILE "  + Couldn't find ($searchString)\n";
+        print stderr "  + Couldn't find ($searchString)\n";
         pop(@recentSearches);    
     }
     
     if (@recentSearches > 10)
     {
         $searchToRemove = shift(@recentSearches);
-        print LOGFILE "    - Removing : ($searchToRemove)\n";
+        print stderr "    - Removing : ($searchToRemove)\n";
     }
     
-    print LOGFILE "  + Removing expired recent searches\n";
+    print stderr "  + Removing expired recent searches\n";
     foreach $file (@filesInDir)
     {
         if ($file =~ /^CustomOnlineVideoLinks.*\.properties$/)
         {
-            print LOGFILE "    - Checking file: ($file)\n";
+            print stderr "    - Checking file: ($file)\n";
             $fileContents = "";
             $updateFile   = 0;
             open(PROPFILE,$feedPath.$file);
@@ -611,13 +671,13 @@ FEED_END
                 if ($line =~ /xPodcastUPnP_Recent/i && $line !~ /CustomSources/i)
                 {
                     $notInList = 1;
-                    print LOGFILE "      + Checking Line ($line)\n"; 
+                    print stderr "      + Checking Line ($line)\n"; 
                     foreach $seachesToCheck (@recentSearches)
                     {   #$searchString
                         if ($line =~ /\Q$seachesToCheck\E/i) 
                         {
                         
-                            print LOGFILE "          + MATCH: ($seachesToCheck)\n"; 
+                            print stderr "          + MATCH: ($seachesToCheck)\n"; 
                             $notInList = 0;
                             last;   
                         }
@@ -627,7 +687,7 @@ FEED_END
                     {
                         $line =~ s/xPodcastUPnP_Recent,//g;
                         $updateFile = 1;
-                        print LOGFILE "          + Removed: ($line)\n";
+                        print stderr "          + Removed: ($line)\n";
                     }
                 }
                 $fileContents .= $line."\n";
