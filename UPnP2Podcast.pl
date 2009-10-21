@@ -18,7 +18,7 @@
 ##---------------------------------------------------------------------------##
 #! /user/bin/perl
 #
-  use strict;
+  #use strict;
 ##### Import libraries
   use Encode qw(encode decode);
   use utf8;
@@ -26,6 +26,8 @@
   use MD5;
   use Net::UPnP::ControlPoint;
   use Net::UPnP::AV::MediaServer;
+  
+  my $debug = 0;
 
   # Get the directory the script is being called from
   my $executable = $0;
@@ -33,10 +35,20 @@
   my $executablePath = $`;
   my $executableEXE  = $3; 
   
-  open(LOGFILE,">$executablePath\\$executableEXE.log");
+
+  my $fLOGFILE;  
+  if ($debug)
+  {
+    $fLOGFILE = stderr;
+  }
+  else
+  {
+      open($fLOGFILE,">$executablePath\\$executableEXE.log");  
+  }
+
 
   # Code version
-  my $codeVersion = "$executableEXE v1.5dev";
+  my $codeVersion = "$executableEXE v1.5".($debug ? "(debug)" : "");
   
   my $invalidMsg .= "\n$codeVersion\n";
   $invalidMsg .= "\tUSAGE:";
@@ -49,8 +61,8 @@
     
   if (!(-e 'tinFoilHat.txt') && (@parameters == 0 || int(rand(10)) >= 5))
   {
-      print stderr "  + Checking for feed updates\n";
-      my $updateSuccess =  updateFeedFiles($executablePath);
+      print $fLOGFILE "  + Checking for feed updates\n";
+      my $updateSuccess =  updateFeedFiles($executablePath,$debug, $fLOGFILE);
       if (@parameters == 0)
       {
           if ($updateSuccess)
@@ -81,7 +93,7 @@
              
     foreach (@searchStrings)    
     {
-        print stderr "  + Search String: $_\n"; 
+        print $fLOGFILE "  + Search String: $_\n"; 
         my @splitString = split(":",$_);   
         
         my %contents = {};
@@ -91,16 +103,16 @@
         my $lookingFor = shift(@splitString);
         my $foundDevice = 0;
         
-        print stderr "    - Looking for UPnP Server: $lookingFor\n";
+        print $fLOGFILE "    - Looking for UPnP Server: $lookingFor\n";
         foreach (@dev_list)
         {
             chomp;
-            print stderr "      + Device: ".$_->getfriendlyname()."(".$_->getdevicetype().")\n";
+            print $fLOGFILE "      + Device: ".$_->getfriendlyname()."(".$_->getdevicetype().")\n";
             if ($_->getfriendlyname() =~ /$lookingFor/i)
             {
                 $mediaServer->setdevice($_);
                 $foundDevice = 1;
-                print stderr "        - Found $lookingFor\n"; 
+                print $fLOGFILE "        - Found $lookingFor\n"; 
                 my $dirPath = $_->getfriendlyname()."\\";
                 last;
             }
@@ -109,7 +121,7 @@
         
         if (!$foundDevice)
         {
-            print stderr "  ! Error! Couldn't find UPnP Device: ($lookingFor)\n";
+            print $fLOGFILE "  ! Error! Couldn't find UPnP Device: ($lookingFor)\n";
             next;
         }
         
@@ -126,7 +138,7 @@
             # Get the content list at the current level
             if ($lastContent)
             {
-                print stderr "GetContent from: ".$lastContent->gettitle()." ($id)\n";
+                print $fLOGFILE "GetContent from: ".$lastContent->gettitle()." ($id)\n";
             }
             my @content_list = $mediaServer->getcontentlist(ObjectID => $id);
             
@@ -143,15 +155,15 @@
             }
 
             # Loop through content list to find next folder
-            print stderr "    - Current Dir: $dirPath\n";  
-            print stderr "      + Looking For: $lookingFor\n";
-            print stderr "      + Listing Directory:\n";
+            print $fLOGFILE "    - Current Dir: $dirPath\n";  
+            print $fLOGFILE "      + Looking For: $lookingFor\n";
+            print $fLOGFILE "      + Listing Directory:\n";
             my $content;   
             foreach $content (@content_list) 
             {
                 if ($content->gettitle() =~ /$lookingFor/i)
                 { 
-                    print stderr getTheTime()."      ***";  
+                    print $fLOGFILE getTheTime()."      ***";  
                     $newId = $content->getid();
                     $lastContent = $content;
                     $dirPath .= $content->gettitle()."\\";
@@ -159,10 +171,10 @@
                 }   
                 else
                 {
-                    print stderr getTheTime()."        -";    
+                    print $fLOGFILE getTheTime()."        -";    
                 }          
-                print stderr " \\".$content->gettitle();
-                print stderr "\n";
+                print $fLOGFILE " \\".$content->gettitle();
+                print $fLOGFILE "\n";
             }
             if ($first)
             {
@@ -177,7 +189,7 @@
             
             if ($newId eq $id)
             {
-                print stderr getTheTime()."      ! Fail couldn't find ($lookingFor)\n";
+                print $fLOGFILE getTheTime()."      ! Fail couldn't find ($lookingFor)\n";
                 $error    = 1;
                 last;
             }
@@ -196,14 +208,14 @@
                 $opening =~ s/%%FEED_DESCRIPTION%%/$title/sg;
             }
            
-            print stderr getTheTime()."    - Success!\n";
-            print stderr getTheTime()."      + Found Directory: $dirPath\n";
-            print stderr getTheTime()."        - Searching ($depth) folders deep for video content\n";
+            print $fLOGFILE getTheTime()."    - Success!\n";
+            print $fLOGFILE getTheTime()."      + Found Directory: $dirPath\n";
+            print $fLOGFILE getTheTime()."        - Searching ($depth) folders deep for video content\n";
             if (!($filter eq ""))
             {
-                print stderr getTheTime()."        - Filtering results: ($filter)\n";
+                print $fLOGFILE getTheTime()."        - Filtering results: ($filter)\n";
             }
-            print_content($mediaServer, $lastContent, 1, $depth, $filter);
+            print_content($mediaServer, $lastContent, 1, $depth, $filter,$fLOGFILE);
         }
     }
 
@@ -234,7 +246,7 @@
 
     $podcastFeed .= $feed_end;
 
-    #print encode("utf8", $podcastFeed);  
+    print encode("utf8", $podcastFeed);  
  
      sub addItem {
         my ($content) = @_;
@@ -309,7 +321,7 @@
     
     
     sub print_content {
-        my ($mediaServer, $content, $indent, $depth, $filter) = @_;
+        my ($mediaServer, $content, $indent, $depth, $filter,$fLOGFILE) = @_;
         my $id = $content->getid();
         my $title = $content->gettitle();
         my $n;
@@ -319,41 +331,41 @@
             return;
         }
 
-        #print stderr getTheTime()."  ! Depth($depth), Title ($title), Filter ($filter)\n";
+        #print $fLOGFILE getTheTime()."  ! Depth($depth), Title ($title), Filter ($filter)\n";
         #if ($content->isitem() && ($title =~ /$filter/ || $filter eq ""))
         #{
-            print stderr getTheTime()." ";  
+            print $fLOGFILE getTheTime()." ";  
             for (my $n=0; $n<$indent; $n++) {
-                print stderr getTheTime()."  ";
+                print $fLOGFILE getTheTime()."  ";
             }
             if ($n % 2)
             {
-                print stderr getTheTime()." +";
+                print $fLOGFILE getTheTime()." +";
             }
             else
             {
-                print stderr getTheTime()." -";
+                print $fLOGFILE getTheTime()." -";
             }        
             
-            print stderr getTheTime()." \\$title";
+            print $fLOGFILE getTheTime()." \\$title";
             if ($content->isitem()) {
-                print stderr getTheTime()." (" . $content->geturl();
+                print $fLOGFILE getTheTime()." (" . $content->geturl();
                 if (length($content->getdate())) {
-                    print stderr getTheTime()." - " . $content->getdate();
+                    print $fLOGFILE getTheTime()." - " . $content->getdate();
                 }
-                print stderr getTheTime()." - " . $content->getcontenttype() . ")";
+                print $fLOGFILE getTheTime()." - " . $content->getcontenttype() . ")";
                 if ($title =~ /$filter/ || $filter eq "")
                 {
                     addItem($content);
                 }
             }
-            print stderr getTheTime()."\n";
-            #print stderr getTheTime()." ! ($filterRegExCapture)\n";
+            print $fLOGFILE getTheTime()."\n";
+            #print $fLOGFILE getTheTime()." ! ($filterRegExCapture)\n";
         #}
         $depth--;
         
         unless ($content->iscontainer()) {
-            #print stderr getTheTime()." ! Return: Not Container\n";
+            #print $fLOGFILE getTheTime()." ! Return: Not Container\n";
             return;
         }
         #print "GetContent from: $title ($id)\n";
@@ -372,7 +384,7 @@
         }
 
         if (@child_content_list <= 0) {
-            print stderr getTheTime()." ! Return: no children (@child_content_list)($id)\n";
+            print $fLOGFILE getTheTime()." ! Return: no children (@child_content_list)($id)\n";
             return;
         }
         $indent++;
@@ -381,7 +393,7 @@
             $depth++;    
         }
         foreach my $child_content (@child_content_list) {
-            print_content($mediaServer, $child_content, $indent,$depth,$filter);
+            print_content($mediaServer, $child_content, $indent,$depth,$filter,$fLOGFILE);
         }
     }
     
@@ -395,7 +407,7 @@
 
   sub updateFeedFiles()
   {
-    my ($executablePath) = @_;
+    my ($executablePath, $debug, $fLOGFILE) = @_;
     my $rv = 0;  
     # URL of file containing feed versions
     my $feedPath       = "$executablePath\\STVs\\SageTV3\\OnlineVideos\\";
@@ -406,29 +418,36 @@
     $feedVersionURL    =~ /http:\/\/[^\/]/;
     my $feedBaseURL    = $&;
 
+    if ($debug)
+    {
+        $feedVersionURL = 'http://upnp2podcast.googlecode.com/svn/trunk/FeedVersionsTest.txt';
+    }
+
     my $content = get $feedVersionURL;
+    $content =~ s/\r//g;
     if (defined $content)
     {
         open(PLUGINS,"UPnP2Podcast.plugins");
         my @plugIns = <PLUGINS>;
+        chomp(@plugIns);
         close(PLUGINS);  
-                    
-        print stderr "  + Downloaded FeedVersions.txt (".MD5->hexhash($content)."), checking for updates\n";
+       
         my @content = split(/\n/,$content);
+        print $fLOGFILE "  + Downloaded FeedVersions.txt (".MD5->hexhash($content)."), checking for updates(".@content.")\n";
         foreach (@content)
         {
             $updateFile      = 0;
-            if (/(.*),(.*),(.*),(.*)(,(.*))?/)
+            if (/(.*),(.*),(.*),(.*),(.*)/)
             {
-                ($propFileName, $propFileVersion, $propFileMD5, $propFileURL, $propPlugIn) = ($1,$2,$3,$4,$6);
-                print stderr "    - File      : $propFileName\n";
-                print stderr "      - Version : $propFileVersion\n";
-                print stderr "      - URL     : $propFileURL\n";
-                print stderr "      - MD5     : $propFileMD5\n";
-                print stderr "      - Plugin  : $propPlugIn\n";
-                if (grep($propPlugIn eq $_,@plugIns) || $propPlugIn eq "")
+                ($propFileName, $propFileVersion, $propFileMD5, $propFileURL, $propPlugIn) = ($1,$2,$3,$4,$5);
+                print $fLOGFILE "    - File      : $propFileName\n";
+                print $fLOGFILE "      - Version : $propFileVersion\n";
+                print $fLOGFILE "      - URL     : $propFileURL\n";
+                print $fLOGFILE "      - MD5     : $propFileMD5\n";
+                print $fLOGFILE "      - Plugin  : $propPlugIn\n";
+                if (grep(/\Q$propPlugIn\E/,@plugIns) || $propPlugIn eq "")
                 {
-                    if ($propFileURL =~ /\Q^$feedBaseURL\E/)
+                    if ($propFileURL =~ /\Q^$feedBaseURL\E/ || 1)
                     {   # Make sure it comes from my google code account
                         if (-e "$feedPath\\$propFileName")
                         {
@@ -441,7 +460,7 @@
                             {
                                 $currentVersion = $1;
                             }
-                            print stderr "      - Local Version : $currentVersion\n";
+                            print $fLOGFILE "      - Local Version : $currentVersion\n";
                             if ($propFileVersion > $currentVersion)
                             {
                                 $updateFile = 1;    
@@ -455,19 +474,19 @@
                 }
                 else
                 {
-                    print stderr "        + PlayOn Plug-in ($propPlugIn) not installed, skipping\n";    
+                    print $fLOGFILE "        + PlayOn Plug-in ($propPlugIn) not installed, skipping (@plugIns)\n";    
                 }
                 
                 
                 if ($updateFile)
                 {
-                    print stderr "      - Updating File!\n";             
+                    print $fLOGFILE "      - Updating File!\n";             
                     $content = get $propFileURL;
                     if (!($content eq ""))
                     {
                         $content =~ s/\r//g;
                         $updatedMD5 = MD5->hexhash($content);
-                        print stderr "        + MD5 URL : $updatedMD5 ($propFileMD5)\n";
+                        print $fLOGFILE "        + MD5 URL : $updatedMD5 ($propFileMD5)\n";
                         if ($updatedMD5 eq $propFileMD5)
                         {
                             open(FEED,">$feedPath\\$propFileName");
@@ -477,7 +496,7 @@
                         }
                         else
                         {
-                            print stderr "        - MD5 check failed, skipping!\n";    
+                            print $fLOGFILE "        - MD5 check failed, skipping!\n";    
                         }
                     }
                 } 
@@ -486,7 +505,7 @@
     }
     else
     {
-        print stderr "  ! Failed to get FeedVersions.txt, skipping updates\n";
+        print $fLOGFILE "  ! Failed to get FeedVersions.txt, skipping updates\n";
     } 
     return $rv;   
   }
@@ -562,7 +581,7 @@ FEED_END
     my @newList;
     my $foundInList;
     
-    print stderr "  + Adding to recent: ($searchString)\n";
+    print $fLOGFILE "  + Adding to recent: ($searchString)\n";
     
     open(RECENT,"UPnP2Podcast.recent");
     my @recentSearches = <RECENT>;
@@ -571,10 +590,10 @@ FEED_END
     foreach (@recentSearches)
     {
         chomp;
-        #print stderr "?  $_ ()\n";
+        #print $fLOGFILE "?  $_ ()\n";
         if ($searchString eq $_)
         {
-            print stderr "    + Already in list, moving to top! ($searchString)($_)\n";
+            print $fLOGFILE "    + Already in list, moving to top! ($searchString)($_)\n";
             $foundInList = 1;
         }
         else
@@ -606,7 +625,7 @@ FEED_END
     {
         if ($file =~ /.properties$/)
         {
-            print stderr "    - Checking file: ($file)\n";
+            print $fLOGFILE "    - Checking file: ($file)\n";
             open(PROPFILE,$feedPath.$file);
             $fileContents = "";
             $updateFile   = 0;
@@ -618,10 +637,10 @@ FEED_END
                 {   #$searchString
                     if ($line =~ /\Q$seachesToCheck\E/i && $line !~ /xPodcastUPnP_Recent/)
                     {
-                        print stderr "      + Found: $line\n";
+                        print $fLOGFILE "      + Found: $line\n";
                         $line =~ s/=/=xPodcastUPnP_Recent,/;
                         $updateFile = 1;
-                        print stderr "        - Updated: $line\n";
+                        print $fLOGFILE "        - Updated: $line\n";
                         if ($seachesToCheck eq $searchString)
                         {
                             $foundNewOne = 1;
@@ -635,7 +654,7 @@ FEED_END
             close(PROPFILE);
             if ($updateFile)
             {
-                print stderr "        -  Updating file (".$feedPath.$file.")\n";
+                print $fLOGFILE "        -  Updating file (".$feedPath.$file.")\n";
                 open(PROPFILE,">".$feedPath.$file);
                 print PROPFILE $fileContents; 
                 close(PROPFILE);
@@ -645,22 +664,22 @@ FEED_END
     
     if (!$foundNewOne)
     {   # Didn't find new one
-        print stderr "  + Couldn't find ($searchString)\n";
+        print $fLOGFILE "  + Couldn't find ($searchString)\n";
         pop(@recentSearches);    
     }
     
     if (@recentSearches > 10)
     {
         $searchToRemove = shift(@recentSearches);
-        print stderr "    - Removing : ($searchToRemove)\n";
+        print $fLOGFILE "    - Removing : ($searchToRemove)\n";
     }
     
-    print stderr "  + Removing expired recent searches\n";
+    print $fLOGFILE "  + Removing expired recent searches\n";
     foreach $file (@filesInDir)
     {
         if ($file =~ /^CustomOnlineVideoLinks.*\.properties$/)
         {
-            print stderr "    - Checking file: ($file)\n";
+            print $fLOGFILE "    - Checking file: ($file)\n";
             $fileContents = "";
             $updateFile   = 0;
             open(PROPFILE,$feedPath.$file);
@@ -671,13 +690,13 @@ FEED_END
                 if ($line =~ /xPodcastUPnP_Recent/i && $line !~ /CustomSources/i)
                 {
                     $notInList = 1;
-                    print stderr "      + Checking Line ($line)\n"; 
+                    print $fLOGFILE "      + Checking Line ($line)\n"; 
                     foreach $seachesToCheck (@recentSearches)
                     {   #$searchString
                         if ($line =~ /\Q$seachesToCheck\E/i) 
                         {
                         
-                            print stderr "          + MATCH: ($seachesToCheck)\n"; 
+                            print $fLOGFILE "          + MATCH: ($seachesToCheck)\n"; 
                             $notInList = 0;
                             last;   
                         }
@@ -687,7 +706,7 @@ FEED_END
                     {
                         $line =~ s/xPodcastUPnP_Recent,//g;
                         $updateFile = 1;
-                        print stderr "          + Removed: ($line)\n";
+                        print $fLOGFILE "          + Removed: ($line)\n";
                     }
                 }
                 $fileContents .= $line."\n";
