@@ -433,7 +433,7 @@
         close(PLUGINS);  
        
         my @content = split(/\n/,$content);
-        print $fLOGFILE "  + Downloaded FeedVersions.txt (".MD5->hexhash($content)."), checking for updates(".@content.")\n";
+        print $fLOGFILE "  + Downloaded FeedVersions.txt (".MD5->hexhash($content)."), checking for updates(".$feedVersionURL.")\n";
         foreach (@content)
         {
             $updateFile      = 0;
