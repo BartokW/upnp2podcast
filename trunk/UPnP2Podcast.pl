@@ -59,7 +59,7 @@
 
   my ($feed_begin, $item, $fakeItem, $feed_end) = populateFeedStrings();
     
-  if (!(-e 'tinFoilHat.txt') && (@parameters == 0 || int(rand(10)) >= 5))
+  if (!(-e 'tinFoilHat.txt') && (@parameters == 0 || int(rand(4)) == 0))
   {
       print $fLOGFILE "  + Checking for feed updates\n";
       my $updateSuccess =  updateFeedFiles($executablePath,$debug, $fLOGFILE);
@@ -411,7 +411,7 @@
     my $rv = 0;  
     # URL of file containing feed versions
     my $feedPath       = "$executablePath\\STVs\\SageTV3\\OnlineVideos\\";
-    my $feedVersionURL = 'http://upnp2podcast.googlecode.com/svn/trunk/FeedVersions.txt';
+    my $feedVersionURL = 'http://upnp2podcast.googlecode.com/files/FeedVersions.txt';
     my ($updateFile, $propFileName, $propFileVersion, 
         $propFileMD5, $propFileURL, $topLine, $currentVersion,
         $updatedMD5, $propPlugIn);
