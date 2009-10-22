@@ -59,7 +59,7 @@
 
   my ($feed_begin, $item, $fakeItem, $feed_end) = populateFeedStrings();
     
-  if (!(-e 'tinFoilHat.txt') && (@parameters == 0 || int(rand(4)) == 0))
+  if (!(-e 'tinFoilHat.txt') && (@parameters == 0 || int(rand(1)) == 0))
   {
       print $fLOGFILE "  + Checking for feed updates\n";
       my $updateSuccess =  updateFeedFiles($executablePath,$debug, $fLOGFILE);
