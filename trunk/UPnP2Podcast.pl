@@ -78,18 +78,17 @@
       if (@parameters == 0)
       {
           if ($updateSuccess)
-          {
+          {             
               $fakeItem =~ s/%%ITEM_TITLE%%/Feeds Updated/g;
-              $fakeItem =~ s/%%ITEM_DESCRIPTION%%/Updated feed files.  Exit and re-enter the Online Services Menu to refres/g;     
+              $fakeItem =~ s/%%ITEM_DESCRIPTION%%/Updated feed files.  Exit and re-enter the Online Services Menu to refresh./g;     
           }
           else
           {
               $fakeItem =~ s/%%ITEM_TITLE%%/No Updates Found/g;
-              $fakeItem =~ s/%%ITEM_DESCRIPTION%%/There were no feed updates available at this time/g;           
-          }
-          
+              $fakeItem =~ s/%%ITEM_DESCRIPTION%%/There were no feed updates available at this time./g;           
+          }            
           $feed_begin =~ s/%%FEED_TITLE%%/No Updates Found/g;
-          $feed_begin =~ s/%%FEED_DESCRIPTION%%/There were no feed updates available at this time/g;           
+          $feed_begin =~ s/%%FEED_DESCRIPTION%%/There were no feed updates available at this time./g;           
 
           print $feed_begin . $fakeItem . $feed_end;
           exit
@@ -262,7 +261,13 @@
 
     $podcastFeed .= $feed_end;
 
-    print encode("utf8", $podcastFeed);  
+    print encode("utf8", $podcastFeed); 
+    
+    if (!$debug)
+    { 
+        print $fLOGFILE "<----------------- Feed ------------------>\n";
+        print $fLOGFILE encode("utf8", $podcastFeed);
+    }
  
      sub addItem {
         my ($content) = @_;
@@ -535,6 +540,9 @@
 
   sub populateFeedStrings()
   {
+    my ($second, $minute, $hour, $dayOfMonth, $month, $yearOffset, $dayOfWeek, $dayOfYear, $daylightSavings) = localtime();
+    my $year = 1900 + $yearOffset;
+    $month++;
     my $feed_begin = <<FEED_BEGIN;
 <rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd"
   xmlns:content="http://purl.org/rss/1.0/modules/content/">
@@ -567,16 +575,17 @@ FEED_BEGIN
 PODCAST_ITEM
 
     my $fakeItem = <<PODCAST_FAKE_ITEM;
-    <item> 
+   <item> 
       <title>%%ITEM_TITLE%%</title> 
       <description>%%ITEM_DESCRIPTION%%</description> 
+      <pubDate>1981-09-15</pubDate> 
       <itunes:subtitle>%%ITEM_DESCRIPTION%%</itunes:subtitle>
-      <itunes:duration>00:01:00</itunes:duration>
-      <enclosure url="http://127.0.0.1/fake.mpg" length="10000" type="video/mpeg2" /> 
-      <media:content duration="60" medium="video" fileSize="10000" url="http://127.0.0.1/fake.mpg" type="video/mpeg2"> 
-        <media:title>%%ITEM_TITLE%%</media:title> 
-        <media:description>%%ITEM_DESCRIPTION%%<</media:description>
-        <media:thumbnail url="http://127.0.0.1/fake.jpg"/>  
+      <itunes:duration>00:46:35</itunes:duration>
+      <enclosure url="http://127.0.0.1/fake.mpg" length="1668940000" type="video/mpeg2" /> 
+      <media:content duration="2795" medium="video" fileSize="1668940000" url="http://127.0.0.1/fake.mpg" type="video/mpeg2"> 
+       <media:title>%%ITEM_TITLE%%</media:title> 
+        <media:description>%%ITEM_DESCRIPTION%%</media:description> 
+        <media:thumbnail url="http://127.0.0.1/fake.jpg"/> 
       </media:content> 
     </item> 
 PODCAST_FAKE_ITEM
