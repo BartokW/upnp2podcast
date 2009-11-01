@@ -46,7 +46,6 @@
       open($fLOGFILE,">$executablePath\\$executableEXE.log");  
   }
 
-
   # Code version
   my $codeVersion = "$executableEXE v1.5".($debug ? "(debug)" : "");
   
@@ -58,6 +57,19 @@
   my @parameters = @ARGV;
 
   my ($feed_begin, $item, $fakeItem, $feed_end) = populateFeedStrings();
+
+  print $fLOGFILE "Welcome to $codeVersion!\n";
+  print $fLOGFILE "  + Path: $executablePath\n";
+  print $fLOGFILE "  + Parameters\n";
+  foreach (@parameters)  
+  {
+      print $fLOGFILE "    - ($_)\n";  
+  }
+
+  if ($parameters[0] eq "update")
+  {
+      pop(@parameters); 
+  }
     
   if (!(-e 'tinFoilHat.txt') && (@parameters == 0 || int(rand(1)) == 0))
   {
@@ -75,6 +87,10 @@
               $fakeItem =~ s/%%ITEM_TITLE%%/No Updates Found/g;
               $fakeItem =~ s/%%ITEM_DESCRIPTION%%/There were no feed updates available at this time/g;           
           }
+          
+          $feed_begin =~ s/%%FEED_TITLE%%/No Updates Found/g;
+          $feed_begin =~ s/%%FEED_DESCRIPTION%%/There were no feed updates available at this time/g;           
+
           print $feed_begin . $fakeItem . $feed_end;
           exit
       }
@@ -420,7 +436,7 @@
 
     if ($debug)
     {
-        $feedVersionURL = 'http://upnp2podcast.googlecode.com/svn/trunk/FeedVersionsTest.txt';
+        $feedVersionURL = 'http://upnp2podcast.googlecode.com/svn/trunk/FeedVersions.txt';
     }
 
     my $content = get $feedVersionURL;
@@ -449,9 +465,9 @@
                 {
                     if ($propFileURL =~ /\Q^$feedBaseURL\E/ || 1)
                     {   # Make sure it comes from my google code account
-                        if (-e "$feedPath\\$propFileName")
+                        if (-e "$feedPath$propFileName")
                         {
-                            open(FEED,"$feedPath\\$propFileName");
+                            open(FEED,"$feedPath$propFileName");
                             $topLine = <FEED>;
                             chomp($topLine);
                             close(FEED);
@@ -486,12 +502,19 @@
                     {
                         $content =~ s/\r//g;
                         $updatedMD5 = MD5->hexhash($content);
-                        print $fLOGFILE "        + MD5 URL : $updatedMD5 ($propFileMD5)\n";
+                        print $fLOGFILE "        + MD5 URL : $updatedMD5 ($propFileMD5)($feedPath$propFileName)\n";
                         if ($updatedMD5 eq $propFileMD5)
                         {
-                            open(FEED,">$feedPath\\$propFileName");
-                            print FEED $content;
-                            close(FEED);
+                            if (open(FEED,">$feedPath$propFileName"))
+                            {
+                                print FEED $content;
+                                close(FEED);
+                            }
+                            else
+                            {
+                                print $fLOGFILE "        ! Couldn't open file for write ($feedPath$propFileName)\n";
+                            }
+    
                             $rv++;
                         }
                         else
