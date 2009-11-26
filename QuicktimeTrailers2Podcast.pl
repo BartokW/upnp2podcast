@@ -70,25 +70,8 @@
 
   my $userInput = $parameters[0]; 
   my @searchStrings = split("&&",$userInput);
-            
-  foreach (@searchStrings)    
-  {
-      print $fLOGFILE "  + Search String: $_\n"; 
-      my @splitString = split(":",$_);   
-      
-      my %contents = {};
-      my $error    = 0;
-      my $dirPath  = "";
-      
-      my $lookingFor = shift(@splitString);
-      my $foundDevice = 0;
-      
-      if ($lookingFor =~ /quicktime/i)
-      {
-          quickTimeTrailers();
-      }
-      # Placeholder for UPnP stuff
-  }
+  
+  quickTimeTrailers($userInput,$debug,$fLOGFILE);
 
     if ($opening eq "")
     {
@@ -105,7 +88,7 @@
         {  # sort hashes alphabetically
             $podcastFeed .= $podcastItems{$_};
         }
-        updateRecentPodcasts($executablePath,$parameters[0]);
+        #updateRecentPodcasts($executablePath,$parameters[0]);
     }
     else
     {   # If no videos were found
@@ -204,6 +187,77 @@
         return "";#$theTime;
     }
 
+sub addItem {
+        my ($content) = @_;
+        my $id    = $content->getid();
+        my $title = decode('utf8' ,$content->gettitle());
+        my $url   = $content->geturl();
+        my $size  = $content->getSize();
+        my $date  = $content->getdate();
+        my $rating      = $content->getRating();
+        my $userRating  = $content->getUserRating();
+        my $dur  = $content->getDur();
+        my $screenShot  = $content->getPicture();
+        my $desc = decode('utf8' ,$content->getDesc());
+        my $newItem = $item;
+
+        if ($title =~ /s([0-9]+)e([0-9]+): (.*)/)
+        {
+            my $season  = $1;
+            my $episode = $2;
+            my $episodeTitle = $3;
+            $newItem =~ s/%%ITEM_DESCRIPTION%%/Season $season Episode $episode - $desc/sg; 
+            $newItem =~ s/%%ITEM_TITLE%%/$episodeTitle/sg;
+        }
+        else
+        {
+            $newItem =~ s/%%ITEM_DESCRIPTION%%/$desc/sg;
+            $newItem =~ s/%%ITEM_TITLE%%/$title/sg;     
+        }
+        
+        $dur    =~ /([0-9]+):([0-9]+):([0-9]+).([0-9]+)/;
+        my $durTotalSec = $1*60*60 + $2*60 + $3;
+        my $durTotalMin = $durTotalSec/60;
+        
+        if ($url =~ /(hulu|cbs)/i)
+        {   # Roughly Account for commercials
+            while($durTotalMin > 0)
+            {
+                $durTotalMin -= 7;
+                $durTotalSec += 30;    
+            }  
+        }
+        
+        my $durDisSec  = $durTotalSec;
+        my $durDisMin  = 0;
+        my $durDisHour = 0;
+        
+        while ($durDisSec > 60)
+        {
+            $durDisSec -= 60;
+            $durDisMin   += 1;
+            if ($durDisMin == 60)
+            {
+                $durDisHour += 1;
+                $durDisMin   = 0;
+            }
+        }
+
+        my $durDisplay = sprintf("%02d:%02d:%02d", $durDisHour, $durDisMin, $durDisSec);       
+        
+        $date  =~ /^(.*)T/;
+        $date  = $1;
+        
+        $newItem =~ s/%%ITEM_URL%%/$url/sg;
+        $newItem =~ s/%%ITEM_SIZE%%/$size/sg;
+        $newItem =~ s/%%ITEM_DATE%%/$date/sg;
+        $newItem =~ s/%%ITEM_PICTURE%%/$screenShot/sg;
+        $newItem =~ s/%%ITEM_DUR_SEC%%/$durTotalSec/sg;
+        $newItem =~ s/%%ITEM_DUR%%/$durDisplay/sg;
+        
+        $podcastItems{lc($title)} = $newItem;
+    }
+
   sub quickTimeTrailers()
   {
     my ($searchString, $debug, $fLOGFILE) = @_;
@@ -218,48 +272,56 @@
         if (/"title":"([^"]*)"/) #"
         {
             $title = $1;
-            print "  + Title: $title\n";
+            #print $fLOGFILE "  + Title: $title\n";
         }
         if (/"releasedate":"([^"]*)"/) #"
         {
             $releaseDate = $1; 
             $releaseDate =~ / 00:/;
             $releaseDate = $`;
-            print "    - Release Date: $releaseDate\n";
         }
         if (/"studio":"([^"]*)"/) #"
         {
             $studio = $1; 
-            print "    - Studio      : $studio\n";
         }
         if (/"poster":"([^"]*)"/) #"
         {
             $poster = $1; 
-            print "    - Poster      : $poster\n";
         }
         if (/"rating":"([^"]*)"/) #"
         {
             $rating = $1;
-            print "    - Rated       : $rating\n";
         }
         if (/"actors":\[([^\]]*)\]/) #"
         {
             $actors = $1;
             $actors =~ s/"//g; #"
             $actors =~ s/,/, /g; #"
-            print "    - Actors      : $actors\n";
         }
         if (/"genre":\[([^\]]*)\]/) #"
         {
             $genres = $1;
             $genres =~ s/"//g; #"
             $genres =~ s/,/, /g; #"
-            print "    - Genres      : $genres\n";
         }
         if (/"location":"([^"]*)"/) #"
         {
             my $trailerPageURL = "http://www.apple.com$1";
-            print "    - Trailer Page: $trailerPageURL\n";
+            
+            if ($studio !~ /Paramount Pictures/i)
+            {
+                next;
+            }
+            
+            print $fLOGFILE "  + Title: $title\n";
+            print $fLOGFILE "    - Release Date: $releaseDate\n";
+            print $fLOGFILE "    - Studio      : $studio\n";
+            print $fLOGFILE "    - Poster      : $poster\n";
+            print $fLOGFILE "    - Rated       : $rating\n";
+            print $fLOGFILE "    - Genres      : $genres\n";
+            print $fLOGFILE "    - Actors      : $actors\n";
+            
+            print $fLOGFILE "    - Trailer Page: $trailerPageURL\n";
             my $trailerPageContent = get $trailerPageURL;
             my $trailerCount = 0;
             @trailerPageLines = split(/>/,$trailerPageContent) ;
@@ -269,7 +331,7 @@
                 if (/meta name="Description" content="(.*)"/) #"
                 {
                     $description = $1;
-                    print "      + Description : $description\n"; 
+                    print $fLOGFILE "      + Description : $description\n"; 
                 }
                 if (/http[^"]*\.mov/) #"
                 {
@@ -277,7 +339,7 @@
                     {   # Pair sizes with Trailers
                         while (@foundSizes)
                         {
-                            print "      + " . pop(@foundSizes) . " MB : ". pop(@foundTrailers) ."\n";   
+                            print $fLOGFILE "      + " . pop(@foundSizes) . " MB : ". pop(@foundTrailers) ."\n";   
                         }
                     }
                     #print "      + $&\n"; 
@@ -302,7 +364,7 @@
                     if (/meta name="Description" content="(.*)"/) #"
                     {
                         $description = $1;
-                        print "      + Description : $description\n"; 
+                        print $fLOGFILE "      + Description : $description\n"; 
                     }
                     if (/http[^"]*\.mov/) #"
                     {
@@ -310,7 +372,7 @@
                         {   # Pair sizes with Trailers
                             while (@foundSizes)
                             {
-                                print "      + " . pop(@foundSizes) . " MB : ". pop(@foundTrailers) ."\n";   
+                                print $fLOGFILE "      + " . pop(@foundSizes) . " MB : ". pop(@foundTrailers) ."\n";   
                             }
                         }
                         #print "      + $&\n"; 
@@ -325,18 +387,32 @@
                     }
                 }            
             }
-           if ($sizes == 1)
+            if ($sizes == 1)
             {   # Pair sizes with Trailers
                 while (@foundSizes)
                 {
-                    print "      + " . pop(@foundSizes) . " : ". pop(@foundTrailers) ."\n";   
+                    $url         = pop(@foundTrailers);
+                    $trailerSize = pop(@foundSizes); 
+                    print $fLOGFILE "      + " . $trailerSize . " : ". $url ."\n";  
                 }
-            }         
+            }
+
+            my $newItem = $item;
+            $trailerSize *= 1024 * 1024;
+            $newItem =~ s/%%ITEM_DESCRIPTION%%/$title -\n$description \n$releaseDate\n$rating\n$genres\n$actors/sg; 
+            $newItem =~ s/%%ITEM_TITLE%%/$title/sg;  
+            $newItem =~ s/%%ITEM_URL%%/$url/sg;
+            $newItem =~ s/%%ITEM_SIZE%%/$trailerSize/sg;
+            $newItem =~ s/%%ITEM_DATE%%/2009-06-03/sg;
+            $newItem =~ s/%%ITEM_PICTURE%%/$poster/sg;
+            $newItem =~ s/%%ITEM_DUR_SEC%%/600/sg;
+            $newItem =~ s/%%ITEM_DUR%%/00:05:00/sg; 
+            $podcastItems{lc($title)} = $newItem;      
         }
         #exit;
         #print "  + $_\n"
     }
-    exit;
+    #exit;
     return $rv;   
   }
 
@@ -367,8 +443,8 @@ FEED_BEGIN
       <pubDate>%%ITEM_DATE%%</pubDate> 
       <itunes:subtitle>%%ITEM_DESCRIPTION%%</itunes:subtitle>
       <itunes:duration>%%ITEM_DUR%%</itunes:duration>
-      <enclosure url="%%ITEM_URL%%" length="%%ITEM_SIZE%%" type="video/mpeg2" /> 
-      <media:content duration="%%ITEM_DUR_SEC%%" medium="video" fileSize="%%ITEM_SIZE%%" url="%%ITEM_URL%%" type="video/mpeg2"> 
+      <enclosure url="%%ITEM_URL%%" length="%%ITEM_SIZE%%" type="video/mp4" /> 
+      <media:content duration="%%ITEM_DUR_SEC%%" medium="video" fileSize="%%ITEM_SIZE%%" url="%%ITEM_URL%%" type="video/mp4"> 
        <media:title>%%ITEM_TITLE%%</media:title> 
         <media:description>%%ITEM_DESCRIPTION%%</media:description> 
         <media:thumbnail url="%%ITEM_PICTURE%%"/> 
