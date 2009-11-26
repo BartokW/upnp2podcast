@@ -47,7 +47,7 @@
   }
 
   # Code version
-  my $codeVersion = "$executableEXE v1.5".($debug ? "(debug)" : "");
+  my $codeVersion = "$executableEXE v1.6".($debug ? "(debug)" : "");
   
   my $invalidMsg .= "\n$codeVersion\n";
   $invalidMsg .= "\tUSAGE:";
@@ -71,7 +71,7 @@
       pop(@parameters); 
   }
     
-  if (!(-e 'tinFoilHat.txt') && (@parameters == 0 || int(rand(1)) == 0))
+  if (!(-e 'tinFoilHat.txt') && (@parameters == 0 || int(rand(10)) > 5))
   {
       print $fLOGFILE "  + Checking for feed updates\n";
       my $updateSuccess =  updateFeedFiles($executablePath,$debug, $fLOGFILE);
@@ -389,28 +389,30 @@
             #print $fLOGFILE getTheTime()." ! Return: Not Container\n";
             return;
         }
-        #print "GetContent from: $title ($id)\n";
+        #print "GetContent from: $title ($id)...";
         my @child_content_list = $mediaServer->getcontentlist(ObjectID => $id );
-
+        #print "Finished\n";
+        my $counter = 5;
         while (@child_content_list <= 0) {
-            my $counter++;
-            print LOGFILE " !";
-            #print LOGFILE " ! Return: no children (@child_content_list)($id)\n";
-            sleep(5);
+            $counter--;
+            print $fLOGFILE getTheTime()." !";
+            #print $fLOGFILE getTheTime()." ! Return: no children (@child_content_list)($id)($counter)\n";
+            #sleep(5);
             @child_content_list = $mediaServer->getcontentlist(ObjectID => $id );
-            if ($counter == 5)
+            if ($counter == 0)
             {
                 last;
             }
         }
 
         if (@child_content_list <= 0) {
-            print $fLOGFILE getTheTime()." ! Return: no children (@child_content_list)($id)\n";
+            #print $fLOGFILE getTheTime()." ! Return: no children (@child_content_list)($id)\n";
             return;
         }
         $indent++;
         if (@child_content_list == 1 && $depth == 0)
         {   # Fine, try just *1*  more
+            #print $fLOGFILE getTheTime()." ! Return: no children (@child_content_list)($id)\n";
             $depth++;    
         }
         foreach my $child_content (@child_content_list) {
