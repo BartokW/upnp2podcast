@@ -1,27 +1,49 @@
 #! /user/bin/perl
+use LWP::Simple;
 
 # Move arguments into user array so we can modify it
 my @parameters = @ARGV;
-if (@parameters == 0)
-{
-    print $invalidMsg;
-    exit;
-}
 
 %categories = ();
 %shows      = ();
 
-foreach $inputFile (@parameters)
-{
-    open(HTMLFILE,"$inputFile");    
-    print "Input File: $inputFile\n";
-    
-    $inputFile =~ /\\?([^\\]*)\./;
-    $inputFileName = $1;
-  
-    print "Input File Name: $inputFileName\n";  
+%links = ();
+$links{"Network"} = 'http://www.hulu.com/browse/network/episodes';
+$links{"Action"} = 'http://www.hulu.com/browse/network/episodes?channel=Action+and+Adventure';
+$links{"Animation"} = 'http://www.hulu.com/browse/network/episodes?channel=Animation+and+Cartoons';
+$links{"Anime"} = 'http://www.hulu.com/browse/network/episodes?channel=Animation+and+Cartoons&subchannel=Anime';
+$links{"Comedy"} = 'http://www.hulu.com/browse/network/episodes?channel=Comedy';
+$links{"Drama"} = 'http://www.hulu.com/browse/network/episodes?channel=Drama';
+$links{"Family"} = 'http://www.hulu.com/browse/network/episodes?channel=Family';
+$links{"Food"} = 'http://www.hulu.com/browse/network/episodes?channel=Food+and+Leisure';
+$links{"Travel"} = 'http://www.hulu.com/browse/network/episodes?channel=Food+and+Leisure&subchannel=Travel';
+$links{"Home"} = 'http://www.hulu.com/browse/network/episodes?channel=Home+and+Garden';
+$links{"Mystery"} = 'http://www.hulu.com/browse/network/episodes?channel=Horror+and+Suspense&subchannel=Mystery';
+$links{"Paranormal"} = 'http://www.hulu.com/browse/network/episodes?channel=Horror+and+Suspense&subchannel=Paranormal';
+$links{"Music"} = 'http://www.hulu.com/browse/network/episodes?channel=Music';
+$links{"News"} = 'http://www.hulu.com/browse/network/episodes?channel=News+and+Information';
+$links{"Reality"} = 'http://www.hulu.com/browse/network/episodes?channel=Reality+and+Game+Shows';
+$links{"SciFi"} = 'http://www.hulu.com/browse/network/episodes?channel=Science+Fiction';
+$links{"SciFi"} = 'http://www.hulu.com/browse/network/episodes?channel=Sports';
+$links{"Talk"} = 'http://www.hulu.com/browse/network/episodes?channel=Talk+and+Interview';
+$links{"Web"} = 'http://www.hulu.com/browse/network/episodes?channel=Web';
+$links{"Science"} = 'http://www.hulu.com/browse/network/episodes?channel=News+and+Information&subchannel=Science+and+Technology';
+$links{"Kids"} = 'http://www.hulu.com/browse/network/episodes?channel=Family&subchannel=Kids';
 
-    while (<HTMLFILE>)
+foreach $huluCategory (sort keys %links)
+{
+    my $content = get $links{$huluCategory};
+    if (defined $content)
+    {
+        $content =~ s/\r//g;
+        @content = split(/\n/,$content);
+        #print $content;
+    }
+
+  
+    print "Hulu Category: $huluCategory\n";  
+
+    foreach (@content)
     {
     		chomp;
     		if (/\/network\/([^"]+)/) #"
@@ -30,7 +52,7 @@ foreach $inputFile (@parameters)
     			$foundNetwork = $1;
     			$foundNetwork =~ s/&amp\;/&/g;
     			$foundNetwork =~ s/\-/ /g;
-    			#print "  + Found Network: ($foundNetwork)\n";
+    			print "  + Found Network: ($foundNetwork)\n";
     		}
     		
     		if (/www.hulu.com[^"]*" class="show.thumb info.hover"/)
@@ -39,9 +61,9 @@ foreach $inputFile (@parameters)
     			$show    = $1;
     			$show =~ s/&amp\;/&/g;
     			print "      + Show: $show\n";
-    			push(@{$categories{$inputFileName}{$foundNetwork}},$show);
+    			push(@{$categories{$huluCategory}{$foundNetwork}},$show);
     			#print "      + Keys : ".(keys %categories)."\n";
-    			push(@{$shows{$show}},[$inputFileName,$foundNetwork]);
+    			push(@{$shows{$show}},[$huluCategory,$foundNetwork]);
     		}	
     }
 }
@@ -52,20 +74,21 @@ $feedNames   = "";
 $sourceNames = "";
 $rowsCols    = "";
 $subCatagorys = "";
-$customSources  = "CustomSources=xPodcastABC_Current,xPodcastNBC_Current,xPodcastFOX_Current,xPodcastComedy_Central_Current,xPodcastUSA_Current,xPodcastSyFy_Current,xPodcastBrowseHulu\n";
+$customSources  = "CustomSources=xPodcastABC_Current,xPodcastNBC_Current,xPodcastFOX_Current,xPodcastComedy_Central_Current,xPodcastUSA_Current,xPodcastSyFy_Current,xPodcastFX_Current,xPodcastBrowseHulu\n";
 
 
 # Hardcoded Stuff
 $sourceNames .= "\nSource/xPodcastBrowseHulu/LongName=Browse Hulu\n";
 $sourceNames .= "Source/xPodcastBrowseHulu/ShortName=Browse Hulu\n";
 
-@hardcodedShows = ('xPodcastABC_Current','xPodcastNBC_Current','xPodcastFOX_Current','xPodcastUSA_Current','xPodcastComedy_Central_Current','xPodcastSyFy_Current');
-@{$currentShows{'xPodcastABC_Current'}} = ('Shaq Vs','Extreme Makeover: Home Edition','Eastwick','Shark Tank','Scrubs','Jimmy Kimmel Live','Supernanny','Brothers & Sisters','Dancing With The Stars','Hank','Ugly Betty','FlashForward','The Forgotten','Desperate Housewives','Modern Family','Wipeout','Lost','Better Off Ted','Defying Gravity','Grey.s Anatomy','Castle','Cougar Town','The Middle','Crash Course','Private Practice');
-@{$currentShows{'xPodcastNBC_Current'}} = ('Late Night with Jimmy Fallon','Mercy','Parks and Recreation','Heroes','The Office','30 Rock','Saturday Night Live','The Biggest Loser','The Jay Leno Show','Trauma','Chuck','The Tonight Show with Conan O.Brien');#'
+@hardcodedShows = ('xPodcastABC_Current','xPodcastNBC_Current','xPodcastFOX_Current','xPodcastUSA_Current','xPodcastComedy_Central_Current','xPodcastSyFy_Current','xPodcastFX_Current');
+@{$currentShows{'xPodcastABC_Current'}} = ('Shaq Vs','Extreme Makeover: Home Edition','Eastwick','Shark Tank','Scrubs','Jimmy Kimmel Live','Supernanny','Brothers & Sisters','Dancing With The Stars','Hank','Ugly Betty','FlashForward','The Forgotten','Desperate Housewives','Modern Family','Wipeout','Lost','Better Off Ted','Defying Gravity','Grey.s Anatomy','Castle','Cougar Town','The Middle','Crash Course','Private Practice','V');
+@{$currentShows{'xPodcastNBC_Current'}} = ('Community','Late Night with Jimmy Fallon','Mercy','Parks and Recreation','Heroes','The Office','30 Rock','Saturday Night Live','The Biggest Loser','The Jay Leno Show','Trauma','Chuck','The Tonight Show with Conan O.Brien');#'
 @{$currentShows{'xPodcastFOX_Current'}} = ('House','Bones','Lie To Me','The Cleveland Show','Brothers','Glee','The Simpsons','Fringe','.Til Death','Kitchen Nightmares','Dollhouse','Family Guy','American Dad.','Hell.s Kitchen');#'
-@{$currentShows{'xPodcastUSA_Current'}} = ('Psych','The Starter Wife','In Plain Sight','Royal Pains','Burn Notice','Monk');#'
+@{$currentShows{'xPodcastUSA_Current'}} = ('White Collar','Psych','The Starter Wife','In Plain Sight','Royal Pains','Burn Notice','Monk');#'
 @{$currentShows{'xPodcastComedy_Central_Current'}} = ('The Colbert Report','The Daily Show with Jon Stewart');#'
 @{$currentShows{'xPodcastSyFy_Current'}} = ('Stargate Universe','Scare Tactics','Ghost Hunters International','Ghost Hunters','Sanctuary','Stargate Atlantis','Stargate SG.1');#'
+@{$currentShows{'xPodcastFX_Current'}} = ('30 Days','It.s Always Sunny in Philadelphia','The League','Nip.Tuck','The Riches','Sons of Anarchy');#'
 
 
 foreach (@hardcodedShows)
@@ -149,9 +172,9 @@ foreach $category (sort { lc ($a) cmp lc($b) } keys %categories)
     		$subCatName     = "Hulu_".$category."_".$networkStriped."_SubCat";
     
     		$networkHuluBanner = $network;
-    		$networkHuluBanner =~ s/&/and/g;
+    		$networkHuluBanner =~ s/&//g;
     		$networkHuluBanner =~ s/[ \-]/_/g;
-    		$networkHuluBanner =~ s/[.:'`"]//g; #"
+    		$networkHuluBanner =~ s/[.:'`"!]//g; #"
     		$networkPoster = "http://assets.hulu.com/companies/company_thumbnail_".lc($networkHuluBanner).".jpg";
     		print stderr "      + Thumb: $networkPoster\n";
     		
@@ -179,7 +202,7 @@ foreach $show (keys %shows)
 		$showHuluBanner = $show;
 		$showHuluBanner =~ s/&/and/g;
 		$showHuluBanner =~ s/[ \-]/_/g;
-		$showHuluBanner =~ s/[.:'`"!]//g; #"
+		$showHuluBanner =~ s/[.:'`"!\\\/]//g; #"
 		$poster = "http://assets.hulu.com/shows/show_thumbnail_".lc($showHuluBanner).".jpg";
 
     print "    - Found Poster     : ($poster)\n";
@@ -194,9 +217,10 @@ foreach $show (keys %shows)
     }
 		
 		$showStripped    = $show;
-		$showStripped    =~ s/[ .:&\-()\$'"!]//g; #"
+		$showStripped    =~ s/[^a-zA-Z0-9]//g; #"
 		
 		$showRegEx       = $show;
+		$showRegEx       =~ s/&/.amp;/g;
 		$showRegEx       =~ s/[^a-zA-Z0-9]/./g; #"
     
   	# Scrape it, bitches!
@@ -295,6 +319,9 @@ $textFile =~ s/\/Hulu_By_Network/\/abHulu_By_Network/g;
 $textFile =~ s/\nHulu_By_Network/\nabHulu_By_Network/g;
 $textFile =~ s/=Network/=By Network/g;
 $textFile =~ s/=Network/=By Network/g;  
+
+# Hardcoded fix for FlashForward
+$textFile =~ s/show_thumbnail_flashforward/show_thumbnail_flash_forward/gi;
 
 ($second, $minute, $hour, $dayOfMonth, $month, $yearOffset, $dayOfWeek, $dayOfYear, $daylightSavings) = localtime();
 $year = 1900 + $yearOffset;
