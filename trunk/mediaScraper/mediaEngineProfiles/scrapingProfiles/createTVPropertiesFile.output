@@ -1,0 +1,17 @@
+MediaType=TV
+Title=%%showTitle%% %%SEoutputFormat%% - %%episodeTitle%%
+MediaTitle=%%showTitle%%
+Actor=%%actorsTemp%%
+ActorRoles=%%rolesTemp%%
+Guest=%%guestStarsTemp%%
+Director=%%DirectorTemp%%
+Writer=%%writersTemp%%
+Genres=%%genresTemp%%
+Description=%%episodeDescription%%
+Rated=%%showRating%%
+UserRating=%%episodeRating%%
+ReleaseDate=%%firstAired%%
+MediaProviderDataID=theTVDB:%%tvdbID%%
+SeasonNumber=%%seasonNum%%
+EpisodeNumber=%%episodeNum%%
+EpisodeTitle=%%episodeTitle%%

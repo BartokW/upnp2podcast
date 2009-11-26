@@ -1,0 +1,23 @@
+<rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd"
+  xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel> 
+    <title>Psych</title> 
+    <description>UPnP2Podcast v1.5 PlayOn:Hulu:TV Episodes:P:^Psych$:+2</description> 
+    <language>en-us</language> 
+    <itunes:summary>Psych</itunes:summary> 
+    <itunes:subtitle>Psych</itunes:subtitle> 
+    <item> 
+      <title>High Top Fade Out</title> 
+      <description>Season 4 Episode 7 - Gus must re-team with his estranged college singing buddies when a member of the old quartet is murdered.</description> 
+      <pubDate>2009-09-25</pubDate> 
+      <itunes:subtitle>Season 4 Episode 7 - Gus must re-team with his estranged college singing buddies when a member of the old quartet is murdered.</itunes:subtitle>
+      <itunes:duration>00:46:35</itunes:duration>
+      <enclosure url="http://10.0.1.8:63478/hulu-f5e09844-797c-4274-b75a-eeb6e2321772/1-hulu-f5e09844-797c-4274-b75a-eeb6e2321772.mpg" length="1668940000" type="video/mpeg2" /> 
+      <media:content duration="2795" medium="video" fileSize="1668940000" url="http://10.0.1.8:63478/hulu-f5e09844-797c-4274-b75a-eeb6e2321772/1-hulu-f5e09844-797c-4274-b75a-eeb6e2321772.mpg" type="video/mpeg2"> 
+       <media:title>High Top Fade Out</media:title> 
+        <media:description>Season 4 Episode 7 - Gus must re-team with his estranged college singing buddies when a member of the old quartet is murdered.</media:description> 
+        <media:thumbnail url="http://10.0.1.8:63478/hulu-f5e09844-797c-4274-b75a-eeb6e2321772/1-hulu-f5e09844-797c-4274-b75a-eeb6e2321772.mpg?albumArt=true"/> 
+      </media:content> 
+    </item> 
+  </channel> 
+</rss> 

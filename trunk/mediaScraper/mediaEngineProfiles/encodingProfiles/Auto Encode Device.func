@@ -1,0 +1,30 @@
+# Profile: Auto Encode Devices
+#
+# Automagically encode content for hardware devices
+#
+
+    Profile           =Auto Encode Devices
+    Encode CLI #1     =/onePass /autoCrop
+    Encoder #1        =/setOptions
+    Encode CLI #2     =?>%%hardwareDevice%%=eq=audioOnlyMp3<:>ffmpeg mp3<?
+    Encoder #2        =/branch
+    Encode CLI #4     =?>%%hardwareDevice%%=eq=iPodLowRes<:>HandBrake iPod LowRes<?
+    Encoder #4        =/branch
+    Encode CLI #6     =?>%%hardwareDevice%%=eq=psp<:>HandBrake PSP<?
+    Encoder #6        =/branch
+    Encode CLI #7     =?>%%hardwareDevice%%=eq=Zune<:>ffmpeg Zune<?
+    Encoder #7        =/branch
+    Encode CLI #7     =?>%%hardwareDevice%%=eq=PocketPC<:>ffmpeg PocketPC<?
+    Encoder #7        =/branch
+    Encode CLI #7     =?>%%hardwareDevice%%=eq=SmartPhone<:>ffmpeg SmartPhone<?
+    Encoder #7        =/branch
+    Encode CLI #2     =?>%%hardwareDevice%%=eq=xbox360<:>HandBrake xbox360<?
+    Encoder #2        =/branch
+    Encode CLI #2     =?>%%hardwareDevice%%=eq=appleTV<:>HandBrake AppleTV<?
+    Encoder #2        =/branch
+    Encode CLI #1     =?>%%hardwareDevice%%=eq=iPhone||%%hardwareDevice%%=eq=iPodTouch<:>Handbrake iPhone<?
+    Encoder #1        =/branch
+    Encode CLI #3     =?>%%hardwareDevice%%=eq=iPodHighRes<:>HandBrake iPod HiRes<?
+    Encoder #3        =/branch
+    Encode CLI #5     =?>%%hardwareDevice%%=eq=ps3<:>HandBrake PS3<?
+    Encoder #5        =/branch

@@ -1,0 +1,33 @@
+# Function: extractSubtitles
+#
+# Extract Subtitles from embedded CC
+#
+#   INPUT : %%ORIGINAL%%
+#   OUTPUT: %%OUTPUT_SUB%%.srt
+#           /extractedSubtitles
+#
+
+    Profile           =extractSubtitles
+    Encode CLI #1     =?>ORIGINAL:embeddedCCCount>10<:>#extract_sub# -srt -sc "?>quickStreamFixFile<:>%%quickStreamFixFile%%<=>cutCommFile<:>%%cutCommFile%%<=>%%ORIGINAL%%<?" -o "%%OUTPUT_SUB%%.srt"<?
+    Encoder #1        =/exe ccextractorwin.exe
+    Encode CLI #2     =?>ORIGINAL:embeddedCCCount>10&&EXISTS:%%INPUTSUB%%.srt<:>/extractedSubtitles<?
+    Encoder #2        =/setOptions
+
+# Function: extractSubtitlesDVD
+#
+# Extract Subtitles from embedded CC
+#
+#   INPUT : %%ORIGINAL%%
+#   OUTPUT: %%OUTPUT_SUB%%.srt
+#           /extractedSubtitles
+#
+
+    Profile           =extractSubtitlesDVD
+    Encode CLI #1     =?>ORIGINAL:embeddedCCCount>10<:>#vob2mpeg# dvd://%%dvdTitle%% -dvd-device "%%ORIGINAL%%" -oac copy -ovc copy -of mpeg -mpegopts format=dvd:tsaf -o "%%OUTPUT_DVDVOB%%.mpg"<?
+    Encoder #1        =/exe mencoder.exe
+    Encode CLI #1     =?>ORIGINAL:embeddedCCCount>10<:>#extract_sub# -srt -sc "%%inputDVDVOB%%" -o "%%OUTPUT_SUB%%.srt"<?
+    Encoder #1        =/exe ccextractorwin.exe
+    Encode CLI #1     =?>ORIGINAL:embeddedCCCount>10<:>#deleteMpeg# "%%inputDVDVOB%%"<?
+    Encoder #1        =/exe del
+    Encode CLI #2     =?>ORIGINAL:embeddedCCCount>10<:>/extractedSubtitles<?
+    Encoder #2        =/setOptions

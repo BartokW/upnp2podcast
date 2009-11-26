@@ -1,0 +1,182 @@
+# Function: HandBrake AppleTV
+#
+# HandBrake's settings for the AppleTV. Provides a good balance between quality and file size, and optimizes performance.
+#
+# Input = %%inputMain%%
+# Ouput = %%OUTPUT_MAIN%%.mp4
+#
+
+    Profile           =HandBrake AppleTV
+    Encode CLI #1     =#handbrake_appleTV#-i "%%ORIGINAL%%" -o "%%OUTPUT_MAIN%%.mp4" %%SNIP:Handbrake DVD%% --preset="AppleTV" ?>deNoise<:>-8<? ?>revTelecine<:>-9<? ?>autoCrop&&ORIGINAL:autoCropHandBrake<:>--crop %%ORIGINAL:autoCropHandBrake%% -l %%ORIGINAL:cropY%%<=>--crop 0:0:0:0<? ?>deinterlace<:>-d<? ?>!onePass<:>-2<?
+    Encoder #1        =/exe HandBrakeCLI.exe
+
+# Function: HandBrake iPhone
+#
+# HandBrake's settings for the iPhone. 
+#
+# Input = %%inputMain%%
+# Ouput = %%OUTPUT_MAIN%%.mp4
+#
+
+    Profile           =HandBrake iPhone
+    Encode CLI #1     =#handbrake_iPhone#-i "%%ORIGINAL%%" -o "%%OUTPUT_MAIN%%.mp4" %%SNIP:Handbrake DVD%% --preset="iPhone / iPod Touch" ?>deNoise<:>-8<? ?>revTelecine<:>-9<? ?>autoCrop&&ORIGINAL:autoCropHandBrake<:>--crop %%ORIGINAL:autoCropHandBrake%%<=>--crop 0:0:0:0<? ?>deinterlace<:>-d<? ?>!onePass<:>-2<?
+    Encoder #1        =/exe HandBrakeCLI.exe
+
+# Function: HandBrake iPod HiRes
+#
+# HandBrake's high resolution settings for the iPod. Good video quality, great for viewing on a TV using your iPod 
+#
+# Input = %%inputMain%%
+# Ouput = %%OUTPUT_MAIN%%.mp4
+#
+
+    Profile           =HandBrake iPod HiRes
+    Encode CLI #1     =#handbrake_iPodHR#-i "%%ORIGINAL%%" -o "%%OUTPUT_MAIN%%.mp4" %%SNIP:Handbrake DVD%% --preset="iPod High-Rez" ?>deNoise<:>-8<? ?>revTelecine<:>-9<? ?>autoCrop&&ORIGINAL:autoCropHandBrake<:>--crop %%ORIGINAL:autoCropHandBrake%%<=>--crop 0:0:0:0<? ?>deinterlace<:>-d<? ?>!onePass<:>-2<?
+    Encoder #1        =/exe HandBrakeCLI.exe
+
+# Function: HandBrake iPod LowRes
+#
+# HandBrake's low resolution settings for the iPod. Optimized for great playback on the iPod screen, with smaller file size. 
+#
+# Input = %%inputMain%%
+# Ouput = %%OUTPUT_MAIN%%.mp4
+#
+
+    Profile           =HandBrake iPod LowRes
+    Encode CLI #1     =#handbrake_iPodLR#-i "%%ORIGINAL%%" -o "%%OUTPUT_MAIN%%.mp4" %%SNIP:Handbrake DVD%% --preset="iPod Low-Rez" ?>deNoise<:>-8<? ?>revTelecine<:>-9<? ?>autoCrop&&ORIGINAL:autoCropHandBrake<:>--crop %%ORIGINAL:autoCropHandBrake%%<=>--crop 0:0:0:0<? ?>deinterlace<:>-d<? ?>!onePass<:>-2<?
+    Encoder #1        =/exe HandBrakeCLI.exe
+
+# Function: HandBrake PS3
+#
+# HandBrake's settings for the Sony PlayStation 3.   
+#
+# Input = %%inputMain%%
+# Ouput = %%OUTPUT_MAIN%%.mp4
+#
+
+    Profile           =HandBrake PS3
+    Encode CLI #1     =#handbrake_PS3#-i "%%ORIGINAL%%" -o "%%OUTPUT_MAIN%%.mp4" %%SNIP:Handbrake DVD%% --preset="PS3" ?>deNoise<:>-8<? ?>revTelecine<:>-9<? ?>!autoCrop<:>--crop 0:0:0:0<? ?>deinterlace<:>-d<? ?>!onePass<:>-2<?
+    Encoder #1        =/exe HandBrakeCLI.exe
+
+# Function: HandBrake PSP
+#
+# HandBrake's settings for the Sony PlayStation Portable.  
+#
+# Input = %%inputMain%%
+# Ouput = %%OUTPUT_MAIN%%.mp4
+#
+
+    Profile           =HandBrake PSP
+    Encode CLI #1     =#handbrake_PSP#-i "%%ORIGINAL%%" -o "%%OUTPUT_MAIN%%.mp4" %%SNIP:Handbrake DVD%% --preset="PSP" ?>deNoise<:>-8<? ?>revTelecine<:>-9<? ?>autoCrop&&ORIGINAL:autoCropHandBrake<:>--crop %%ORIGINAL:autoCropHandBrake%%<=>--crop 0:0:0:0<? ?>deinterlace<:>-d<? ?>!onePass<:>-2<?
+    Encoder #1        =/exe HandBrakeCLI.exe
+
+# Function: HandBrake xbox360
+#
+# HandBrake's settings for the Xbox 360.  
+#
+# Input = %%inputMain%%
+# Ouput = %%OUTPUT_MAIN%%.mp4
+#
+
+    Profile           =HandBrake xbox360
+    Encode CLI #1     =#handbrake_xbox360#-i "%%ORIGINAL%%" -o "%%OUTPUT_MAIN%%.mp4" %%SNIP:Handbrake DVD%% --preset="Xbox 360" ?>deNoise<:>-8<? ?>revTelecine<:>-9<? ?>autoCrop&&ORIGINAL:autoCropHandBrake<:>--crop %%ORIGINAL:autoCropHandBrake%%<=>--crop 0:0:0:0<? ?>deinterlace<:>-d<? ?>!onePass<:>-2<?
+    Encoder #1        =/exe HandBrakeCLI.exe
+
+# Function: mencoder iPod
+#
+# Profile for all iPod devices
+#
+# Input = %%inputMain%%
+# Ouput = %%OUTPUT_MAIN%%.mp4
+#
+
+    Profile           =mencoder iPod
+    Encode CLI #1     =#mencoder_iPod#-aid 0 -vf %%SNIP:mencoder Video Filters%% -sws 2 "%%inputMain%%" -of lavf -lavfopts format=mp4 -ovc x264 -x264encopts %%SNIP:x264 iPod%% -af channels=2 -oac faac -faacopts br=128:mpeg=4:object=2:tns:raw -o "%%OUPUT_MAIN%%.mp4"
+    Encoder #1        =/exe mencoder.exe
+    Encode CLI #2     =#iPod_mp4#-tmp "%%scratchPath%%" -add "%%inputMain%%"" "%%OUTPUT_MAIN%%.mp4"
+    Encoder #2        =/exe mp4box.exe
+
+# Function: ffmpeg Zune
+#
+# Profile for all MS Zunes
+#
+# Input = %%inputMain%%
+# Ouput = %%OUTPUT_MAIN%%.wmv
+#
+
+    Profile           =ffmpeg Zune
+    Encode CLI #1     =#ffmpeg_zune#-y -i "%%inputMain%%" -deinterlace -pix_fmt yuv420p -g 15 -qmin 3 -maxrate 628000 -bufsize 628k -async 50 -vcodec wmv2 -b 500000 -r 29.97 -s 320x240 -acodec wmav2 -ar 44100 -ac 2 -ab 128k "%%OUTPUT_MAIN%%.wmv"
+    Encoder #1        =/exe ffmpegSVN.exe
+
+# Function: Audio Only MP3
+#
+# Audio Only for mp3 players
+#
+# Input = %%inputMain%%
+# Ouput = %%OUTPUT_MAIN%%.mp3
+#
+
+    Profile           =ffmpeg mp3
+    Encode CLI #1     =#ffmpeg_audioOnlyMp3#-y -i "%%inputMain%%" -ab 192kb -ac 2 "%%OUTPUT_MAIN%%.mp3"
+    Encoder #1        =/exe ffmpegSVN.exe
+
+# Function: ffmpeg iPhone
+#
+# ffmpeg to iphone conversion for non-mpegs
+#
+# Input = %%inputMain%%
+# Ouput = %%OUTPUT_MAIN%%.mp4
+#
+
+    Profile           =ffmpeg iPhone
+    Encode CLI #1     =#ffmpeg_iPhone#-y -i "%%inputMain%%" -benchmark -threads 2 -async 1 -deinterlace -s 320x240 -acodec libfaac -vcodec mpeg4 -b 384kb -coder 0 -level 13 -qscale 7 "%%OUTPUT_MAIN%%.mp4"
+    Encoder #1        =/exe ffmpegSVN.exe
+
+# Function: ffmpeg iPod LowRes
+#
+# ffmpeg to iPod low resolution for non-Mpegs
+#
+# Input = %%inputMain%%
+# Ouput = %%OUTPUT_MAIN%%.mp4
+#
+
+    Profile           =ffmpeg iPod LowRes
+    Encode CLI #1     =#ffmpeg_iPodHRe#-y -i "%%inputMain%%" -acodec libfaac -ab 96kb -vcodec mpeg4 -b 1200kb -mbd 2 -flags +4mv+trell -aic 2 -cmp 2 -subcmp 2 -async 1 -deinterlace -s 160x120 "%%OUTPUT_MAIN%%.mp4"
+    Encoder #1        =/exe ffmpegSVN.exe
+
+# Function: ffmpeg iPod HiRes
+#
+# ffmpeg to iPod high resolution for non-Mpegs
+#
+# Input = %%inputMain%%
+# Ouput = %%OUTPUT_MAIN%%.mp4
+#
+
+    Profile           =ffmpeg iPod HiRes
+    Encode CLI #1     =#ffmpeg_iPodLR#-y -i "%%inputMain%%" -acodec libfaac -ab 96kb -vcodec mpeg4 -b 1200kb -mbd 2 -flags +4mv+trell -aic 2 -cmp 2 -subcmp 2 -async 1 -deinterlace -s 640x480 "%%OUTPUT_MAIN%%.mp4"
+    Encoder #1        =/exe ffmpegSVN.exe
+
+
+# Function: ffmpeg PocketPC
+#
+# ffmpeg to PocketPC
+#
+# Input = %%inputMain%%
+# Ouput = %%OUTPUT_MAIN%%.wmv
+#
+
+    Profile           =ffmpeg PocketPC
+    Encode CLI #1     =#ffmpeg_PocketPC#-y -i "%%inputMain%%" -vcodec wmv2 -b 500kb -r 30 -g 300 -s 320x240 -acodec wmav2 -ab 128kb -async 1 -ac 2 -deinterlace "%%OUTPUT_MAIN%%.wmv"
+    Encoder #1        =/exe ffmpegSVN.exe
+
+# Function: ffmpeg SmartPhone
+#
+# ffmpeg to SmartPhones
+#
+# Input = %%inputMain%%
+# Ouput = %%OUTPUT_MAIN%%.wmv
+#
+
+    Profile           =ffmpeg SmartPhone
+    Encode CLI #1     =#ffmpeg_PocketPC#-y -i "%%inputMain%%" -vcodec wmv2 -b 500kb -r 30 -g 300 -s 160x120 -acodec wmav2 -ab  64kb -async 1 -ac 2 -deinterlace "%%OUTPUT_MAIN%%.wmv"
+    Encoder #1        =/exe ffmpegSVN.exe

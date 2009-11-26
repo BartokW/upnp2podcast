@@ -1,0 +1,90 @@
+# Function: outputModes
+#
+# Select the appropriate output mode
+#
+# Input  = %%inputMain%%
+# Output = /(outputComplete|outputFailure)
+
+    Profile           =outputModes
+    Encode CLI #1     =?>(>!inputMain:videoContainer&&!%%hardwareDevice%%=~videoOnly<)||(>!inputMain:videoInfo&&!%%hardwareDevice%%=~audioOnly<)<:>/ERROR "No Audio or Video"<?
+    Encoder #1        =/setOptions
+    Encode CLI #1     =Match Timestamps
+    Encoder #1        =/insertFunction
+    Encode CLI #1     =?>%%outputMode%%=eq=inPlace<:>/inPlace<?
+    Encoder #1        =/setOptions
+    Encode CLI #1     =?>EXISTS:%%inputMain%%&&!%%inputMain%%=eq=%%ORIGINAL%%&&!videoDVD<:>?>inPlace&&!hardwareDevice&&!isDVD<:>outputInPlace<=>outputDirectory<?<?
+    Encoder #1        =/insertFunction
+    Encode CLI #2     =?>cutComm&&cutCommComplete<:>?>EXT:edl<:>#Moving_EDL#"%%ORIGINAL_FULLFILE_FORWARDSLASHES%%.edl" "%%ORIGINAL_FULLFILE_FORWARDSLASHES%%.edlcut"<?<?
+    Encoder #2        =/exe move
+    Encode CLI #3     =?>cutComm&&cutCommComplete<:>?>EXT:txt<:>#Moving_TXT#"%%ORIGINAL_FULLFILE_FORWARDSLASHES%%.txt" "%%ORIGINAL_FULLFILE_FORWARDSLASHES%%.txtcut"<?<?
+    Encoder #3        =/exe move
+    Encode CLI #3     =?>cutComm&&cutCommComplete<:>?>EXT:VPrj<:>#Moving_TXT#"%%ORIGINAL_FULLFILE_FORWARDSLASHES%%.VPrj" "%%ORIGINAL_FULLFILE_FORWARDSLASHES%%.VPrjcut"<?<?
+    Encoder #3        =/exe move
+    Encode CLI #2     =?>EXISTS:%%finalOutputName%%&&!%%finalOutputName%%=eq=%%ORIGINAL%%&&!videoDVD<:>/outputComplete<=>/outputFailure<?
+    Encoder #2        =/setOptions
+
+# Output: outputIsDVD - Copies all videos compressed from a VIDEO_TS folder
+#                       into a new folder next to the original
+#
+# Input = %%inputMain%%
+# TODO: FIX
+
+    Profile           =outputIsDVD
+    Encode CLI #1     =/finalOutputName "%%ORIGINAL_PATH%%_compress\%%ORIGINAL_PATH_FILE%%.title_%%dvdTitle%%.%%inputMain_EXT%%"
+    Encoder #1        =/setOptions
+    Encode CLI #1     =?>!DIRECTORY:?>outputDirectory<:>%%outputDirectory%%<=>%%ORIGINAL_PATH%%_compress<??>hardwareDevice<:>\%%hardwareDevice%%<?<:>"%%check%%"<?
+    Encoder #1        =/exe mkdir
+    Encode CLI #2     ="%%inputMain_FORWARDSLASHES%%" "%%finalOutputName_FORWARDSLASHES%%"
+    Encoder #2        =/exe copy
+
+# Output: outputDirectory - Copies encoded video with the original name so it will be
+#                           picked up as a Sage Recording
+#
+# Input = %%inputMain%%
+#
+
+    Profile           =outputDirectory
+    Encode CLI #1     =/finalOutputName "?>outputDirectory<:>%%outputDirectory%%<=>%%ORIGINAL_PATH%%<??>isDVD<:>_compress<??>hardwareDevice<:>\%%hardwareDevice%%<?\?>outputNameWExt<:>%%outputNameWExt%%<=>?>outputName<:>%%outputName%%<=>%%SNIP:defaultOutputName%%<??>isDVD<:>.title_%%dvdTitle%%<?.?>appendFileName<:>%%appendFileName%%.<?%%inputMain_EXT%%<?"
+    Encoder #1        =/setOptions
+    Encode CLI #1     =?>!DIRECTORY:%%finalOutputName_PATH_FORWARDSLASHES%%<:>#makeOutputDir#"%%finalOutputName_PATH_FORWARDSLASHES%%"<?
+    Encoder #1        =/exe mkdir
+    Encode CLI #2     =#outputDirectory#"%%inputMain_FORWARDSLASHES%%" "%%finalOutputName_FORWARDSLASHES%%"
+    Encoder #2        =/exe copy
+
+# Output: outputInPlace - Copies encoded video with the original name so it will be
+#                         picked up as a Sage Recording
+#
+# Input = %%inputMain%%
+#
+
+    Profile           =outputInPlace
+    Encode CLI #1     =/finalOutputName "?>outputDirectory<:>%%outputDirectory%%\%%ORIGINAL_NAME_FORWARDSLASHES%%<=>%%ORIGINAL_FULLFILE_FORWARDSLASHES%%<?.%%inputMain_EXT%%"
+    Encoder #1        =/setOptions
+    Encode CLI #1     =?>!%%inputMain_DRIVE%%=eq=%%ORIGINAL_DRIVE%%<:>#MAKE_TMP#"%%inputMain_FORWARDSLASHES%%" "%%finalOutputName_FULLFILE_FORWARDSLASHES%%.tmp"<?
+    Encoder #1        =/exe move
+    Encode CLI #1     =?>!DIRECTORY:%%finalOutputName_PATH_FORWARDSLASHES%%<:>#makeOutputDir#"%%finalOutputName_PATH_FORWARDSLASHES%%"<?
+    Encoder #1        =/exe mkdir
+    Encode CLI #2     =#DELETE_ORIGINAL#"%%ORIGINAL_FORWARDSLASHES%%"
+    Encoder #2        =/exe del
+    Encode CLI #2     =#COPY_FINAL_VIDEO#"?>!%%inputMain_DRIVE%%=eq=%%ORIGINAL_DRIVE%%<:>%%finalOutputName_FULLFILE_FORWARDSLASHES%%.tmp<=>%%inputMain_FORWARDSLASHES%%<?" "%%finalOutputName_FORWARDSLASHES%%"
+    Encoder #2        =/exe move
+
+
+# Snip: defaultOutputName - Copies encoded video with the original name so it will be
+#                         picked up as a Sage Recording
+#
+# Input = %%inputMain%%
+#
+
+    Profile           =defaultOutputName
+    Encode CLI #1     =?>isDVD<:>%%ORIGINAL_PATH_NAME%%<=>%%ORIGINAL_NAME%%<?.%%profile%%
+    Encoder #1        =
+
+# FUnction: Touch - Matches the new file to the original files timestamps
+#
+# Input = %%inputMain%%
+#
+
+    Profile           =Match Timestamps
+    Encode CLI #1     =#matching_timestamps#-r "%%ORIGINAL%%" "%%inputMain%%"
+    Encoder #1        =touch.exe

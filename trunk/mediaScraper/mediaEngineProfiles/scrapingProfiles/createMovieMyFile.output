@@ -1,0 +1,6 @@
+Title=%%showTitle%% (%%releaseYear%%)
+overview=%%plot%%
+actors=%%castMyFile%%%%directorsMyFile%%%%writersMyFile%%
+TVRated=%%fullRating%%
+TVDuration=%%runTime%%
+released=%%releaseDate%%

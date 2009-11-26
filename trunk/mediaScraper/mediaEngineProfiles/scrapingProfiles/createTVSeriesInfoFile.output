@@ -1,0 +1,8 @@
+Show=%%showTitle%%
+theTVDBID=%%tvdbID%%
+Description=%%showDescription%%
+FirstAired=%%showPremired%%
+AirsOn=%%showDayOfWeek%%
+Runtime=%%showRuntime%%
+Network=%%showNetwork%%
+Genre=%%showGenre%%

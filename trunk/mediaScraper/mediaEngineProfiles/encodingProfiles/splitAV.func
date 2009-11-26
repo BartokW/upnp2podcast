@@ -1,0 +1,18 @@
+# Function: splitAV
+#
+# Split the audio and video inteo seperate files
+#
+#   INPUT : %%inputMain%%
+#   OUTPUT: %%OUTPUT_VIDEO%%.?>x264<:>h264<=>divx<:>divx<=>xvid<:>xvid<=>avi<?
+#           %%OUTPUT_AUDIO%%.?>mp3<:>mp3<=>aac<:>aac<=>ac3<:>ac3<=>avi?
+#
+
+    Profile           =splitAV
+    Encode CLI #1     =#dumpVideo#"?>splitFileVideo<:>%%splitFileVideo%%<=>%%inputMain%%<?" -oac copy -ovc copy -of rawvideo -o "%%OUTPUT_VIDEO%%.?>splitFileVideo<:>?>splitFileVideo:videoCodec=~h264<:>h264<=>splitFileVideo:videoCodec=~mpeg4&&mp4<:>divx<=>avi<?<=>?>inputMain:videoCodec=~h264<:>h264<=>inputMain:videoCodec=~mpeg4&&mp4<:>divx<=>avi<?<?" 
+    Encoder #1        =/exe mencoder.exe
+    Encode CLI #2     =#dumpAudio#"?>splitFileAudio<:>%%splitFileAudio%%<=>%%inputMain%%<?" -oac copy -ovc copy -of rawaudio -o "%%OUTPUT_AUDIO%%.?>splitFileAudio<:>?>splitFileAudio:audioCodec=~mp3<:>mp3<=>splitFileAudio:audioCodec=~aac<:>aac<=>splitFileAudio:audioCodec=~ac3<:>ac3<=>avi<?<=>?>inputMain:audioCodec=~mp3<:>mp3<=>inputMain:audioCodec=~aac<:>aac<=>inputMain:audioCodec=~ac3<:>ac3<=>avi<?<?" 
+    Encoder #2        =/exe mencoder.exe
+    Encode CLI #2     =%splitFileVideo
+    Encoder #2        =/setOptions
+    Encode CLI #2     =%splitFileAudio
+    Encoder #2        =/setOptions

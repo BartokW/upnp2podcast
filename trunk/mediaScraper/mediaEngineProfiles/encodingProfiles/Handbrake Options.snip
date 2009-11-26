@@ -1,0 +1,53 @@
+# Snippit: HandBrake Audio
+#
+# HandBrake's audio settings    
+#
+
+    Profile           =Handbrake Audio
+    Encode CLI #1     =?>isDVD&&handBrakeAudioTracks<:> -a %%handBrakeAudioTracks%% -E %%handBrakeAudioEncoders%% -B %%handbrakeAudioBitrate%%<=>?>!(>aac51||ac3<)<:>?>ORIGINAL:audioBitrate<160<:>-B 128<=>-B 160<?<? -E ?>aac<:>?>avi<:>lame<=>faac<?<=>copyAudio||aac51||ac3||<:>ac3<=>?>mp4<:>faac<=>lame<?<?<?
+    Encoder #1        =
+
+# Snippit: HandBrake Video
+#
+# HandBrake's Video settings    
+#
+
+    Profile           =Handbrake Video
+    Encode CLI #1     =-e ?>xvid<:>xvid<=>divx<:>ffmpeg<=>x264 -T -x %%SNIP:x264 Options%%<? -b ?>cliBitrate<:>%%cliBitrate%%<=>1500<?
+    Encoder #1        =
+
+# Snippit: Handbrake DVD
+#
+# Settings for compressing from DVD  
+#
+
+    Profile           =Handbrake DVD
+    Encode CLI #1     =?0>isDVD<:> -m ?1>dvdTitle<:>-t %%dvdTitle%%<=>-L<1? ?1>dvdStartChap<:>-c %%dvdStartChap%%?3>dvdEndChap<:>-%%dvdEndChap%%<3?<1?<0?
+    Encoder #1        =
+
+# Snippit: HandBrake Video Filters
+#
+# HandBrake's video filters and misc. options  
+#
+
+    Profile           =Handbrake Video Filters
+    Encode CLI #1     =?>deinterlace<:>--decomb<? ?>!onePass<:>-2<? ?>deNoise<:>-8<? ?>reverseTelecine||isDVD<:>--detelecine ?>!deinterlace<:>--decomb<?<? %%SNIP:Handbrake AutoCrop%%  
+    Encoder #1        =
+
+# Snippit: HandBrake AutoCrop
+#
+# Handbrake autoCrop logic 
+#
+
+    Profile           =Handbrake AutoCrop
+    Encode CLI #1     =?>autoCrop&&ORIGINAL:autoCropHandBrake<:>--crop %%ORIGINAL:autoCropHandBrake%% ?>verticalScale<:>-l %%verticalScale%%<=>!horizontalScale<:>-l %%ORIGINAL:cropY%%<? ?>horizontalScale<:>-w %%horizontalScale%%<=>!verticalScale<:>-w %%ORIGINAL:cropX%%<?<=>?>!isDVD<:> --crop 0:0:0:0<? ?>verticalScale<:>-l %%verticalScale%%<? ?>horizontalScale<:>-w %%horizontalScale%%<?<?
+    Encoder #1        =
+
+# Snippit: HandBrake Subtitles
+#
+# Handbrake autoCrop logic 
+#
+
+    Profile           =Handbrake Subtitles
+    Encode CLI #1     =?>handbrakeSubtitles<:>--subtitle %%handbrakeSubtitles%%<=>EXISTS:%%INPUTSUB%%<:>--srt-file "%%INPUTSUB%%" --srt-codeset UTF-8 --srt-offset 0 --srt-lang eng<?
+    Encoder #1        =

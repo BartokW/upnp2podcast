@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE sageShowInfo PUBLIC "-//NIELM//DTD SAGESHOWINFO XML 1.2//EN" "http://sageplugins.sourceforge.net/nielm_modules/sagexmlinfo/sageshowinfo_1_2.dtd">
+<sageShowInfo version="1.2">
+     <showList>  
+        <show>
+           <title>%%showTitle_toXML%%</title>
+           <episode>%%episodeTitle_toXML%%</episode> 
+           <duration>%%original:durationSec_toXML%%</duration>
+           <category>%%showGenre_toXML%%</category> 
+	         <description>%%episodeDescription_toXML%%</description>
+	         <rating>%%episodeRating_toXML%%</rating>
+           <peopleList>
+%%xmlActors%%
+%%xmlGuestActors%%
+%%xmlDirector%%
+%%xmlWriters%%
+           </peopleList>
+	   <year>%%yearOnly_toXML%%</year>
+	   <language>English</language>
+           <originalAirDate>%%firstAired_toXML%%T23:00:00.00Z</originalAirDate>
+           <misc>%%SEoutputFormatSE_toXML%%</misc>
+           <airing duration="%%original:durationSec%%" startTime="%%firstAired_toXML%%T23:00:00.00Z"> 
+           <parentalRating>%%showRating_toXML%%</parentalRating>    
+		            <isHDTV></isHDTV>
+                <stereo></stereo>
+                <mediafile type="?>isTV<:>TV<=>isMovie<:>Movie<?">
+                    <segmentList>
+                        <segment filePath="%%inputFile_toXML%%"/>
+                    </segmentList>
+                </mediafile>
+           </airing>
+        </show>
+     </showList>
+</sageShowInfo>

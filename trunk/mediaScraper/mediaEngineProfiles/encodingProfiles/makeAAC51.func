@@ -1,0 +1,27 @@
+# Function: makeAAC51
+#
+# Create an AAC 5.1 track from an AC3 track
+#
+#   INPUT : %%inputAudio%%.ac3 || %%inputMain%%
+#   OUTPUT: %%OUTPUT_AUDIO%%.aac
+#           /aac51
+#
+
+    Profile           =AC3toAAC51
+    Encode CLI #1     =#createWAV#-core( -input  "%%inputAudio%%" -output "%%OUTPUT_AUDIO%%.wav" -6chwav )
+    Encoder #1        =/exe besweet.exe
+    Encode CLI #2     =#createAAC#-cbr 192000 -ignorelength -if "%%inputAudio%%" -of "%%OUTPUT_AUDIO%%.aac"
+    Encoder #2        =/exe neroAacEnc.exe
+    Encode CLI #2     =/aac51
+    Encoder #2        =/setOptions
+
+# Profile: makeAAC51
+#
+# Add 5.1 AAC track to handbrake .mkv output
+#
+
+    Profile           =makeAAC51
+    Encode CLI #2     =?>!inputAudio<:>splitAV<?
+    Encoder #2        =/insertFunction
+    Encode CLI #2     =AC3toAAC51
+    Encoder #2        =/insertFunction

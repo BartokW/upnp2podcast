@@ -1,0 +1,42 @@
+# Function: All to DVD
+#
+# Converts any video into a DVD compliant mpeg-2.  Maintains multi-channel audio and attempts to fast convert mpeg-2 videos already in DVD format
+#
+#   INPUT : %%inputMain%%
+#   OUTPUT: %%OUTPUT_MAIN%%.mpg
+
+    Profile                 =All to DVD
+    Encode CLI #1           =?>%%SNIP:StreamCopyCheck%%&&STREAMCOPYDVD<:>StreamCopyDVD<=>AnytoDVD<?
+    Encoder #1              =/insertFunction
+
+# Function: AnytoDVD
+#
+# Convert any video into DVD compliant format
+#
+# Input = %%inputMain%%
+# Ouput = %%OUTPUT_MAIN%%.mpg
+#
+
+    Profile                 =AnytoDVD
+    Encode CLI #1           =#EncodeOthersDVD#"%%inputMain%%" -oac lavc -ovc lavc -of mpeg -mpegopts format=dvd:tsaf -vf scale=?>NTSC<:>720:480<=>720:576<?,harddup -srate 48000 -af lavcresample=48000 -channels ?>inputMain:audioChannels=eq=6<:>6 -af channels=6:6:0:0:4:1:1:2:2:3:3:4:5:5<=>2<? -lavcopts threads=%%CPUs%%:vcodec=mpeg2video:vrc_buf_size=1835:vrc_maxrate=9800:vbitrate=%%DVD_BITRATE_KBS%%:keyint=18:vstrict=0:acodec=ac3:abitrate=?>ORIGINAL:audioChannels=eq=6<:>384<=>192<?:aspect=?>ORIGINAL:ffmpegARValue>1.55<:>16/9<=>4/3<? -ofps ?>NTSC<:>30000/1001<=>25<? -o "%%OUTPUT_MAIN%%.mpg"
+    Encoder #1              =/exe mencoder.exe
+
+# Function: streamCopyDVD
+#
+# Runs a stream copy on a mpeg in DVD format to add nav packets
+#
+# Input = %%inputMain%%
+# Ouput = %%OUTPUT_MAIN%%.mpg
+#
+
+    Profile                 =StreamCopyDVD
+    Encode CLI #1           =#StreamCopyDVD#-i "%%inputMain%%" -target ?>NTSC<:>ntsc-dvd<=>pal-dvd<? -acodec copy -vcodec copy "%%OUTPUT_MAIN%%.mpg"
+    Encoder #1              =/exe ffmpeg.exe
+
+# SNippit: StreamCopyCheck
+#
+# Check if video format is eligable for a stream copy to DVD
+#
+    Profile                 =StreamCopyCheck
+    Encode CLI #1           =(>(>NTSC&&ORIGINAL:frameRate=~29.97<)||(>!NTSC&&ORIGINAL:frameRate=~25.00<)<)&&(>(>NTSC&&ORIGINAL:videoResolution=eq=720x480<)||(>!NTSC&&ORIGINAL:videoResolution=eq=720x576<)<)&&(>(>NTSC&&ORIGINAL:frameRate=eq=29.97<)||(>!NTSC&&ORIGINAL:frameRate=eq=25<)<)&&ORIGINAL:videoCodec=eq=mpeg2video
+    Encoder #1              =

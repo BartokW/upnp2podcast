@@ -1,0 +1,34 @@
+# Function: mkvMux
+#
+# Remux video into mkv format
+#
+#   INPUT : %%inputMain%%
+#   OUTPUT: %%OUTPUT_MAIN%%.mkv
+#
+
+    Profile           =mkvMux
+    Encode CLI #1     =?>!(>inputAudio&&inputVideo<)<:>splitAV<?
+    Encoder #1        =/insertFunction
+    Encode CLI #5     =/mkvVideoTrack ?>inputMain:videoContainer=~matroska<:>1<=>0<?
+    Encoder #5        =/setOptions
+    Encode CLI #2     =#mkv_mux# -o "%%OUTPUT_MAIN%%.mkv" --default-track %%mkvVideoTrack%%:yes --display-dimensions %%mkvVideoTrack%%:%%inputMain:videoResolution%% -d %%mkvVideoTrack%% ?>x264&&!inputMain:videoContainer=~matroska<:>--default-duration 0:?>inputMain:frameRate==23.98<:>24000/1001<=>%%inputMain:frameRate%%<?fps<? -A -S "%%inputMain%%" -a ?>inputAudio:audioChannels=eq=6&&inputAudio:audioCodec=eq=mpeg4aac<:>1<=>0<? -D -S "%%inputAudio%%" ?>aac51<:>--aac-is-sbr 1<? --track-order 0:%%mkvVideoTrack%%,1:?>aac&&inputAudio:audioChannels=eq=6&&inputAudio:audioCodec=eq=ac3<:>1<=>0<?
+    Encoder #2        =/exe mkvmerge.exe
+
+
+# Function: mkvAttachExtras
+#
+# Add edl and .properties file to mkv
+#
+#   INPUT : %%inputMain%% (must be mkv)
+#   OUTPUT: %%OUTPUT_MAIN%%.mkv
+#
+
+    Profile           =mkvAttachExtras
+    Encode CLI #4     =?>!(>subtitleFile&&EXT:srt<)&&ORIGINAL:embeddedCCCount>10&&addSubtitleTrack&&!subtitleComplete<:>extractSubtitles<?
+    Encoder #4        =/insertFunction
+    Encode CLI #5     =?>EXT:edl||EXISTS:%%ORIGINAL%%.properties||extractedSubtitles||EXT:srt<:>#add_extras_mkv#-o "%%OUTPUT_MAIN%%.mkv" "%%inputMain%%" ?>addSubtitleTrack&&!subtitleComplete<:>?>extractedSubtitles<:>"%%inputSub%%"<=>EXT:srt<:>"%%ORIGINAL_FULLFILE%%.srt"<?<? ?>EXT:edl<:>--attachment-mime-type text/plain --attachment-name "Comskip EDL" --attach-file "%%ORIGINAL_FULLFILE%%.edl"<? ?>EXISTS:%%ORIGINAL%%.properties<:>--attachment-mime-type text/plain --attachment-name "SageTV .properties metadata file" --attach-file "%%ORIGINAL%%.properties"<?<?
+    Encoder #5        =/exe mkvmerge.exe
+    Encode CLI #5     =?>addSubtitleTrack&&!subtitleComplete&&(>extractedSubtitles||EXT:srt<)<:>/subtitleComplete<?
+    Encoder #5        =/setOptions
+
+

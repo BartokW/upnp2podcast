@@ -1,0 +1,52 @@
+# Snippit: mencoder divx
+#
+# A simple 2-Pass divx encode
+#
+
+    Profile           =mencoder Divx
+    Encode CLI #1     =lavc -lavcopts ?>!onePass&&passOne&&!passTwo<:>vpass=1:turbo:<=>passTwo<:>vpass=2:<?vbitrate=?0>cliBitrate<:>%%cliBitrate%%<=>1500<0?:?>ac3||aac51<:>acodec=ac3:abitrate=?>ORIGINAL:audioChannels=eq=6<:>384<=>192<?:<?vcodec=mpeg4:mbd=2:trell:v4mv:last_pred=2:dia=-1:vmax_b_frames=2:vb_strategy=1:cmp=3:subcmp=3:precmp=0:vqcomp=0.6:turbo:threads=%%CPUs%%
+    Encoder #1        =
+
+# Snippit: mencoder x264
+#
+# A simple 2-Pass x264 encode
+#
+
+    Profile           =mencoder x264
+    Encode CLI #1     =x264 -x264encopts bitrate=?0>cliBitrate<:>%%cliBitrate%%<=>1500<0?:threads=auto:?>!onePass&&passOne&&!passTwo<:>pass=1:<=>passTwo<:>pass=2:<?%%SNIP:x264 Options%%:?>!onePass&&passOne&&!passTwo<:>%%SNIP:x264 Turbo%%:<?
+    Encoder #1        =
+
+# Snippit: mencoder xvid
+#
+# A simple 2-Pass xvid encode
+#
+  
+    Profile           =mencoder Xvid
+    Encode CLI #1     =xvid -xvidencopts bitrate=?0>cliBitrate<:>%%cliBitrate%%<=>1500<0?:?>!onePass&&passOne&&!passTwo<:>pass=1:turbo:<=>passTwo<:>pass=2:<?threads=%%CPUs%%:autoaspect:trellis:chroma_me:chroma_opt:hq_ac:quant_type=h263
+    Encoder #1        =
+
+# Snippit: mencoder Video Filters
+#
+# Settings for mencoder's video filters
+#
+
+    Profile           =mencoder Video Filters
+    Encode CLI #1     =?>autoCrop&&ORIGINAL:autoCropMencoder<:>crop=%%ORIGINAL:autoCropMencoder%%,<??>reverseTelecine||(>autoTelecineDetect&&ORIGINAL:percentFilm>40<)<:>?>ORIGINAL:videoResolution=~x720<:>framestep=2,filmdint=fast=0=dint_thres=256,softskip,<=>pullup,softskip,<?<??>deinterlace<:>yadif,<??>verticalScale||horizontalScale||(>autoCrop&&ORIGINAL:autoCropMencoder<)<:>scale=?>horizontalScale<:>%%horizontalScale%%<=>(>autoCrop&&ORIGINAL:autoCropMencoder<)&&!verticalScale<:>%%ORIGINAL:cropX%%<=>-10<?:?>verticalScale<:>%%verticalScale%%<=>(>autoCrop&&ORIGINAL:autoCropMencoder<)&&!horizontalScale<:>%%ORIGINAL:cropY%%<=>-10<?:0:0:0.00:0.50,<??>deNoise<:>hqdn3d=2:1:2,<?harddup ?>reverseTelecine<:>?>ORIGINAL:videoResolution=~x720<:>-fps 60000/1001<? -ofps 24000/1001<=>customVideoFPS<:>-ofps %%customVideoFPS%%<? -sws 2 ?>burnSubtitles<:>%%SNIP:mencoder Subtitles%%<?
+    Encoder #1        =
+
+# Snippit: mencoder Audio
+#
+# mencoder's audio settings
+#
+    Profile           =mencoder Audio
+    Encode CLI #2     =?0>aac51&&ORIGINAL:audioChannels=eq=6&&ORIGINAL:audioCodec=~ac3<:>pcm -channels 1 -srate 4000<=>ac3<:>lavc -af lavcresample=48000 -channels ?>ORIGINAL:audioChannels=eq=6<:>6<=>2<? -srate 48000<=>copyAudio<:>copy -channels ?>ORIGINAL:audioChannels=eq=6<:>6 -af channels=6:6:0:0:4:1:1:2:2:3:3:4:5:5<=>2<?<=>aac<:>faac -faacopts br=160:mpeg=4:object=2 -channels 2 -srate 48000<=>mp3lame -lameopts vbr=2:q=3 -channels 2 -srate 48000<0? ?>!divx&&ac3<:>-lavcopts acodec=ac3:abitrate=?>ORIGINAL:audioChannels=eq=6<:>384<=>192<?<?
+    Encoder #2        =
+
+# Snippit: mencoder Subtitles
+#
+# Settings for burning subtitles into video w/mencoder
+#
+
+    Profile           =mencoder Subtitles
+    Encode CLI #1     =?>(>subtitleFile||!ORIGINAL:embeddedCCCount>10<)&&(>EXT:smi||EXT:srt<)<:>-sub "%%ORIGINAL_FULLFILE%%?>EXT:srt<:>.srt<=>EXT:smi<:>.smi<?"<=>ORIGINAL:embeddedCCCount>10<:>-subcc<? ?>(>subtitleFile||!ORIGINAL:embeddedCCCount>10<)&&(>EXT:smi||EXT:srt<)||ORIGINAL:embeddedCCCount>10<:>-subfont-text-scale ?>subtitleFontSize<:>%%subtitleFontSize%%<=>2.3<? ?>subtitleBackgroundAlpha<:>-sub-bg-alpha %%subtitleBackgroundAlpha%%<? -subpos ?>mencoderSubPos<:>%%mencoderSubPos%%<=>100<?<?
+    Encoder #1        =
