@@ -1,0 +1,1 @@
+/genPropertyFile /downloadAllFanArt /baseFolder "TV"

@@ -1,0 +1,121 @@
+# 
+# Profile: createInfoFileEpisodeData
+#
+
+    Profile           =createInfoFileSeriesData
+    Encode CLI #2     =($$actorsCombinedInfoFile$$[^\|]+)
+    Encoder #2        =/use "%%actorsCombined%%" /multiple /split ", "
+    Encode CLI #2     =?>!PATH:%%snip:outputFile%%.info<:>"%%snip:outputPath%%"<?
+    Encoder #2        =/exe mkdir
+    Encode CLI #2     =?>!EXISTS:%%snip:outputFile%%.info<:>/writeInfoFile<?
+    Encoder #2        =/setOptions
+    Encode CLI #2     =?>outputToSTDOUT<:>STDOUT<=>!EXISTS:%%snip:outputFile%%.info||updateInfo<:>%%snip:outputFile%%.info<?
+    Encoder #2        =/output createTVSeriesInfoFile /fromXML
+
+# 
+# Profile: createInfoFileEpisodeData
+#
+
+    Profile           =createInfoFileEpisodeData
+    Encode CLI #2     =($$guestStarsTemp$$[^\|]+)
+    Encoder #2        =/use "%%guestStars%%" /multiple /split ", "
+    Encode CLI #2     =($$DirectorTemp$$[^\|]+)
+    Encoder #2        =/use "%%Director%%" /multiple /split ", "
+    Encode CLI #2     =($$writersTemp$$[^\|]+)
+    Encoder #2        =/use "%%writers%%" /multiple /split ", "
+    Encode CLI #2     =?>!PATH:%%snip:outputFile%%.info<:>"%%snip:outputPath%%"<?
+    Encoder #2        =/exe mkdir
+    Encode CLI #2     =?>outputToSTDOUT<:>STDOUT<=>writeInfoFile||updateInfo<:>%%snip:outputFile%%.info<?
+    Encoder #2        =/output createTVEpisodeInfoFile /append  /fromXML
+
+# 
+# Profile: createPropertiesFile
+#
+
+    Profile           =createPropertiesFile
+    Encode CLI #2     =($$actorsTemp$$[^\|]+)
+    Encoder #2        =/use "%%actors%%" /multiple /split ;
+    Encode CLI #2     =\s*($$guestStarsTemp$$[^\|]+)
+    Encoder #2        =/use "%%guestStars%%" /multiple /split ;
+    Encode CLI #2     =($$DirectorTemp$$[^\|]+)
+    Encoder #2        =/use "%%Director%%" /multiple /split ;
+    Encode CLI #2     =($$writersTemp$$[^\|]+)
+    Encoder #2        =/use "%%writers%%" /multiple /split ;
+    Encode CLI #2     =($$rolesTemp$$[^\|]+)
+    Encoder #2        =/use "%%roles%%" /multiple /split ;
+    Encode CLI #2     =($$genresTemp$$[^\|,]+)
+    Encoder #2        =/use "%%showGenre%%" /multiple /split ;        
+    Encode CLI #2     =?>!PATH:%%snip:outputFile%%.info<:>"%%snip:outputPath%%"<?
+    Encoder #2        =/exe mkdir
+    Encode CLI #2     =?>outputToSTDOUT<:>STDOUT<=>!EXISTS:%%snip:outputFile%%.%%inputFile_EXT%%.properties||updateInfo<:>%%snip:outputFile%%?>!DIRECTORY:%%inputFile%%<:>.<?%%inputFile_EXT%%.properties<?
+    Encoder #2        =/output createTVPropertiesFile  /fromXML
+    Encode CLI #2     =?>!DIRECTORY:%%inputFile%%&&!airingID<:>"%%inputFile%%"<?
+    Encoder #2        =/exe touch.exe
+
+
+#
+# Profile: createMyFile
+#
+
+    Profile           =createMyFile
+    Encode CLI #2     =($$guestStarsTemp$$[^\|]+)
+    Encoder #2        =/use "%%guestStars%%" /multiple /split ", " /variable guestStarsMy /format "$$guestStarsTemp$$ (Guest Star)"
+    Encode CLI #2     =($$directorsTemp$$[^\|]+)
+    Encoder #2        =/use "%%director%%" /multiple /split ", " /variable directorsMy /format "$$directorsTemp$$ (Director)"
+    Encode CLI #2     =($$writersTemp$$[^\|]+)
+    Encoder #2        =/use "%%writers%%" /multiple /split ", " /variable writersMy /format "$$writersTemp$$ (Writer)"
+    Encode CLI #2     =($$actorsTemp$$[^\|]+)
+    Encoder #2        =/use "%%actors%%" /multiple /split ", "
+    Encode CLI #2     =?>!PATH:%%snip:outputFile%%.info<:>"%%snip:outputPath%%"<?
+    Encoder #2        =/exe mkdir
+    Encode CLI #2     =?>outputToSTDOUT<:>STDOUT<=>!EXISTS:%%snip:outputFile%%.my||updateInfo<:>%%snip:outputFile%%.my<?
+    Encoder #2        =/output createTVMyFile  /fromXML
+
+
+# 
+# Profile: createTVXMLFile
+#
+
+    Profile           =createTVXMLFile
+    Encode CLI #2     =($$actorsTemp$$[^\|]+)
+    Encoder #2        =/use "%%actors_toXML%%" /multiple /split "\n" /variable xmlActors /format "<person role=$$quote$$Actor$$quote$$>$$actorsTemp$$</person>"
+    Encode CLI #2     =($$actorsTemp$$[^\|]+)
+    Encoder #2        =/use "%%guestStars_toXML%%" /multiple /split "\n" /variable xmlGuestActors /format "<person role=$$quote$$Actor$$quote$$>$$actorsTemp$$</person>"
+    Encode CLI #2     =($$actorsTemp$$[^\|]+)
+    Encoder #2        =/use "%%director_toXML%%" /multiple /split "\n" /variable xmlDirector /format "<person role=$$quote$$Director$$quote$$>$$actorsTemp$$</person>"
+    Encode CLI #2     =($$actorsTemp$$[^\|]+)
+    Encoder #2        =/use "%%writers_toXML%%" /multiple /split "\n" /variable xmlWriters /format "<person role=$$quote$$Writer$$quote$$>$$actorsTemp$$</person>"
+    Encode CLI #2     =?>!PATH:%%snip:outputFile%%.xml<:>"%%snip:outputPath%%"<?
+    Encoder #2        =/exe mkdir
+    Encode CLI #2     =?>!EXISTS:%%snip:outputFile%%.xml||updateInfo<:>%%snip:outputFile%%.xml<?
+    Encoder #2        =/output createTVXMLFile
+    Encode CLI #2     =?>outputToSTDOUT<:>STDOUT<=>EXISTS:%%snip:outputFile%%.xml&&addToSageDB<:>addXMLToSageDB<?
+    Encoder #2        =/insertFunction
+
+# 
+# Profile: addXMLToSageDB
+#
+
+    Profile           =addXMLToSageDB
+    Encode CLI #1     =getWebserverPassword
+    Encoder #1        =/insertFunction
+    Encode CLI #2     =-F "impTVFiles=checked" -F "impShowOverwrite=checked" -F "impMFOverwrite=checked" -F "impMFRename=keep" -F "impMFRedate=redateFromAiring" -F "xmlFile=@%%snip:outputFile%%.xml" -F "Import=submit" "http://%%userName%%:%%password%%@?>sageTVServer<:>%%sageTVServer%%<=>localhost<?:?>port<:>%%port%%<=>8080<?/sage/XMLImporter?Import=yes"
+    Encoder #2        =/exe curl.exe
+    Encode CLI #2     =?>!saveXMLFILE<:>"%%snip:outputFile%%.xml"<?
+    Encoder #2        =/exe del
+
+#
+# Snip: outputFile
+#
+
+    Profile           =outputFile
+    Encode CLI #1     =%%SNIP:outputPath%%?>outputName<:>%%outputName%%<=>inputFile<:>%%inputFile_NAME%%<=>showTitle<:>%%showTitle_WIN32%%<?
+    Encoder #1        =
+
+#
+# Snip: outputFile
+#
+
+    Profile           =outputPath
+    Encode CLI #1     =?>outputFolder<:>%%outputFolder%%\<=>inputFile<:>%%inputFile_PATH%%\<=>showTitle<:>%%SNIP:fanartPath%%\%%showTitle_WIN32%%\<?
+    Encoder #1        =

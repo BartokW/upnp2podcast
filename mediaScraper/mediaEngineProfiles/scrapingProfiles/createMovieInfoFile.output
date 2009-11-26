@@ -1,0 +1,19 @@
+Title		: %%showTitle%%
+imdb ID		: %%imdbMiniMovieID%%
+theMovieDB ID	: %%theMovieDBID%%
+Release Date	: %%releaseDate%%
+Release Year    : %%releaseYear%%
+Plot		: %%plot%%
+Runtime		: %%runTime%%
+Rating Info	: %%fullRating%%
+Rating		: %%miniRating%%
+Actors		: %%castInfoFile%%
+Directors	: %%directorInfoFile%%
+Writers		: %%writersInfoFile%%
+Full Backdrops	: %%fanArtFull%%
+Medium Backdrop	: %%fanArtMed%%
+Thumb Backdrops	: %%fanArtSmall%%
+Full Posters	: %%posterFull%%
+Medium Posters	: %%posterMed%%
+Thumb Posters	: %%posterSmall%%
+Cover Posters	: %%posterCover%%

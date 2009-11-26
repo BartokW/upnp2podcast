@@ -1,0 +1,100 @@
+# Scraper: getSingleImageTV
+#
+#  INPUT: %%singleImage%%       - Image to download
+#       : %%downloadTo%%        - Path to download image
+#
+
+    Profile           =getSingleImage
+    Encode CLI #2     =?>!PATH:%%downloadTo%%<:>"%%downloadTo_PATH%%"<?
+    Encoder #2        =/exe mkdir
+    Encoder #2        =/insertFunction
+    Encode CLI #2     =?>!NOTEMPTY:%%downloadTo%%<:>"%%singleImage%%" -t 50 -O "%%downloadTo%%"<?
+    Encoder #2        =/exe wget.exe
+    Encode CLI #2     =?>!NOTEMPTY:%%downloadTo%%<:>"%%downloadTo%%"<?
+    Encoder #2        =/exe del
+
+
+# Scraper: fanartFile
+#
+#  INPUT: %%tvdbID%%       - theTVDB show ID
+#
+
+    Profile           =fanartFile
+    Encode CLI #1     =%%SNIP:fanartPath%%\?>centralFanartPath<:>%%showTitle_WIN32%%\Backgrounds\%%singleImage_NAME%%<=>isTV||videoTS<:>background<=>%%inputFile_NAME%%_background<?.%%singleImage_EXT%%
+    Encoder #1        =
+    
+# Scraper: actorsFile
+#
+#  INPUT: %%tvdbID%%       - theTVDB show ID
+#
+
+    Profile           =actorsFile
+    Encode CLI #1     =%%SNIP:fanartPath%%\%%showTitle_WIN32%%\Actors\%%actorName%%.%%singleImage_EXT%%
+    Encoder #1        =
+
+# Scraper: thumbNailFile
+#
+#  INPUT: %%tvdbID%%       - theTVDB show ID
+#
+
+    Profile           =thumbNailFile
+    Encode CLI #1     =%%inputFile_PATH%%\%%inputFile_NAME%%?>videoTS<:>\folder<?.%%singleImage_EXT%%
+    Encoder #1        =
+
+
+# Scraper: posterSeasonFile
+#
+#  INPUT: %%tvdbID%%       - theTVDB show ID
+#
+
+    Profile           =posterSeasonFile
+    Encode CLI #1     =%%SNIP:fanartPath%%\?>centralFanartPath<:>%%showTitle_WIN32%%\Season %%seasonNum%%\Posters\%%singleImage_NAME%%<=>isTV||videoTS<:>folder<=>%%inputFile_NAME%%<?.%%singleImage_EXT%%
+    Encoder #1        =
+
+
+# Scraper: bannerSeasonFile
+#
+#  INPUT: %%tvdbID%%       - theTVDB show ID
+#
+
+    Profile           =bannerSeasonFile
+    Encode CLI #1     =%%SNIP:fanartPath%%\?>centralFanartPath<:>%%showTitle_WIN32%%\Season %%seasonNum%%\Banners\%%singleImage_NAME%%<=>isTV||videoTS<:>banner<=>%%inputFile_NAME%%<?.%%singleImage_EXT%%
+    Encoder #1        =
+
+
+# Scraper: posterFile
+#
+#  INPUT: %%tvdbID%%       - theTVDB show ID
+#
+
+    Profile           =posterFile
+    Encode CLI #1     =%%SNIP:fanartPath%%\?>centralFanartPath<:>%%showTitle_WIN32%%\Posters\%%singleImage_NAME%%<=>isTV||videoTS<:>folder<=>%%inputFile_NAME%%<?.%%singleImage_EXT%%
+    Encoder #1        =
+
+
+# Scraper: bannerFile
+#
+#  INPUT: %%tvdbID%%       - theTVDB show ID
+#
+
+    Profile           =bannerFile
+    Encode CLI #1     =%%SNIP:fanartPath%%\?>centralFanartPath<:>%%showTitle_WIN32%%\Banners\%%singleImage_NAME%%<=>isTV||videoTS<:>banner<=>%%inputFile_NAME%%_banner<?.%%singleImage_EXT%%
+    Encoder #1        =
+
+# Scraper: actorPath
+#
+#  INPUT: %%tvdbID%%       - theTVDB show ID
+#
+
+    Profile           =actorPath
+    Encode CLI #1     =%%SNIP:fanartPath%%\%%showTitle_WIN32%%\Actors\%%actorName%%.%%singleImage_EXT%%
+    Encoder #1        =
+
+# Scraper: fanartLoc
+#
+#  INPUT: %%tvdbID%%       - theTVDB show ID
+#
+
+    Profile           =fanartPath
+    Encode CLI #1     =?>centralFanartPath<:>%%centralFanartPath%%\?>isTV<:>TV<=>isMovie<:>Movies<?<=>?>videoTS<:>%%inputFile%%<=>%%inputFile_PATH%%<?<?
+    Encoder #1        =

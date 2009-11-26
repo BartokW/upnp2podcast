@@ -1,0 +1,44 @@
+#
+# Snip: organizeFiles
+#
+
+    Profile           =organizeFiles
+    Encode CLI #1     =?>organizeFiles&&organizeBaseFolder&&!DIRECTORY:%%SNIP:organizePath%%<:> "%%SNIP:organizePath%%"<?
+    Encoder #1        =/exe mkdir
+    Encode CLI #1     =?>organizeFiles&&!EXISTS:%%SNIP:organizeName%%<:> "%%inputFile%%" "%%SNIP:organizeName%%"<?
+    Encoder #1        =/exe move
+    Encode CLI #1     =?>organizeFiles&&EXISTS:%%SNIP:organizeName%%<:>($$inputFile$$.*)<?
+    Encoder #1        =/use "%%SNIP:organizeName%%"
+
+#
+# Snip: organizeName
+#
+
+    Profile           =organizeName
+    Encode CLI #1     =%%SNIP:organizePath%%\?>isTV<:>%%SNIP:organizeTVName%%<=>isMovie<:>%%SNIP:organizeMovieName%%<?.%%inputFile_EXT%%
+    Encoder #1        =
+
+#
+# Snip: organizePath
+#
+
+    Profile           =organizePath
+    Encode CLI #1     =?>organizeBaseFolder<:>%%organizeBaseFolder%%\?>isTV<:>TV\%%showTitle_WIN32%%\Season %%seasonNum%%<=>isMovie<:>Movies<?<=>%%inputFile_PATH%%<?
+    Encoder #1        =
+
+#
+# Snip: organizeMovieName
+#
+
+    Profile           =organizeMovieName
+    Encode CLI #1     =%%showTitle_WIN32%% (%%releaseYear%%)
+    Encoder #1        =
+
+
+#
+# Snip: organizeTVName
+#
+
+    Profile           =organizeTVName
+    Encode CLI #1     =?>!organizeTVNoTitle<:>%%showTitle_WIN32%% <?%%SEoutputFormat%% - %%episodeTitle_WIN32%%
+    Encoder #1        =

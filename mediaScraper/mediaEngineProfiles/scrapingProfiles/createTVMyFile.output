@@ -1,0 +1,8 @@
+Title=%%showTitle%%
+TVOriginalAiringDate=%%firstAired%%
+actors=%%actorsTemp%%%%guestStarsMy%%%%directorsMy%%%%writersMy%%
+TVEpisode=%%SEoutputFormat%% - %%episodeTitle%%
+TVOverview=%%episodeDescription%%
+TVDuration=%%showRuntime%%
+TVGenre=%%showGenre%%
+TVChannelName=%%showNetwork%%

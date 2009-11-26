@@ -1,0 +1,113 @@
+# Profile: Input File - The input is just a file, will attempt to pull out the information needed to scrape
+#
+#   INPUT : %%inputFile%%    - Input file with unknown format
+#
+
+    Profile           =inputFile
+    Encode CLI #1     =($$airingID$$[0-9]*)\-[0-9]\.[a-zA-Z0-9]+$
+    Encoder #1        =/use %%inputFile%%
+    Encode CLI #1     =?>airingID<:>getAiringIDFromFile<?
+    Encoder #1        =/branch    
+    Encode CLI #1     =?>DIRECTORY:%%inputFile_PATH%%\VIDEO_TS<:>/videoTS<?
+    Encoder #1        =/setOptions
+    Encode CLI #1     =?>DIRECTORY:%%inputFile_PATH%%\VIDEO_TS<:>($$inputFile$$.*)<?
+    Encoder #1        =/use "%%inputFile_PATH%%"
+    Encode CLI #1     =?>ExISTS:%%inputFile_PATH%%\folder.override&&!showTitle<:>($$showTitle$$.*)<?
+    Encoder #1        =/use "%%inputFile_PATH%%\folder.override" /readFile
+    Encode CLI #1     =?>ExISTS:%%inputFile_PATH_PATH%%\folder.override&&!showTitle<:>($$showTitle$$.*)<?
+    Encoder #1        =/use "%%inputFile_PATH_PATH%%\folder.override" /readFile
+    Encode CLI #1     =?>ExISTS:%%inputFile_PATH%%\%%inputFile_NAME%%.override&&!showTitle<:>($$showTitle$$.*)<?
+    Encoder #1        =/use "%%inputFile_PATH%%\%%inputFile_NAME%%.override" /readFile
+    Encode CLI #1     =?>ExISTS:%%inputFile_PATH%%\folder.override.txt&&!showTitle<:>($$showTitle$$.*)<?
+    Encoder #1        =/use "%%inputFile_PATH%%\folder.override.txt" /readFile
+    Encode CLI #1     =?>ExISTS:%%inputFile_PATH_PATH%%\folder.override.txt&&!showTitle<:>($$showTitle$$.*)<?
+    Encoder #1        =/use "%%inputFile_PATH_PATH%%\folder.override.txt" /readFile
+    Encode CLI #1     =?>ExISTS:%%inputFile_PATH%%\%%inputFile_NAME%%.override.txt&&!showTitle<:>($$showTitle$$.*)<?
+    Encoder #1        =/use "%%inputFile_PATH%%\%%inputFile_NAME%%.override.txt" /readFile
+    Encode CLI #1     =TV_Series_Season_Episode
+    Encoder #1        =/insertFunction
+    Encode CLI #1     =TV_Series_SeasonXEpisode
+    Encoder #1        =/insertFunction
+    Encode CLI #1     =BareFile
+    Encoder #1        =/insertFunction
+    Encode CLI #1     =?>%%SNIP:checkforExistingMetaData%%&&!updateInfo<:>break<?
+    Encoder #1        =/break
+    Encode CLI #1     =?>(>showTitle&&seasonNum&&episodeNum<)||(>showTitle&&getAllSeriesInfo<)<:>theTVDB<?
+    Encoder #1        =/branch
+    Encode CLI #1     =MoviesBareFile
+    Encoder #1        =/insertFunction
+    Encode CLI #1     =?>showTitle<:>imdbMovie<?
+    Encoder #1        =/branch
+
+# Profile: Input File - The input is just a file, will attempt to pull out the information needed to scrape
+#
+#   INPUT : %%inputFile%%    - Input file with unknown format
+#
+
+    Profile           =checkforExistingMetaData
+    Encode CLI #1     =(>!genInfoFile||(>genInfoFile&&EXISTS:%%snip:outputFile%%.info<)<)&&(>!genMyFile||(>genMyFile&&EXISTS:%%snip:outputFile%%.my<)<)&&(>!(>genPropertyFile||!(>genPropertyFile&&genMyFile&&genInfoFIle<)<)||(>(>genPropertyFile||!(>genPropertyFile&&genMyFile&&genInfoFIle<)<)&&EXISTS:%%snip:outputFile%%?>!DIRECTORY:%%inputFile%%<:>.<?%%inputFile_EXT%%.properties<)<)
+    Encoder #1        =/break
+
+
+
+# Profile: Series\Season\Episode format
+#
+#   INPUT : %%inputFile%%    - Input file with unknown format
+#
+
+    Profile           =TV_Series_Season_Episode
+    Encode CLI #1     =?>!showTitle||!seasonNum||!episodeNum<:>?>baseFolder<:>%%baseFolder%%<=>TV<?[\\\/]+($$showTitle$$[^\\\/]+)[\\\/]+[^0-9\\\/]+($$seasonNum$$[0-9]+)[\\\/]+[\p{L}0-9 \.\_]+[ ]?[\-\. ]{1}[ ]?S?[0-9]{1,2}[ \.\-]?[xE]($$episodeNum$$[0-9]{2})[^pi0-9]<?
+    Encoder #1        =/use "%%inputFile_FULLFILE%% " /noOverWrite
+    Encode CLI #1     =?>!showTitle||!seasonNum||!episodeNum<:>?>baseFolder<:>%%baseFolder%%<=>TV<?[\\\/]+($$showTitle$$[^\\\/]+)[\\\/]+[^0-9\\\/]+($$seasonNum$$[0-9]+)[\\\/]+\s*[0-9]?>4digitTV<:>{1,2}<=>{1}<?($$episodeNum$$[0-9]{2})[^pi0-9]<?
+    Encoder #1        =/use "%%inputFile_FULLFILE%% " /noOverWrite
+    Encode CLI #1     =?>!showTitle||!seasonNum||!episodeNum<:>?>baseFolder<:>%%baseFolder%%<=>TV<?[\\\/]+($$showTitle$$[^\\\/]+)[\\\/]+[^0-9\\\/]+($$seasonNum$$[0-9]+)[\\\/]+\s*($$episodeNum$$[0-9]{2})[^pi0-9]<?
+    Encoder #1        =/use "%%inputFile_FULLFILE%% " /noOverWrite
+
+
+# Profile: Series\SeasonXEpisode format
+#
+#   INPUT : %%inputFile%%    - Input file with unknown format
+#
+
+    Profile           =TV_Series_SeasonXEpisode
+    Encode CLI #1     =?>!showTitle||!seasonNum||!episodeNum<:>?>baseFolder<:>%%baseFolder%%<=>TV<?[\\\/]+($$showTitle$$[^\\\/]+)[\\\/]+.*($$seasonNum$$[0-9]{2})[xE]($$episodeNum$$[0-9]{1,2})[^pi0-9]<?
+    Encoder #1        =/use "%%inputFile_FULLFILE%% " /noOverWrite
+    Encode CLI #1     =?>!showTitle||!seasonNum||!episodeNum<:>?>baseFolder<:>%%baseFolder%%<=>TV<?[\\\/]+($$showTitle$$[^\\\/]+)[\\\/]+.*($$seasonNum$$[0-9]{1})[xE]($$episodeNum$$[0-9]{1,2})[^pi0-9]<?
+    Encoder #1        =/use "%%inputFile_FULLFILE%% " /noOverWrite
+    Encode CLI #1     =?>!showTitle||!seasonNum||!episodeNum<:>?>baseFolder<:>%%baseFolder%%<=>TV<?[\\\/]+($$showTitle$$[^\\\/]+)[\\\/]+.*($$seasonNum$$[0-9]?>4digitTV<:>{1,2}<=>{1}<?)($$episodeNum$$[0-9]{2})[^pi0-9]<?
+    Encoder #1        =/use "%%inputFile_FULLFILE%% " /noOverWrite
+
+# Profile: Standalone File format, in other words, just throw everything at it and see what sticks
+#
+#   INPUT : %%inputFile%%    - Input file with unknown format
+#
+
+    Profile           =BareFile
+    Encode CLI #1     =?>!showTitle||!seasonNum||!episodeNum<:>?>!showTitle<:>($$showTitle$$[\p{L}0-9 \.\_()\-\&'`]+)[ ]?[\-\. ]{1}[ ]?<?S?($$seasonNum$$[0-9]{1,2})[ \.\-]?[xE]($$episodeNum$$[0-9]{2})[^pi0-9]<?
+    Encoder #1        =/use "%%inputFile_NAME%% " /noOverWrite
+    Encode CLI #1     =?>!showTitle||!seasonNum||!episodeNum<:>?>!showTitle<:>($$showTitle$$[\p{L}0-9 \.\_()\-\&'`]+)[ ]?[\-\. ]{1}[ ]?<?($$seasonNum$$[0-9]?>4digitTV<:>{1,2}<=>{1}<?)($$episodeNum$$[0-9]{2})[^pi0-9]<?
+    Encoder #1        =/use "%%inputFile_NAME%% " /noOverWrite
+    Encode CLI #1     =?>!showTitle||!seasonNum||!episodeNum<:>^S?($$seasonNum$$[0-9]+)[ \.\-]?[xE]($$episodeNum$$[0-9]{2})?>!showTitle<:>[ ]?[\-\. ]{1}[ ]?($$showTitle$$[\p{L}0-9 \.\_()\-\&'`]+)<=>[^pi0-9]<?<?
+    Encoder #1        =/use "%%inputFile_NAME%% " /noOverWrite
+    Encode CLI #1     =?>!showTitle||!seasonNum||!episodeNum<:>^($$seasonNum$$[0-9]?>4digitTV<:>{1,2}<=>{1}<?)[ \.\-]?($$episodeNum$$[0-9]{2})?>!showTitle<:>[ ]?[\-\. ]{1}[ ]?($$showTitle$$[\p{L}0-9 \.\_()\-\&'`]+)<=>[^pi0-9]<?<?
+    Encoder #1        =/use "%%inputFile_NAME%% " /noOverWrite
+
+# Profile: Standalone File format, in other words, just throw everything at it and see what sticks
+#
+#   INPUT : %%inputFile%%    - Input file with unknown format
+#
+
+    Profile           =MoviesBareFile
+    Encode CLI #1     =($$inputFileTemp$$.*)
+    Encoder #1        =/use "%%inputFile_NAME%%"
+    Encode CLI #1     =($$inputFileTemp$$.*)
+    Encoder #1        =/use "%%inputFileTemp_DOTTOSPACE%%"
+    Encode CLI #1     =DVDrip
+    Encoder #1        =/use "%%inputFileTemp%% " /captureBefore $$inputFileTemp$$
+    Encode CLI #1     =[^ ]?[0-9]{4}[^ ]?
+    Encoder #1        =/use "%%inputFileTemp%% " /captureBefore $$inputFileTemp$$
+    Encode CLI #1     =((1080|720|480)[ip])
+    Encoder #1        =/use "%%inputFileTemp%% " /captureBefore $$inputFileTemp$$
+    Encode CLI #1     =?>!showTitle<:>($$showTitle$$.*)<?
+    Encoder #1        =/use "%%inputFileTemp%% "
+

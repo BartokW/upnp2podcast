@@ -1,0 +1,8 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~
+Episode		: %%SEoutputFormat%%
+Title		: %%episodeTitle%%
+First Aired	: %%firstAired%%
+Guest Stars	: %%guestStarsTemp%%
+Directors	: %%DirectorTemp%%
+Writers		: %%writersTemp%%
+Description	: %%episodeDescription%%

@@ -1,0 +1,64 @@
+# Scraper: getSageTVInfo
+#
+#   INPUT : %%input%%    - File in SageRecording Format w/ airing ID in file name
+#   OUTPUT: %%airingID%% - Airing ID for searching SageWebserver
+#
+
+    Profile           =getAiringIDFromFile
+    Encode CLI #1     =($$airingID$$[0-9]*)\-[0-9]\.[a-zA-Z0-9]+$
+    Encoder #1        =/use %%inputFile%%
+    Encode CLI #1     =getWebserverPassword
+    Encoder #1        =/insertFunction
+    Encode CLI #1     =?>airingID<:>http://?>sageTVServer<:>%%sageTVServer%%<=>localhost:%%port%%<?/sage/DetailedInfo?AiringId=%%airingID%%&xml=yes<?
+    Encoder #1        =/get sageAiringInfoXML /user "%%userName%%" /password "%%password%%" /realm "SageTV Web Interface"
+    Encode CLI #1     =<title>($$showTitle$$[^<]+)</title>.*<originalAirDate>($$firstAired$$[0-9\-]+)T[^<]+</originalAirDate>
+    Encoder #1        =/use sageAiringInfoXML /flatten
+    Encode CLI #1     =<title>($$showTitle$$[^<]+)</title>.*<originalAirDate>($$firstAired$$[0-9\-]+)T[^<]+</originalAirDate>
+    Encoder #1        =/use sageAiringInfoXML /flatten
+    Encode CLI #1     =?>showTitle&&firstAired<:>theTVDB<?
+    Encoder #1        =/branch
+
+# Scraper: getWebserverPassword
+#
+#   INPUT : %%airingID%%  - File in SageRecording Format w/ airing ID in file name
+#   OUTPUT: %%showTitle%% - Title of show to search
+#
+
+    Profile           =getWebserverPassword
+    Encode CLI #1     =SageTV Web Interface=/sage,($$userName$$[^:]+):($$password$$[^ ]+)\n
+    Encoder #1        =/use "C:\Program Files\SageTV\SageTV\webserver\realms.properties" /readFile
+    Encode CLI #1     =nielm/webserver/port=($$port$$[0-9]+)\n
+    Encoder #1        =/use "C:\Program Files\SageTV\SageTV\Sage.properties" /readFile  
+
+# Scraper: findWebserverPassword
+#
+#   INPUT : %%airingID%%  - File in SageRecording Format w/ airing ID in file name
+#   OUTPUT: %%showTitle%% - Title of show to search
+#
+
+    Profile           =getCentralFanArtPath
+    Encode CLI #1     =phoenix/mediametadata/fanartCentralFolder=($$propsFanArtPath$$.{3,})\n
+    Encoder #1        =/use "C:\Program Files\SageTV\SageTV\Sage.properties" /readFile  
+    Encode CLI #1     =($$centralFanartPath$$.*)
+    Encoder #1        =/use "%%propsFanArtPath_PROPSPATH%%" 
+
+
+
+# Scraper: scrapeFavorites
+#
+#   INPUT : %%airingID%%  - File in SageRecording Format w/ airing ID in file name
+#   OUTPUT: %%showTitle%% - Title of show to search
+#
+
+    Profile           =scrapeFavorites
+    Encode CLI #1     =?>!centralFanartPath<:>getCentralFanArtPath<?
+    Encoder #1        =/insertFunction
+    Encode CLI #1     =getWebserverPassword
+    Encoder #1        =/insertFunction
+    Encode CLI #1     =?>centralFanartPath<:>http://?>sageTVServer<:>%%sageTVServer%%<=>localhost<?/sage/Favorites?xml=yes<?
+    Encoder #1        =/get sageFavoritesXML /user "%%userName%%" /password "%%password%%" /realm "SageTV Web Interface"
+    Encode CLI #2     =<title>($$showTitle$$[^<]*)<\/title> 
+    Encoder #2        =/use "sageFavoritesXML" /forEach theTVDBTitleOnly /flushRegExVars /clearOnFailure
+    
+        
+    

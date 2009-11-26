@@ -1,0 +1,241 @@
+# Scraper: theTVDBScrape
+#
+#  INPUT: %%input%%     - File in SageRecording Format w/ airing ID in file name
+#     OR: %%AiringID%%  - Airing ID for searching SageWebserver
+#     OR: %%showTitle%% - Title of show to search
+#
+
+    Profile           =theTVDB
+    Encode CLI #1     =?>!centralFanartPath<:>getCentralFanArtPath<?
+    Encoder #1        =/insertFunction
+    Encode CLI #1     =($$showTitle$$.*)
+    Encoder #1        =/use "%%showTitle_STRIPSPACES_DOTTOSPACE%%"
+    Encode CLI #1     =/isTV
+    Encoder #1        =/setOptions
+    Encode CLI #1     =?>showTitle<:>theTVDBAPISearch<?
+    Encoder #1        =/insertFunction
+    Encode CLI #1     =?>!tvdbID<:>theTVDBSearch<?
+    Encoder #1        =/insertFunction
+    Encode CLI #2     =?>!tvdbID<:>imdbGetFirstPopular<?
+    Encoder #2        =/insertFunction
+    Encode CLI #1     =?>!tvdbID&&guessMatch<:>theTVDBAPISearch<?
+    Encoder #1        =/insertFunction
+    Encode CLI #2     =?>tvdbID<:>http://www.thetvdb.com/api/%%theTVDBapiKey%%/series/%%tvdbID%%/banners.xml<?
+    Encoder #2        =/get $$fullBannersInfoXML$$
+    Encode CLI #2     =?>tvdbID<:>http://www.thetvdb.com/api/%%theTVDBapiKey%%/series/%%tvdbID%%/actors.xml<?
+    Encoder #2        =/get $$fullActorsInfoXML$$
+    Encode CLI #1     =?>tvdbID<:>formatSeasonEpisodeNumbers<?
+    Encoder #1        =/insertFunction
+    Encode CLI #1     =?>tvdbID<:>theTVDBAPIGetShowInfo<?
+    Encoder #1        =/insertFunction
+    Encode CLI #1     =?>tvdbID<:>theTVDBAPIGetEpisodeData<?
+    Encoder #1        =/insertFunction
+    Encode CLI #1     =?>tvdbID&&organizeFiles&&!videoTS<:>organizeFiles<?
+    Encoder #1        =/insertFunction
+    Encode CLI #1     =?>tvdbID<:>theTVDBdownloadImages<?
+    Encoder #1        =/insertFunction
+    Encode CLI #1     =?>tvdbID&&genInfoFile<:>createInfoFileSeriesData<?
+    Encoder #1        =/insertFunction
+    Encode CLI #1     =?>tvdbID&&genInfoFile<:>createInfoFileEpisodeData<?
+    Encoder #1        =/insertFunction
+    Encode CLI #1     =?>tvdbID&&genMyFile<:>createMyFile<?
+    Encoder #1        =/insertFunction
+    Encode CLI #1     =?>tvdbID&&(>genXMLFile||addToSageDB<)<:>createTVXMLFile<?
+    Encoder #1        =/insertFunction
+    Encode CLI #1     =?>tvdbID&&(>genPropertyFile||(>!genInfoFile&&!genMyFile&&!genPropertyFile<)<)<:>createPropertiesFile<?
+    Encoder #1        =/insertFunction
+
+
+# Scraper: theTVDBSeriesOnly
+#
+#
+
+    Profile           =theTVDBTitleOnly
+    Encode CLI #1     =($$showTitle$$.*)
+    Encoder #1        =/use "%%showTitle_STRIPSPACES_DOTTOSPACE%%"
+    Encode CLI #1     =/isTV /titleOnly /outputName "%%showTitle_WIN32%%"
+    Encoder #1        =/setOptions
+    Encode CLI #1     =?>showTitle<:>theTVDBAPISearch<?
+    Encoder #1        =/insertFunction
+    Encode CLI #1     =?>!tvdbID<:>theTVDBSearch<?
+    Encoder #1        =/insertFunction
+    Encode CLI #2     =?>tvdbID<:>http://www.thetvdb.com/api/%%theTVDBapiKey%%/series/%%tvdbID%%/banners.xml<?
+    Encoder #2        =/get $$fullBannersInfoXML$$ /clearOnfailure
+    Encode CLI #2     =?>tvdbID<:>http://www.thetvdb.com/api/%%theTVDBapiKey%%/series/%%tvdbID%%/actors.xml<?
+    Encoder #2        =/get $$fullActorsInfoXML$$  /clearOnfailure
+    Encode CLI #2     =?>!tvdbID<:>imdbGetFirstPopular<?
+    Encoder #2        =/insertFunction
+    Encode CLI #1     =?>!tvdbID&&guessMatch<:>theTVDBAPISearch<?
+    Encoder #1        =/insertFunction
+    Encode CLI #1     =?>tvdbID<:>theTVDBAPIGetShowInfo<?
+    Encoder #1        =/insertFunction
+    Encode CLI #1     =?>tvdbID<:>theTVDBdownloadImages<?
+    Encoder #1        =/insertFunction
+    Encode CLI #1     =?>tvdbID<:>createInfoFileSeriesData<?
+    Encoder #1        =/insertFunction
+
+
+# Scraper: theTVDBdownloadImages
+#
+#
+
+    Profile           =theTVDBdownloadImages
+    Encode CLI #1     =?>downloadAllFanArt||downloadFanArt<:>downloadFanArt<?
+    Encoder #1        =/insertFunction
+    Encode CLI #1     =?>downloadAllFanArt||downloadThumbNail<:>downloadThumbNail<?
+    Encoder #1        =/insertFunction
+    Encode CLI #1     =?>downloadAllFanArt||downloadPoster<:>downloadPoster<?
+    Encoder #1        =/insertFunction
+    Encode CLI #1     =?>(>downloadAllFanArt||downloadBanner<)&&centralFanartPath<:>downloadBanner<?
+    Encoder #1        =/insertFunction
+    Encode CLI #1     =?>(>downloadAllFanArt||downloadSeasonBanner<)&&centralFanartPath<:>downloadSeasonBanner<?
+    Encoder #1        =/insertFunction
+    Encode CLI #1     =?>(>downloadAllFanArt||downloadSeasonPoster<)&&centralFanartPath<:>downloadSeasonPoster<?
+    Encoder #1        =/insertFunction
+    Encode CLI #1     =?>(>downloadAllFanArt||downloadActors<)&&centralFanartPath&&XdisabledX<:>downloadActors<?
+    Encoder #1        =/insertFunction
+    
+    # Download Thumbs
+    Profile           =downloadThumbNail
+    Encode CLI #2     =?>episodeThumbLinks<:>($$singleImage$$[^,]+)<?
+    Encoder #2        =/use "@@episodeThumbLinks@@" /clearOnFailure
+    Encode CLI #2     =?>episodeThumbLinks<:>($$downloadTo$$.+)<?
+    Encoder #2        =/use "%%SNIP:thumbNailFile%%" /clearOnFailure
+    Encode CLI #2     =?>singleImage&&downloadTo<:>getSingleImage<?
+    Encoder #2        =/insertFunction
+
+    # Download Fan Art
+    Profile           =downloadFanArt
+    Encode CLI #2     =?>fanartLinks<:>($$singleImage$$[^,]{4,})($$ignore$$,)?<?
+    Encoder #2        =/use "@@fanartLinks@@" /clearOnFailure ?>centralFanartPath<:>/forEachLimit %%maxImagesToDownload%% /forEach downloadFanArtFile<?
+    Encode CLI #2     =?>!centralFanartPath<:>downloadFanArtFile<?
+    Encoder #2        =/insertFunction
+    
+    # Download Fan Art File
+    Profile           =downloadFanArtFile
+    Encode CLI #2     =?>fanartLinks<:>($$downloadTo$$.+)<?
+    Encoder #2        =/use "%%SNIP:fanartFile%%" /clearOnFailure
+    Encode CLI #2     =?>singleImage&&downloadTo<:>getSingleImage<?
+    Encoder #2        =/insertFunction
+    
+    # Download Poster
+    Profile           =downloadPoster
+    Encode CLI #2     =?>posterLinks<:>($$singleImage$$[^,]+)($$ignore$$,)<?
+    Encoder #2        =/use "@@posterLinks@@" /clearOnFailure ?>centralFanartPath<:>/forEachLimit %%maxImagesToDownload%% /forEach downloadPosterFile<?
+    Encode CLI #2     =?>!centralFanartPath<:>downloadPosterFile<?
+    Encoder #2        =/insertFunction
+    
+    # Download Poster File
+    Profile           =downloadPosterFile
+    Encode CLI #2     =?>posterLinks<:>($$downloadTo$$.+)<?
+    Encoder #2        =/use "%%SNIP:posterFile%%" /clearOnFailure
+    Encode CLI #2     =?>singleImage&&downloadTo<:>getSingleImage<?
+    Encoder #2        =/insertFunction
+
+    # Download Banner
+    Profile           =downloadBanner
+    Encode CLI #2     =?>bannerLinks<:>($$singleImage$$[^,]+)($$ignore$$,)<?
+    Encoder #2        =/use "@@bannerLinks@@" /clearOnFailure ?>centralFanartPath<:>/forEachLimit %%maxImagesToDownload%% /forEach downloadBannerFile<?
+    Encode CLI #2     =?>!centralFanartPath<:>downloadBannerFile<?
+    Encoder #2        =/insertFunction
+    
+    # Download Banner File
+    Profile           =downloadBannerFile
+    Encode CLI #2     =?>bannerLinks<:>($$downloadTo$$.+)<?
+    Encoder #2        =/use "%%SNIP:bannerFile%%" /clearOnFailure
+    Encode CLI #2     =?>singleImage&&downloadTo<:>getSingleImage<?
+    Encoder #2        =/insertFunction
+    
+    # Download Season Poster
+    Profile           =downloadSeasonPoster
+    Encode CLI #2     =?>posterSeasonLinks&&centralFanartPath<:>($$singleImage$$[^,]+)($$ignore$$,)<?
+    Encoder #2        =/use "@@posterSeasonLinks@@" /clearOnFailure ?>centralFanartPath<:>/forEachLimit %%maxImagesToDownload%% /forEach downloadSeasonPosterFile<?
+    Encode CLI #2     =?>!centralFanartPath<:>downloadBannerFile<?
+    Encoder #2        =/insertFunction
+    
+    # Download Season Poster File
+    Profile           =downloadSeasonPosterFile
+    Encode CLI #2     =?>posterSeasonLinks&&centralFanartPath<:>($$downloadTo$$.+)<?
+    Encoder #2        =/use "%%SNIP:posterSeasonFile%%" /clearOnFailure
+    Encode CLI #2     =?>singleImage&&downloadTo<:>getSingleImage<?
+    Encoder #2        =/insertFunction
+    
+    # Download Season Banner
+    Profile           =downloadSeasonBanner
+    Encode CLI #2     =?>bannerSeasonLinks&&centralFanartPath<:>($$singleImage$$[^,]+)($$ignore$$,)<?
+    Encoder #2        =/use "@@bannerSeasonLinks@@" /clearOnFailure ?>centralFanartPath<:>/forEachLimit %%maxImagesToDownload%% /forEach downloadSeasonBannerFile<?
+    Encode CLI #2     =?>!centralFanartPath<:>downloadBannerFile<?
+    Encoder #2        =/insertFunction
+    
+    # Download Season Banner File
+    Profile           =downloadSeasonBannerFile
+    Encode CLI #2     =?>bannerSeasonLinks&&centralFanartPath<:>($$downloadTo$$.+)<?
+    Encoder #2        =/use "%%SNIP:bannerSeasonFile%%" /clearOnFailure
+    Encode CLI #2     =?>singleImage&&downloadTo<:>getSingleImage<?
+    Encoder #2        =/insertFunction
+    
+    
+    # Download Actors
+    Profile           =downloadActors
+    Encode CLI #2     =?>actorsCombined<:>($$actorName$$[^|]+)\|\|($$singleImage$$[^|]+)(\|\|)?<?
+    Encoder #2        =/use "@@actorsCombined@@" /clearOnFailure ?>centralFanartPath<:>/forEach downloadActorsFile<?
+    
+    # Download Actor File
+    Profile           =downloadActorsFile
+    Encode CLI #2     =?>actorName&&singleImage<:>($$downloadTo$$.+)<?
+    Encoder #2        =/use "%%SNIP:actorPath%%" /clearOnFailure
+    Encode CLI #2     =?>singleImage&&downloadTo&&!%%singleImage_EXT%%=eq=<:>getSingleImage<?
+    Encoder #2        =/insertFunction
+
+
+# Scraper: theTVDBSearch
+#
+#  INPUT : %%showTitle%%    - Title of show to search
+#  OUTPUT: %%tvdbID%%       - theTVDB show ID
+#
+
+    Profile           =theTVDBSearch
+    Encode CLI #1     =http://thetvdb.com/?string=%%showTitle%%&searchseriesid=&tab=listseries&function=Search
+    Encoder #1        =/get $$tvDBSearchResultsHTML$$
+    Encode CLI #2     =id=($$tvdbID$$[0-9]*)[^>]*>($$showTitle$$%%showTitle_ESCCHARS%%)<\/a>.*English
+    Encoder #2        =/use tvDBSearchResultsHTML
+
+# Scraper: theTVDBAPISearch
+#
+#  INPUT : %%showTitle%%    - Title of show to search
+#  OUTPUT: %%tvdbID%%       - theTVDB show ID
+#
+
+    Profile           =theTVDBAPISearch
+    Encode CLI #1     =http://www.thetvdb.com/api/GetSeries.php?seriesname=%%showTitle%%
+    Encoder #1        =/get $$tvDBSearchResultsHTML$$
+    Encode CLI #2     =<seriesid>($$tvdbID$$[0-9]*)</seriesid>\s*<language>en</language>\s*<SeriesName>($$showTitle$$%%showTitle_ESCCHARS_XMLAMP%%)</SeriesName>
+    Encoder #2        =/use tvDBSearchResultsHTML /flatten
+    Encode CLI #2     =($$showTitle$$.*)
+    Encoder #2        =/use "%%showTitle_FROMXML%%"
+    
+# Scraper: formatSeasonEpisodeNumbers
+#
+#  INPUT : %%seasonNum%%    - Season Number
+#          %%episodeNum%%   - Episode Number
+#
+
+    Profile           =formatSeasonEpisodeNumbers    
+    Encode CLI #1     =($$seasonNum$$.*)
+    Encoder #1        =/use "%%seasonNum_STRIPZEROS%%"
+    Encode CLI #1     =($$episodeNum$$.*)
+    Encoder #1        =/use "%%episodeNum_STRIPZEROS%%"
+    Encode CLI #2     =($$checkForTwo$$[0-9]{2,})
+    Encoder #2        =/use "%%episodeNum%%" /clearOnFailure
+    Encode CLI #2     =?>checkForTwo<:>0<?($$episodeNumFill$$.*)
+    Encoder #2        =/use "0%%episodeNum%%"
+    Encode CLI #2     =($$checkForTwo$$[0-9]{2,})
+    Encoder #2        =/use "%%seasonNum%%" /clearOnFailure
+    Encode CLI #2     =?>checkForTwo<:>0<?($$seasonNumFill$$.*)
+    Encoder #2        =/use "0%%seasonNum%%"
+    Encode CLI #2     =($$SEoutputFormat$$.*)
+    Encoder #2        =/use "?>tvSE<:>S%%seasonNumFill%%E%%episodeNumFill%%<=>tvE<:>E%%episodeNumFill%%<=>%%seasonNum%%x%%episodeNumFill%%<?"
+    Encode CLI #2     =($$SEoutputFormatSE$$.*)
+    Encoder #2        =/use "S%%seasonNumFill%%E%%episodeNumFill%%"
+    Encode CLI #2     =($$SEoutputFormatX$$.*)
+    Encoder #2        =/use "%%seasonNum%%x%%episodeNumFill%%"

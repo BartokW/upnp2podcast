@@ -1,0 +1,1 @@
+/genPropertyFile /downloadAllFanArt /baseFolder "TV" /defaultProfile inputFile  /findFileRegEx "avi|mpg|mkv|mp4|mpeg|VIDEO_TS|ts|ogm|divx|mpts|dvr-ms" /throttle 10 /maxImagesToDownload 3

@@ -1,0 +1,33 @@
+# Function: mp4Remux
+#
+# Remux video into mp4 format
+#
+#   INPUT : %%inputMain%%
+#   OUTPUT: %%OUTPUT_MAIN%%.mp4
+#
+
+    Profile           =mp4Mux
+    Encode CLI #1     =splitAV
+    Encoder #1        =/insertFunction
+    Encode CLI #1     =#muxMp4Video# -create="%%inputVideo%%" -rate=?>inputMain:frameRate==23.98<:>23.976<=>%%inputMain:frameRate%%<? "%%OUTPUT_MP4TEMP%%.mp4"
+    Encoder #1        =/exe mp4creator.exe
+    Encode CLI #1     =#muxMp4Audio# -create="%%inputAudio%%" "%%inputMp4Temp%%"
+    Encoder #1        =/exe mp4creator.exe
+    Encode CLI #1     =/inputMain "%%inputMp4Temp%%"
+    Encoder #1        =/setOptions
+
+# Function: mp4AttachSubtitles
+#
+# Add subtitle track to mp4
+#
+#   INPUT : %%inputMain%% (must be mp4)
+#   OUTPUT: %%OUTPUT_MAIN%%.mp4
+#
+
+    Profile           =mp4AttachSubtitles
+    Encode CLI #4     =?>!(>subtitleFile&&EXT:srt<)&&ORIGINAL:embeddedCCCount>10<:>?>isDVD<:>extractSubtitlesDVD<=>extractSubtitles<?<?
+    Encoder #4        =/insertFunction
+    Encode CLI #5     =?>(>extractedSubtitles||EXT:srt<)&&inputMain:videoContainer=eq=mov<:>#add_subtitle_track#-add "%%inputMain%%" -keepall -add ?>extractedSubtitles<:>"%%inputSub%%"<=>EXT:srt<:>"%%ORIGINAL_FULLFILE%%.srt"<? -new "%%scratchPath%%\short.mp4"<?
+    Encoder #5        =/exe mp4box.exe
+    Encode CLI #1     =/!inputMain "%%scratchPath%%\short.mp4"
+    Encoder #1        =/setOptions

@@ -1,0 +1,269 @@
+# Scraper: imdbMovie
+#
+#     INPUT: %%showTitle%% - Title of movie to search
+#
+
+    Profile           =imdbMovie
+    Encode CLI #1     =?>!centralFanartPath<:>getCentralFanArtPath<?
+    Encoder #1        =/insertFunction
+    Encode CLI #1     =($$showTitle$$.*)
+    Encoder #1        =/use "%%showTitle_STRIPSPACES_DOTTOSPACE%%"
+    Encode CLI #1     =/isMovie
+    Encoder #1        =/setOptions
+    Encode CLI #1     =?>showTitle<:>imdbTitleSearch<?
+    Encoder #1        =/insertFunction
+    Encode CLI #2     =?>!imdbMovieID<:>imdbGetFirstPopular<?
+    Encoder #2        =/insertFunction
+    Encode CLI #1     =?>imdbMovieID<:>imdbGetMovieInfo<?
+    Encoder #1        =/insertFunction
+    Encode CLI #1     =?>imdbMovieID<:>imdbTheMovieDBSearch<?
+    Encoder #1        =/insertFunction
+    Encode CLI #1     =?>imdbMovieID&&organizeFiles&&!guessMatch&&!videoTS&&inputFile<:>organizeFiles<?
+    Encoder #1        =/insertFunction
+    Encode CLI #1     =?>downloadFanArt<:>imdbDownloadImages<?
+    Encoder #1        =/insertFunction
+    Encode CLI #1     =?>imdbMovieID&&genInfoFile&&inputFile<:>writeMovieInfoFile<?
+    Encoder #2        =/insertFunction
+    Encode CLI #1     =?>imdbMovieID&&genMyFile&&inputFile<:>writeMovieMyFile<?
+    Encoder #2        =/insertFunction
+    Encode CLI #1     =?>imdbMovieID&&(>genPropertyFile||(>!genInfoFile&&!genMyFile&&!genPropertyFile<)<)<:>writeMoviePropertiesFile<?
+    Encoder #2        =/insertFunction
+
+
+# Scraper: imdbMovie
+#
+#     INPUT: %%showTitle%% - Title of movie to search
+#
+
+    Profile           =imdbMovieTitleOnly
+    Encode CLI #1     =($$showTitle$$.*)
+    Encoder #1        =/use "%%showTitle_STRIPSPACES_DOTTOSPACE%%"
+    Encode CLI #1     =/isMovie /titleOnly /outputName "%%showTitle_WIN32%%"
+    Encoder #1        =/setOptions
+    Encode CLI #1     =?>!centralFanartPath<:>break<?
+    Encoder #1        =/break
+    Encode CLI #1     =?>showTitle<:>imdbTitleSearch<?
+    Encoder #1        =/insertFunction
+    Encode CLI #2     =?>!imdbMovieID<:>imdbGetFirstPopular<?
+    Encoder #2        =/insertFunction
+    Encode CLI #1     =?>imdbMovieID<:>imdbGetMovieInfo<?
+    Encoder #1        =/insertFunction
+    Encode CLI #1     =?>imdbMovieID<:>imdbTheMovieDBSearch<?
+    Encoder #1        =/insertFunction
+    Encode CLI #1     =?>downloadFanArt<:>imdbDownloadImages<?
+    Encoder #1        =/insertFunction
+    Encode CLI #1     =?>imdbMovieID<:>writeMovieInfoFile<?
+    Encoder #2        =/insertFunction
+
+# Scraper: theTVDBdownloadImages
+#
+#
+
+    Profile           =imdbDownloadImages
+    # Get Fanart
+    Encode CLI #2     =?>fanArtFull<:>($$singleImage$$[^,]+)<?
+    Encoder #2        =/use "@@fanArtFull@@" /clearOnFailure
+    Encode CLI #2     =?>fanArtFull<:>($$downloadTo$$.+)<?
+    Encoder #2        =/use "%%SNIP:fanartFile%%" /clearOnFailure
+    Encode CLI #2     =?>singleImage&&downloadTo<:>getSingleImage<?
+    Encoder #2        =/insertFunction
+
+    # Get Poster
+    Encode CLI #2     =?>posterMed<:>($$singleImage$$[^,]+)<?
+    Encoder #2        =/use "@@posterMed@@" /clearOnFailure
+    Encode CLI #2     =?>posterMed<:>($$downloadTo$$.+)<?
+    Encoder #2        =/use "%%SNIP:posterFile%%" /clearOnFailure
+    Encode CLI #2     =?>singleImage&&downloadTo<:>getSingleImage<?
+    Encoder #2        =/insertFunction
+
+
+# Scraper: writeMovieInfoFile
+#
+#     INPUT: Everything
+#
+
+    Profile           =writeMovieInfoFile
+    Encode CLI #2     =($$writersInfoFile$$[^\|]+)
+    Encoder #2        =/use "%%writer%%" /multiple /split ", "
+    Encode CLI #2     =($$directorInfoFile$$[^\|]+)
+    Encoder #2        =/use "%%director%%" /multiple /split ", "
+    Encode CLI #2     =($$castInfoFile$$[^\|]+)
+    Encoder #2        =/use "%%cast%%" /multiple /split ", "
+    Encode CLI #2     =?>!PATH:%%snip:outputFile%%.info<:>"%%snip:outputPath%%"<?
+    Encoder #2        =/exe mkdir
+    Encode CLI #1     =%%snip:outputFile%%.info
+    Encoder #2        =/output createMovieInfoFile /fromXML
+
+# Scraper: =writeMovieMyFile
+#
+#     INPUT: Everything
+#
+
+
+    Profile           =writeMovieMyFile
+    Encode CLI #2     =($$directorsTemp$$[^\|]+)
+    Encoder #2        =/use "%%director%%" /multiple /split ", " /variable directorsMyFile /format "(Director)$$directorsTemp$$"
+    Encode CLI #2     =($$writersTemp$$[^\|]+)
+    Encoder #2        =/use "%%writer%%" /multiple /split ", " /variable writersMyFile /format "(Writer)$$writersTemp$$"
+    Encode CLI #2     =($$castMyFile$$[^\|]+)
+    Encoder #2        =/use "%%cast%%" /multiple /split ", "
+    Encode CLI #2     =?>!PATH:%%snip:outputFile%%.info<:>"%%snip:outputPath%%"<?
+    Encoder #2        =/exe mkdir
+    Encode CLI #1     =%%snip:outputFile%%.my
+    Encoder #2        =/output createMovieMyFile /fromXML
+
+# Scraper: =writeMoviePropertiesFile
+#
+#     INPUT: Everything
+#
+
+    Profile           =writeMoviePropertiesFile
+    Encode CLI #2     =($$directorPropFile$$[^\|]+)
+    Encoder #2        =/use "%%director%%" /multiple /split ;
+    Encode CLI #2     =($$writersPropFile$$[^\|]+)
+    Encoder #2        =/use "%%writer%%" /multiple /split ;
+    Encode CLI #2     =($$castPropFile$$[^\|]+)
+    Encoder #2        =/use "%%cast%%" /multiple /split ;
+    Encode CLI #2     =($$rolesPropFile$$[^\|]+)
+    Encoder #2        =/use "%%roles%%" /multiple /split ;
+    Encode CLI #2     =($$genresPropFile$$[^\|]+)
+    Encoder #2        =/use "%%genres%%" /multiple /split ;
+    Encode CLI #2     =($$akaPropFile$$[^\|]+)
+    Encoder #2        =/use "%%aka%%" /multiple /split ;
+    Encode CLI #2     =?>!PATH:%%snip:outputFile%%.info<:>"%%snip:outputPath%%"<?
+    Encoder #2        =/exe mkdir
+    Encode CLI #1     =%%snip:outputFile%%?>!DIRECTORY:%%inputFile%%<:>.<?%%inputFile_EXT%%.properties
+    Encoder #2        =/output createMoviePropertiesFile /fromXML
+    Encode CLI #2     =?>!DIRECTORY:%%inputFile%%&&!airingID<:>"%%inputFile%%"<?
+    Encoder #2        =/exe touch.exe
+
+
+# Scraper: imdbTitleSearch
+#
+#  INPUT : %%showTitle%%    	- Title of show to search
+#  OUTPUT: $$imdbMovieID$$  	- the full IMDB ID /title/tt###...
+#  OUTPUT: $$imdbMiniMovieID$$  - just the IMDB ID tt####...
+#  OUTPUT: $$imdbSearchHTML$$	- The HTML for the imdb search for %%showTitle%%
+#
+
+
+    Profile           =imdbTitleSearch
+    Encode CLI #1     =http://www.imdb.com/find?s=tt&q=%%showTitle%%&x=0&y=0
+    Encoder #1        =/get $$imdbSearchHTML$$
+    Encode CLI #2     =link=($$imdbMovieID$$[^']*)[^>]*>"?%%showTitle_ESCCHARS%%"?</a>
+    Encoder #2        =/use imdbSearchHTML
+    Encode CLI #2     =($$imdbMiniMovieID$$[^\/]*)/$
+    Encoder #2        =/use "@@imdbMovieID@@"
+    Encode CLI #2     =?>!imdbMovieID<:><title>($$checkTitle$$IMDb[^<]*Search)<?
+    Encoder #2        =/use imdbSearchHTML
+    Encode CLI #2     =?>!checkTitle&&!imdbMovieID<:><title>($$showTitle$$[^<\(]+)<?
+    Encoder #2        =/use imdbSearchHTML
+    Encode CLI #2     =?>!checkTitle<:>id=($$imdbMiniMovieID$$tt[0-9]+)<?
+    Encoder #2        =/use imdbSearchHTML
+    Encode CLI #2     =?>!checkTitle<:>($$imdbMovieID$$.*)<?
+    Encoder #2        =/use "/title/%%imdbMiniMovieID%%"
+    Encode CLI #2     =($$imdbMiniMovieIDNum$$[0-9]+)
+    Encoder #2        =/use "@@imdbMiniMovieID@@"
+
+
+# Scraper: imdbGetFirstPopular
+#
+#    This will do a search for the current %%showTitle%% and grab the first thing it finds
+#  and then use it as the new %%showTitle%%.  This will lead to far fewer misses, but also a 
+#  few missmatches. I don't it will be a big deal because the files were probably badly named
+#  in the first place.
+#
+#  INPUT : %%showTitle%%    	- Title of show to search
+#  OUTPUT: $$imdbMovieID$$  	- the full IMDB ID /title/tt###...
+#  OUTPUT: $$imdbMiniMovieID$$  - just the IMDB ID tt####...
+#  OUTPUT: $$showTitle$$  	- imdb's best guess as to what %%showTitle%% should be
+#
+
+
+    Profile           =imdbGetFirstPopular
+    Encode CLI #1     =?>!imdbSearchHTML<:>http://www.imdb.com/find?s=tt&q=%%showTitle%%&x=0&y=0<?
+    Encoder #1        =/get $$imdbSearchHTML$$
+    Encode CLI #2     =($$captureResult$$<b>($$ignore$$Popular Titles|Titles \(Approx Matches\))</b>.{1,750}</a>\s*\([0-9]{4}\))\s*($$isTV$$<small>.TV series.)?
+    Encoder #2        =/use imdbSearchHTML
+    Encode CLI #2     =/title/($$imdbMiniMovieID$$[^\/]+)[^>]*>"?($$showTitle$$[^<>"]+)"?</a>\s*\([0-9]{4}\)$
+    Encoder #2        =/use @@captureResult@@
+    Encode CLI #2     =?>imdbMiniMovieID<:>($$imdbMovieID$$.*)<?
+    Encoder #2        =/use "/title/%%imdbMiniMovieID%%"
+    Encode CLI #2     =($$imdbMiniMovieIDNum$$[0-9]+)
+    Encoder #2        =/use "@@imdbMiniMovieID@@"
+    Encode CLI #2     =?>imdbMiniMovieID<:>/guessMatch<?
+    Encoder #2        =/setOptions
+
+
+# Scraper: imdbTheMovieDBSearch
+#
+#  INPUT : %%showTitle%%    - Title of show to search
+#  OUTPUT: %%tvdbID%%       - theTVDB show ID
+#
+
+
+    Profile           =imdbTheMovieDBSearch
+    Encode CLI #1     =?>imdbMiniMovieID<:>http://api.themoviedb.org/2.0/Movie.imdbLookup?imdb_id=%%imdbMiniMovieID%%&api_key=57983e31fb435df4df77afb854740ea9<?
+    Encoder #1        =/get tmdbSearchHTML
+    Encode CLI #1     =<id>($$theMovieDBID$$[0-9]+)</id>
+    Encoder #1        =/use tmdbSearchHTML
+    Encode CLI #1     =?>theMovieDBID<:>http://api.themoviedb.org/2.0/Movie.getInfo?id=%%theMovieDBID%%&api_key=57983e31fb435df4df77afb854740ea9<?
+    Encoder #1        =/get $$tmdbInfoHTML$$
+    Encode CLI #2     =<backdrop size="original">($$fanArtFull$$[^<]*)
+    Encoder #2        =/use tmdbInfoHTML /flatten /multiple /split ", "
+    Encode CLI #2     =<backdrop size="mid">($$fanArtMed$$[^<]*)
+    Encoder #2        =/use tmdbInfoHTML /flatten /multiple /split ", "
+    Encode CLI #2     =<backdrop size="thumb">($$fanArtSmall$$[^<]*)
+    Encoder #2        =/use tmdbInfoHTML /flatten /multiple /split ", "
+    Encode CLI #2     =<backdrop size="cover">($$fanArtCover$$[^<]*)
+    Encoder #2        =/use tmdbInfoHTML /flatten /multiple /split ", "
+    Encode CLI #2     =<poster size="original">($$posterFull$$[^<]*)
+    Encoder #2        =/use tmdbInfoHTML /flatten /multiple /split ", "
+    Encode CLI #2     =<poster size="mid">($$posterMed$$[^<]*)
+    Encoder #2        =/use tmdbInfoHTML /flatten /multiple /split ", "
+    Encode CLI #2     =<poster size="thumb">($$posterSmall$$[^<]*)
+    Encoder #2        =/use tmdbInfoHTML /flatten /multiple /split ", "
+    Encode CLI #2     =<poster size="cover">($$posterCover$$[^<]*)
+    Encoder #2        =/use tmdbInfoHTML /flatten /multiple /split ", "
+    Encode CLI #2     =?>!director<:><person job="director">\s*<name>($$director$$[^<]*)</name><?
+    Encoder #2        =/use tmdbInfoHTML /flatten /multiple
+    Encode CLI #2     =?>!writer<:><person job="($$ignore$$screenplay|author|writer)">\s*<name>($$writer$$[^<]*)</name><?
+    Encoder #2        =/use tmdbInfoHTML /flatten /multiple
+    Encode CLI #2     =?>!cast<:><person job="actor">\s*<name>($$cast$$[^<]*)</name>\s*<role>($$roles$$[^<]*)</role><?
+    Encoder #2        =/use tmdbInfoHTML /flatten /multiple
+
+# Scraper: imdbTitleSearch
+#
+#  INPUT : %%showTitle%%    - Title of show to search
+#  OUTPUT: %%tvdbID%%       - theTVDB show ID
+#
+
+    Profile           =imdbGetMovieInfo
+    Encode CLI #1     =Using API
+    Encoder #1        =/use "@@imdbMiniMovieIDNum@@" /imdb
+
+    Profile           =imdbGetMovieInfoOld
+    Encode CLI #1     =http://www.imdb.com%%imdbMovieID%%
+    Encoder #1        =/get $$imdbMovieInfoHTML$$
+    Encode CLI #2     =<h5>Director:</h5>\s*($$ignore$$<[^>]+>)?($$director$$[^<]*)
+    Encoder #2        =/use imdbMovieInfoHTML /flatten    
+    Encode CLI #2     =<h5>Writer:</h5>\s*($$ignore$$<[^>]+>)?($$writer$$[^<]*)
+    Encoder #2        =/use imdbMovieInfoHTML /flatten
+    Encode CLI #2     =<h5>Release Date:</h5>\s*($$ignore$$<[^>]+>)?($$releaseDate$$[^<]*)
+    Encoder #2        =/use imdbMovieInfoHTML /flatten
+    Encode CLI #2     =($$releaseYear$$[0-9]{4})
+    Encoder #2        =/use "@@releaseDate@@"
+    Encode CLI #2     =<h5>Plot:</h5>\s*($$ignore$$<[^>]+>)?($$plot$$[^<]*)
+    Encoder #2        =/use imdbMovieInfoHTML /flatten
+    Encode CLI #2     =<h5>Runtime:</h5>\s*($$ignore$$<[^>]+>)?($$runTime$$[^<|]*)
+    Encoder #2        =/use imdbMovieInfoHTML /flatten
+    Encode CLI #2     =($$runTimeMinutes$$[0-9]+)
+    Encoder #2        =/use "%%runTime%%" /flatten
+    Encode CLI #2     =<h5><[^>]*>MPAA</a>:</h5>($$fullRating$$[^<]*) 
+    Encoder #2        =/use imdbMovieInfoHTML /flatten
+    Encode CLI #2     =\s($$miniRating$$G|PG|PG\-13|R|NC\-17|Unrated)\s 
+    Encoder #2        =/use "%%fullRating%%" /flatten
+    Encode CLI #2     =<div class="headerinline"><h3>Cast($$castLine$$[^!]*)<!
+    Encoder #2        =/use imdbMovieInfoHTML /flatten
+    Encode CLI #2     =<a href="/name/[^\/]*/">($$cast$$[^<]*)
+    Encoder #2        =/use @@castLine@@ /flatten /multiple

@@ -1,0 +1,3 @@
+    Profile           =(Don't Compress)
+    Encode CLI #1     =#No_Compress#"%%ORIGINAL%%" "%%OUTPUT_MAIN%%.%%ORIGINAL_EXT%%"
+    Encoder #1        =/exe copy

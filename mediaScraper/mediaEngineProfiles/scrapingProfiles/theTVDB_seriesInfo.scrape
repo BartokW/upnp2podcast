@@ -1,0 +1,160 @@
+# Scraper: theTVDBGetShowInfo
+#
+#  INPUT : %%showTitle%%    - Title of show to search
+#  OUTPUT: %%tvdbID%%       - theTVDB show ID
+#
+
+    Profile           =theTVDBGetShowInfo
+    Encode CLI #1     =http://thetvdb.com/?tab=series&id=%%tvdbID%%&lid=7
+    Encoder #1        =/get $$tvDBShowInfoHTML$$
+    Encode CLI #2     =<h1>[^<]+<\/h1>\s*($$showDescription$$[^<]*)
+    Encoder #2        =/use tvDBShowInfoHTML /flatten
+    Encode CLI #2     =>First Aired:<[^>]*>\s+<[^>]*>\s*($$showPremired$$[^<]*)
+    Encoder #2        =/use tvDBShowInfoHTML /flatten
+    Encode CLI #2     =>Air Day:<[^>]*>\s+<[^>]*>\s*($$showDayOfWeek$$[^<]*)
+    Encoder #2        =/use tvDBShowInfoHTML /flatten
+    Encode CLI #2     =>Runtime:<[^>]*>\s+<[^>]*>\s*($$showRuntime$$[^<]*)
+    Encoder #2        =/use tvDBShowInfoHTML /flatten
+    Encode CLI #2     =>Network:<[^>]*>\s+<[^>]*>\s*($$showNetwork$$[^<]*)
+    Encoder #2        =/use tvDBShowInfoHTML /flatten
+    Encode CLI #2     =>Genre:<[^>]*>\s+<[^>]*>\s*($$showGenre$$[^<]*)
+    Encoder #2        =/use tvDBShowInfoHTML /flatten
+    Encode CLI #2     =($$showGenre$$[^\|]+)
+    Encoder #2        =/use "%%showGenre%%" /multiple /split ", "
+    Encode CLI #1     =theTVDBGetActors
+    Encoder #1        =/insertFunction
+    Encode CLI #1     =theTVDBGetBanners
+    Encoder #1        =/insertFunction
+    Encode CLI #1     =theTVDBGetPosters
+    Encoder #1        =/insertFunction
+    Encode CLI #1     =theTVDBGetFanart
+    Encoder #1        =/insertFunction
+
+    
+# Scraper: theTVDBGetActors
+#
+#  INPUT : %%showTitle%%    - Title of show to search
+#  OUTPUT: %%tvdbID%%       - theTVDB show ID
+#
+
+    Profile           =theTVDBGetActors
+    Encode CLI #1     =http://thetvdb.com/?tab=actors&id=%%tvdbID%%&lid=7
+    Encoder #1        =/get $$tvDBActorInfoHTML$$
+    Encode CLI #2     =<img src="($$actorPicture$$[^"]*)"[^>]*>\s*<h2><[^>]*>($$actors$$[^<]*)
+    Encoder #2        =/use tvDBActorInfoHTML /multiple /variable actorsCombined /format "$$actors$$(http://www.theTVDB.com$$actorPicture$$)" /flatten
+
+    
+# Scraper: theTVDBGetBanners
+#
+#  INPUT: %%tvdbID%%       - theTVDB show ID
+#
+
+    Profile           =theTVDBGetBanners
+    Encode CLI #1     =http://thetvdb.com/?tab=seriesbanners&id=%%tvdbID%%
+    Encoder #1        =/get $$tvDBBannersHTML$$
+    Encode CLI #2     =<a href="($$banners$$[^"]*)"[^>]*>View Full Size
+    Encoder #2        =/use tvDBBannersHTML /multiple /variable bannerLinks /format "http://www.theTVDB.com/$$banners$$" /flatten /split ", "
+
+
+# Scraper: theTVDBGetAPosters
+#
+#  INPUT: %%tvdbID%%       - theTVDB show ID
+#
+
+    Profile           =theTVDBGetPosters
+    Encode CLI #1     =http://thetvdb.com/?tab=seriesposters&id=%%tvdbID%%
+    Encoder #1        =/get $$tvDBPosterHTML$$
+    Encode CLI #2     =<a href="($$posters$$[^"]*)"[^>]*>View Full Size
+    Encoder #2        =/use tvDBPosterHTML /multiple /variable posterLinks /format "http://www.theTVDB.com/$$posters$$" /flatten /split ", "
+
+
+# Scraper: theTVDBGetFanart
+#
+#  INPUT: %%tvdbID%%       - theTVDB show ID
+#
+
+    Profile           =theTVDBGetFanart
+    Encode CLI #1     =http://thetvdb.com/?tab=seriesfanart&id=%%tvdbID%%
+    Encoder #1        =/get $$tvDBFanartHTML$$
+    Encode CLI #2     =<a href="($$fanart$$[^"]*)"[^>]*>View Full Size
+    Encoder #2        =/use tvDBFanartHTML /multiple /variable fanartLinks /format "http://www.theTVDB.com/$$fanart$$" /flatten /split ", "
+
+
+# Scraper: =theTVDBAPIGetShowInfo
+#
+#  INPUT : %%showTitle%%    - Title of show to search
+#  OUTPUT: %%tvdbID%%       - theTVDB show ID
+#
+
+    Profile           =theTVDBAPIGetShowInfo
+    Encode CLI #1     =http://www.thetvdb.com/api/%%theTVDBapiKey%%/series/%%tvdbID%%
+    Encoder #1        =/get $$tvDBShowInfoHTML$$
+    Encode CLI #2     =<Overview>($$showDescription$$[^<]*)</Overview>
+    Encoder #2        =/use tvDBShowInfoHTML /flatten
+    Encode CLI #2     =<FirstAired>($$showPremired$$[^<]*)</FirstAired>
+    Encoder #2        =/use tvDBShowInfoHTML /flatten
+    Encode CLI #2     =<Airs_DayOfWeek>($$showDayOfWeek$$[^<]*)</Airs_DayOfWeek>
+    Encoder #2        =/use tvDBShowInfoHTML /flatten
+    Encode CLI #2     =<Runtime>($$showRuntime$$[^<]*)</Runtime>
+    Encoder #2        =/use tvDBShowInfoHTML /flatten
+    Encode CLI #2     =<Network>($$showNetwork$$[^<]*)</Network>
+    Encoder #2        =/use tvDBShowInfoHTML /flatten
+    Encode CLI #2     =<Genre>($$showGenre$$[^<]*)</Genre>
+    Encoder #2        =/use tvDBShowInfoHTML /flatten
+    Encode CLI #2     =($$showGenre$$[^\|]+)
+    Encoder #2        =/use "%%showGenre%%" /multiple /split ", "
+    Encode CLI #2     =($$showGenre$$.+), $
+    Encoder #2        =/use "%%showGenre%%"
+    Encode CLI #2     =<ContentRating>($$showRating$$[^<]*)</ContentRating>
+    Encoder #2        =/use tvDBShowInfoHTML /flatten
+    Encode CLI #1     =theTVDBAPIGetActors
+    Encoder #1        =/insertFunction
+    Encode CLI #1     =theTVDBAPIGetBanners
+    Encoder #1        =/insertFunction
+    Encode CLI #1     =theTVDBAPIGetPosters
+    Encoder #1        =/insertFunction
+    Encode CLI #1     =theTVDBAPIGetFanart
+    Encoder #1        =/insertFunction
+
+
+# Scraper: theTVDBGetActors
+#
+#  INPUT : %%showTitle%%    - Title of show to search
+#  OUTPUT: %%tvdbID%%       - theTVDB show ID
+#
+
+    Profile           =theTVDBAPIGetActors
+    Encode CLI #2     =<Image>($$actorPicture$$[^<]*)</Image>\s+<Name>($$actors$$[^<]*)</Name>\s+<Role>($$roles$$[^<]*)</Role>
+    Encoder #2        =/use fullActorsInfoXML /multiple /variable actorsCombined /format "$$actors$$||http://www.theTVDB.com/banners/$$actorPicture$$" /flatten /clearOnFailure
+
+    
+# Scraper: theTVDBGetBanners
+#
+#  INPUT: %%tvdbID%%       - theTVDB show ID
+#
+
+    Profile           =theTVDBAPIGetBanners
+    Encode CLI #2     =<id>[^<]*</id>\s*<BannerPath>($$banners$$[^<]*)</BannerPath>\s*<BannerType>season</BannerType>\s*<BannerType2>seasonwide</BannerType2>\s*<Language>en</Language>\s*<Season>%%seasonNum%%</Season>
+    Encoder #2        =/use fullBannersInfoXML /multiple /variable bannerSeasonLinks /format "http://www.theTVDB.com/banners/$$banners$$" /flatten /split ", " /clearOnFailure
+    Encode CLI #2     =<id>[^<]*</id>\s*<BannerPath>($$banners$$[^<]*)</BannerPath>\s*<BannerType>series</BannerType>\s*<BannerType2>graphical</BannerType2>\s*<Language>en</Language>\s*
+    Encoder #2        =/use fullBannersInfoXML /multiple /variable bannerLinks /format "http://www.theTVDB.com/banners/$$banners$$" /flatten /split ", " /clearOnFailure
+
+# Scraper: theTVDBAPIGetAPosters
+#
+#  INPUT: %%tvdbID%%       - theTVDB show ID
+#
+
+    Profile           =theTVDBAPIGetPosters
+    Encode CLI #2     =<id>[^<]*</id>\s*<BannerPath>($$posters$$[^<]*)</BannerPath>\s*<BannerType>season</BannerType>\s*<BannerType2>season</BannerType2>\s*<Language>en</Language>\s*<Season>%%seasonNum%%</Season>
+    Encoder #2        =/use fullBannersInfoXML /multiple /variable posterSeasonLinks /format "http://www.theTVDB.com/banners/$$posters$$" /flatten /split ", " /clearOnFailure
+    Encode CLI #2     =<id>[^<]*</id>\s*<BannerPath>($$posters$$[^<]*)</BannerPath>\s*<BannerType>poster</BannerType>\s*<BannerType2>[^<]*</BannerType2>\s*<Language>en</Language>\s*
+    Encoder #2        =/use fullBannersInfoXML /multiple /variable posterLinks /format "http://www.theTVDB.com/banners/$$posters$$" /flatten /split ", " /clearOnFailure
+
+# Scraper: theTVDBAPIGetFanart
+#
+#  INPUT: %%tvdbID%%       - theTVDB show ID
+#
+
+    Profile           =theTVDBAPIGetFanart
+    Encode CLI #2     =<id>[^<]*</id>\s*<BannerPath>($$fanart$$[^<]*)</BannerPath>\s*<BannerType>fanart</BannerType>
+    Encoder #2        =/use fullBannersInfoXML /multiple /variable fanartLinks /format "http://www.theTVDB.com/banners/$$fanart$$" /flatten /split ", " /clearOnFailure

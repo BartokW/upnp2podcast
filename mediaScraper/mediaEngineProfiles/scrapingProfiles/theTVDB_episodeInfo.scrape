@@ -1,0 +1,143 @@
+# Scraper: theTVDBGetEpisodes
+#
+#  INPUT : %%showTitle%%    - Title of show to search
+#  OUTPUT: %%tvdbID%%       - theTVDB show ID
+#
+
+    Profile           =theTVDBGetEpisodes
+    Encode CLI #1     =http://thetvdb.com/?tab=seasonall&id=%%tvdbID%%&lid=7
+    Encoder #1        =/get $$tvDBShowInfoHTML$$
+    Encode CLI #2     =<a href="($$episodeLink$$[^"]*)"[^>]*>\s*($$seasonXepisode$$($$seasonAllNum$$[0-9]+) - ($$episodeAllNum$$[0-9]+))</a>.*lid=[0-9]">
+    Encoder #2        =/use tvDBShowInfoHTML /multiple /variable episodeXlink /format "$$seasonXepisode$$:http://www.theTVDB.com$$episodeLink$$" 
+
+# Scraper: theTVDBGetAllEpisodeInfo
+#
+#  INPUT  : %%getSeasonXepisode%% - Season - Episode to get info for
+#  OUTPUT : $$episodePage$$ - HTML of episode page for specified episode
+#
+
+    Profile           =theTVDBGetAllEpisodeInfo
+    Encode CLI #1     =theTVDBGetEpisodes
+    Encoder #1        =/insertFunction
+    Encode CLI #1     =($$getSeasonXepisode$$[0-9]+ - [0-9]+):[^|]*
+    Encoder #1        =/use "%%episodeXlink%%" /forEach genEachPropertyFile
+    Encode CLI #1     =BREAK
+    Encoder #1        =/break
+    
+    
+    Profile           =genEachPropertyFile
+    Encode CLI #1     =($$seasonNum$$[0-9]+) - ($$episodeNum$$[0-9]+)
+    Encoder #1        =/use "%%getSeasonXepisode%%" /clearOnFailure
+    Encode CLI #1     =?>seasonNum&&episodeNum<:>theTVDBAPIGetEpisodeData<?
+    Encoder #1        =/insertFunction
+    Encode CLI #1     =?>tvdbID<:>formatSeasonEpisodeNumbers<?
+    Encoder #1        =/insertFunction
+    Encode CLI #1     =?>seasonNum&&episodeNum<:>($$inputFile$$.*)<?
+    Encoder #1        =/use "%%SNIP:organizeName%%"
+    Encode CLI #1     =?>seasonNum&&episodeNum<:>($$inputFile$$.*)<?
+    Encoder #1        =/use "%%inputFile_FULLFILE%%.mkv"
+    Encode CLI #1     =?>!DIRECTORY:%%SNIP:organizePath%%<:> "%%SNIP:organizePath%%"<?
+    Encoder #1        =/exe mkdir
+    Encode CLI #1     =?>seasonNum&&episodeNum<:>createPropertiesFile<?
+    Encoder #1        =/insertFunction
+    Encode CLI #1     = "C:\Documents and Settings\zadigian\Desktop\mediaScraperBeta12\clip.mkv" "%%inputFile_FULLFILE%%.mkv"
+    Encoder #1        =/exe copy
+    Encode CLI #1     =?>!DIRECTORY:%%organizeBaseFolder%%\fanart\%%showTitle_WIN32%%<:> /E /Y "C:\Documents and Settings\zadigian\Desktop\mediaScraperBeta12\fanartExample" "%%organizeBaseFolder%%\fanart\%%showTitle_WIN32%%\"<?
+    Encoder #1        =/exe xcopy
+    
+    
+# Scraper: theTVDBGetEpisodeInfo
+#
+#  INPUT  : %%getSeasonXepisode%% - Season - Episode to get info for
+#
+
+    Profile           =theTVDBGetEpisodeInfo
+    Encode CLI #1     =?>!getSeasonXepisode&&seasonNum&&episodeNum<:>theTVDBPrepSeasonEpisodeNum<?
+    Encoder #1        =/insertFunction
+    Encode CLI #1     =theTVDBGetEpisodePage
+    Encoder #1        =/insertFunction
+    Encode CLI #1     =theTVDBGetEpisodeData
+    Encoder #1        =/insertFunction
+
+# Scraper: theTVDBPrepSeasonEpisodeNum
+#
+#  INPUT  : %%seasonNum%%  - Season to get info for
+#  INPUT  : %%episodeNum%% - Episode to get info for
+#
+
+    Profile           =theTVDBPrepSeasonEpisodeNum
+    Encode CLI #1     =($$getSeasonXepisode$$.*)
+    Encoder #1        =/use "%%seasonNum_STRIPLEADINGZERO%% - %%episodeNum_STRIPLEADINGZERO%%"
+
+# Scraper: theTVDBGetEpisodePage
+#
+#  INPUT  : %%getSeasonXepisode%% - Season - Episode to get info for
+#  OUTPUT : $$episodePage$$ - HTML of episode page for specified episode
+#
+
+    Profile           =theTVDBGetEpisodePage
+    Encode CLI #1     =%%getSeasonXepisode%%:($$getEpisodePage$$[^|]*)
+    Encoder #1        =/use "%%episodeXlink%%"
+    Encode CLI #1     =%%getEpisodePage%%
+    Encoder #1        =/get $$episodePageHTML$$
+   
+# Scraper: theTVDBGetEpisodeData
+#
+#  INPUT : %%getSeasonXepisode%% - Season - Episode to get info for
+#  INPUT : %%episodePage%%       - HTML for epsidoe page
+#
+
+    Profile           =theTVDBGetEpisodeData
+    Encode CLI #1     =%%showTitle_ESCCHARS%%\s*:\s*($$episodeTitle$$[^<]*)</title>
+    Encoder #1        =/use episodePageHTML /flatten
+    Encode CLI #1     =name="FirstAired" value="\|*($$firstAired$$[^"]*)\s*
+    Encoder #1        =/use episodePageHTML /flatten
+    Encode CLI #1     =($$yearOnly$$[0-9]{4})
+    Encoder #1        =/use "@@firstAired@@"
+    Encode CLI #1     =name="GuestStars" value="\|*($$guestStars$$[^"]*)\s*
+    Encoder #1        =/use episodePageHTML /flatten
+    Encode CLI #1     =name="Director" value="\|*($$Director$$[^"]*)\s*
+    Encoder #1        =/use episodePageHTML /flatten
+    Encode CLI #1     =name="Writer" value="\|*($$writers$$[^"]*)\s*
+    Encoder #1        =/use episodePageHTML /flatten
+    Encode CLI #1     ="Overview_7" style="display: inline">\s*($$episodeDescription$$[^<]*)<\/textarea>
+    Encoder #1        =/use episodePageHTML /flatten
+
+
+# Scraper: theTVDBAPIGetEpisodeData
+#
+#  INPUT : %%getSeasonXepisode%% - Season - Episode to get info for
+#  INPUT : %%episodePage%%       - HTML for epsidoe page
+#
+
+    Profile           =theTVDBAPIGetEpisodeData
+    Encode CLI #2     =?>seasonNum&&episodeNum<:>http://www.thetvdb.com/api/%%theTVDBapiKey%%/series/%%tvdbID%%/default/%%seasonNum%%/%%episodeNum%%<?
+    Encoder #2        =/get $$episodePageXML$$
+    Encode CLI #2     =?>firstAired<:>http://thetvdb.com/api/GetEpisodeByAirDate.php?apikey=%%theTVDBapiKey%%&seriesid=%%tvdbID%%&airdate=%%firstAired_SUBDAY%%<?
+    Encoder #2        =/get $$episodePageXML$$    
+    Encode CLI #1     =Episode->EpisodeName
+    Encoder #1        =/use episodePageXML /isXML /variable episodeTitle /flatten
+    Encode CLI #1     =Episode->SeasonNumber
+    Encoder #1        =/use episodePageXML /isXML /variable seasonNum /flatten
+    Encode CLI #1     =Episode->EpisodeNumber
+    Encoder #1        =/use episodePageXML /isXML /variable episodeNum /flatten
+    Encode CLI #1     =Episode->FirstAired
+    Encoder #1        =/use episodePageXML /isXML /variable firstAired /flatten
+    Encode CLI #1     =Episode->GuestStars
+    Encoder #1        =/use episodePageXML /isXML /variable guestStars /flatten
+    Encode CLI #1     =Episode->Director
+    Encoder #1        =/use episodePageXML /isXML /variable Director /flatten
+    Encode CLI #1     =Episode->Writer
+    Encoder #1        =/use episodePageXML /isXML /variable writers /flatten
+    Encode CLI #1     =Episode->Overview
+    Encoder #1        =/use episodePageXML /isXML /variable episodeDescription /flatten
+    Encode CLI #1     =Episode->filename
+    Encoder #1        =/use episodePageXML /isXML /variable episodeThumb /flatten
+    Encode CLI #1     =Episode->Rating
+    Encoder #1        =/use episodePageXML /isXML /variable episodeRating /flatten
+    Encode CLI #1     =($$yearOnly$$[0-9]{4})
+    Encoder #1        =/use "@@firstAired@@"
+    Encode CLI #1     =($$temp$$.*)
+    Encoder #1        =/use "@@episodeThumb@@" /variable episodeThumbLinks /format "http://www.theTVDB.com/banners/$$temp$$" /flatten /split ", "
+    Encode CLI #1     =?>firstAired<:>formatSeasonEpisodeNumbers<?
+    Encoder #1        =/insertFunction
