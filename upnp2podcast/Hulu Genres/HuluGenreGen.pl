@@ -297,7 +297,7 @@ foreach $show (keys %shows)
         $linksFile .= "xPodcast_".$subCatName.","; 
     }  
     chop($linksFile);
-    $linksFile .=   ";external,UPnP2Podcast,PlayOn:Hulu:TV Episodes:".uc($showFirstLetter).":^".$showRegEx."\$:+2\n"; 
+    $linksFile .=   ",xFlagTitleNone;external,UPnP2Podcast,PlayOn:Hulu:TV Episodes:".uc($showFirstLetter).":^".$showRegEx."\$:+2\n"; 
 }
 
 open (LINKS,">CustomOnlineVideoLinks_UPnP2Podcast_Hulu.properties");
