@@ -87,4 +87,4 @@
 
     Profile           =Match Timestamps
     Encode CLI #1     =#matching_timestamps#-r "%%ORIGINAL%%" "%%inputMain%%"
-    Encoder #1        =touch.exe
+    Encoder #1        =/exe touch.exe
