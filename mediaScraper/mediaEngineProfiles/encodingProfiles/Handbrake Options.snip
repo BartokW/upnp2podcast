@@ -40,7 +40,7 @@
 #
 
     Profile           =Handbrake AutoCrop
-    Encode CLI #1     =?>autoCrop&&ORIGINAL:autoCropHandBrake<:>--crop %%ORIGINAL:autoCropHandBrake%% ?>verticalScale<:>-l %%verticalScale%%<=>!horizontalScale<:>-l %%ORIGINAL:cropY%%<? ?>horizontalScale<:>-w %%horizontalScale%%<=>!verticalScale<:>-w %%ORIGINAL:cropX%%<?<=>?>!isDVD<:> --crop 0:0:0:0<? ?>verticalScale<:>-l %%verticalScale%%<? ?>horizontalScale<:>-w %%horizontalScale%%<?<?
+    Encode CLI #1     =?>autoCrop&&ORIGINAL:autoCropHandBrake&&!isDVD<:>--crop %%ORIGINAL:autoCropHandBrake%%<? ?>verticalScale<:>-l %%verticalScale%%<? ?>horizontalScale<:>-w %%horizontalScale%%<? ?>isDVD<:>--loose-anamorphic<?
     Encoder #1        =
 
 # Snippit: HandBrake Subtitles
@@ -49,5 +49,5 @@
 #
 
     Profile           =Handbrake Subtitles
-    Encode CLI #1     =?>handbrakeSubtitles<:>--subtitle %%handbrakeSubtitles%%<=>EXISTS:%%INPUTSUB%%<:>--srt-file "%%INPUTSUB%%" --srt-codeset UTF-8 --srt-offset 0 --srt-lang eng<?
+    Encode CLI #1     =?>handbrakeSubtitles<:>--subtitle %%handbrakeSubtitles%%<=>EXISTS:%%INPUTSUB%%&&extractedSubtitles<:>--srt-file "%%INPUTSUB%%" --srt-codeset UTF-8 --srt-offset 0 --srt-lang eng<?
     Encoder #1        =
