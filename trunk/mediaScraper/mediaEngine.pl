@@ -105,6 +105,11 @@
         $verboseLevel = 0;
         print STDOUT $ourStorySoFar;   
     }
+    
+    if (exists $optionsHash{lc("batch")})
+    {
+        $batchMode = 1;
+    }
 
    #### extra log file
    if (exists $optionsHash{lc("altLogFile")})
@@ -1432,7 +1437,7 @@
             $startRunCommand = "$runEXE $currentTarget";
         }        
 
-        if ($teeOutput && !(exists $perRunOptionsHash->{lc("batch")}))
+        if ($teeOutput && exists $perRunOptionsHash->{lc("tee")})
         {
             $captureLogTee = "\"".$binFiles->{lc("mtee.exe")}."\" \"$logFile.log\"";
             $runCommand = encode('ISO-8859-1',"$startRunCommand 2>\"$logFile.err.log\" \| $captureLogTee");
@@ -1622,7 +1627,7 @@
         }
         
 
-        echoPrint("  + Reading Profiles\n",2);
+        echoPrint("  + Reading Profiles (".@profileFiles.")\n",2);
         foreach $file (@profileFiles)
         {
             @commands = ();
@@ -2207,13 +2212,17 @@
         foreach (keys (%passwords))
         {
             $toPrint =~ s/$_/******/g;    
-        }     
-
-        my $shortPrint  = substr($toPrint, 0, 150);
+        }
         
-        if (length($toPrint) > 150)
+        my $shortPrint = $toPrint;     
+        if ($batchMode == 0)
         {
-            $shortPrint .= "...\n";    
+            $shortPrint  = substr($toPrint, 0, 150);
+            
+            if (length($toPrint) > 150)
+            {
+                $shortPrint .= "...\n";    
+            }
         }
         
         if ($toPrint =~ /.*\n.*\n.*\n.*\n/)
@@ -2837,6 +2846,7 @@ sub dvdScanForTitles
     }
     return @newPerRunOptions;
 }
+
 
 
 
