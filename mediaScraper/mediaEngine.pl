@@ -27,6 +27,8 @@
     use Data::Dumper;
     use IMDB::Film;
     use Date::Calc qw(:all);
+    #use Win32::Process;
+    #use Win32;
 
     # Code version
     $codeVersion = "mediaEngine v1.0beta";
@@ -1451,6 +1453,15 @@
         }
         else
         {
+            #echoPrint("        - Executing command (new): $runCommand\n");
+            #Win32::Process::Create($ProcessObj, 
+            #        "$runEXE",
+            #        "$currentTarget",
+            #        0,
+            #        IDLE_PRIORITY_CLASS|DETACHED_PROCESS,
+            #        getPath("$logFile.log"));
+            #$ProcessObj->Wait(INFINATE);
+        
             $runCommand = encode('ISO-8859-1',"$runCommand > \"$logFile.log\" 2>&1");
             echoPrint("        - Executing command: $runCommand\n");
             `$runCommand`;
