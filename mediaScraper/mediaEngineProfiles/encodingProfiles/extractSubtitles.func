@@ -10,7 +10,7 @@
     Profile           =extractSubtitles
     Encode CLI #1     =?>ORIGINAL:embeddedCCCount>10<:>#extract_sub# -srt -sc "?>quickStreamFixFile<:>%%quickStreamFixFile%%<=>cutCommFile<:>%%cutCommFile%%<=>%%ORIGINAL%%<?" -o "%%OUTPUT_SUB%%.srt"<?
     Encoder #1        =/exe ccextractorwin.exe
-    Encode CLI #2     =?>ORIGINAL:embeddedCCCount>10&&EXISTS:%%INPUTSUB%%.srt<:>/extractedSubtitles<?
+    Encode CLI #2     =?>ORIGINAL:embeddedCCCount>10&&EXISTS:%%INPUTSUB%%<:>/extractedSubtitles<?
     Encoder #2        =/setOptions
 
 # Function: extractSubtitlesDVD
