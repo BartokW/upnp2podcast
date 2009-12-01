@@ -44,6 +44,8 @@
     
     # Start at -1, elevate to 0 if nessisary
     $verboseLevel = -1; 
+    
+    $errorLevel = 0;
 
     # Create log file
     %fileHandles = ();
@@ -2423,7 +2425,7 @@ sub detectVideoProperties
 
         for ($j = 1; $j < $numClips; $j++)
         {               
-            $comskipString = forkCommand($binFiles->{lc("comskip.exe")}," --ini=\"".getPath($binFiles->{lc("comskip.exe")})."comskip.ini\" \"$baseFileName.clip_$j.mpg\" > \"$baseFileName.clip_$j.comskip.log\" 2>&1","$baseFileName.clip_$j.comskip.finished");
+            $comskipString = forkCommand($binFiles->{lc("comskip.exe")}," --ini=\"".getPath($binFiles->{lc("comskip.exe")})."\\comskip.ini\" \"$baseFileName.clip_$j.mpg\" > \"$baseFileName.clip_$j.comskip.log\" 2>&1","$baseFileName.clip_$j.comskip.finished");
             echoPrint("        - Running Comskip: $comskipString\n",2);
             if (!(-s "$baseFileName.clip_$j.csv"))
             {
