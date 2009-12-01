@@ -21,6 +21,8 @@
 ##### Import libraries
     use Encode qw(encode decode);
     use utf8;
+    use Win32::Process;
+    use Win32;
 
     # Get the directory the script is being called from
     $executable = $0;
@@ -67,11 +69,22 @@
     
     if ($executable =~ /\.pl$/)
     {
-        $mediaEngine = "$executablePath\\mediaEngine.pl"
+        $mediaEngine = "$executablePath\\mediaEngine.pl";
     }
     else
     {
-        $mediaEngine = "$executablePath\\mediaEngine.exe"
+        $mediaEngine = "$executablePath\\mediaEngine.exe";
     }
-    system("\"$mediaEngine\" $optionsForEngine");
+    
+    $mediaEngine = "$executablePath\\mediaEngine.exe";
+    #system("\"$mediaEngine\" $optionsForEngine");
+    #echoPrint("        - Executing command (new): $runCommand\n");
+    Win32::Process::Create($ProcessObj, 
+            "$mediaEngine",
+            $optionsForEngine,
+            0,
+            IDLE_PRIORITY_CLASS,
+            ".");
+    $ProcessObj->Wait(1000 * 60 * 60 * 24);
+    $ProcessObj->Kill(0);
 
