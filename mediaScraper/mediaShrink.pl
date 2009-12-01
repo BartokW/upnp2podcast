@@ -76,15 +76,34 @@
         $mediaEngine = "$executablePath\\mediaEngine.exe";
     }
     
-    $mediaEngine = "$executablePath\\mediaEngine.exe";
+    #$mediaEngine = "$executablePath\\mediaEngine.exe";
     #system("\"$mediaEngine\" $optionsForEngine");
     #echoPrint("        - Executing command (new): $runCommand\n");
+    $mediaEngine = "$executablePath\\mediaEngine.exe";   
+    print "        - Executing command (new): \"$mediaEngine\" $optionsForEngine\n";
+    #system("\"$mediaEngine\" $optionsForEngine");
     Win32::Process::Create($ProcessObj, 
             "$mediaEngine",
-            $optionsForEngine,
+            getFile($mediaEngine)." $optionsForEngine",
             0,
             IDLE_PRIORITY_CLASS,
             ".");
     $ProcessObj->Wait(1000 * 60 * 60 * 24);
-    $ProcessObj->Kill(0);
+
+    sub getFile
+    {   # G:\videos\(filename).avi
+        my ( $fileName ) = @_;
+        my $rv = "";
+        if ($fileName =~ m#(([^\\/]*)\.([a-zA-Z0-9]{2,}))$#)
+        {
+            $rv = $2;
+        }
+    
+        if (-d $fileName && $fileName =~ m#([^\\/]*)$#)
+        {
+                $rv = $&;
+        }
+    
+        return $rv;
+    }
 
