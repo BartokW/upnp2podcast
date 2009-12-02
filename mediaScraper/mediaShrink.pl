@@ -80,7 +80,7 @@
     #system("\"$mediaEngine\" $optionsForEngine");
     #echoPrint("        - Executing command (new): $runCommand\n");
     $mediaEngine = "$executablePath\\mediaEngine.exe";   
-    print "        - Executing command (new): \"$mediaEngine\" $optionsForEngine\n";
+    print " Executing command: \"$mediaEngine\" $optionsForEngine\n";
     #system("\"$mediaEngine\" $optionsForEngine");
     Win32::Process::Create($ProcessObj, 
             "$mediaEngine",
@@ -89,6 +89,10 @@
             IDLE_PRIORITY_CLASS,
             ".");
     $ProcessObj->Wait(1000 * 60 * 60 * 24);
+    $ProcessObj->GetExitCode($exitcode);
+    print "Exiting Code: ($exitcode)\n";
+    exit $exitcode; 
+    
 
     sub getFile
     {   # G:\videos\(filename).avi

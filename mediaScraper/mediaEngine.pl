@@ -529,7 +529,7 @@
             }
             
             if (exists $perRunOptionsHash{lc("wereDoneHere")})
-            {
+            {    
                 last;
             }
             
@@ -587,6 +587,7 @@
         deleteTempFiles(\@logFileToDelete);
     }
     
+    exit $errorLevel;
     
     
 ######################################################
@@ -1357,6 +1358,7 @@
                 echoPrint("    ! $reason\n");
                 echoPrint("    ! Moving onto next file");
                 $optionsHash->{lc("wereDoneHere")} = $reason;
+                $errorLevel++;
                 return;
             }
             elsif ($newOptions[0] =~ m#^/(!?)([a-zA-Z0-9_]+)#i)
@@ -2600,6 +2602,10 @@ sub detectVideoProperties
             
             $videoInfoArray->{lc("autoCropHandBrake")} = "$topCrop[$cropIndex]:".($yRes - ($cropY+$topCrop[$cropIndex])).":$leftCrop[$cropIndex]:".($xRes - ($cropX+$leftCrop[$cropIndex]));  
             $videoInfoArray->{lc("autoCropMencoder")} =  "$cropX:$cropY:$leftCrop[$cropIndex]:$topCrop[$cropIndex]";
+            $videoInfoArray->{lc("cropConfidence")} = $percentConfidence;
+            $videoInfoArray->{lc("cropRatioX")} = ($cropX/$xRes);
+            $videoInfoArray->{lc("cropRatioY")} = ($cropY/$yRes);  
+            
             $videoInfoArray->{lc("cropConfidence")} = $percentConfidence;
     
             if (abs($videoInfoArray->{lc("ffmpegARValue")} - $aspectRatioValue) > .05)
