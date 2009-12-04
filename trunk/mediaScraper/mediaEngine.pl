@@ -31,7 +31,7 @@
     #use Win32;
 
     # Code version
-    $codeVersion = "mediaEngine v1.0beta";
+    $codeVersion = "mediaEngine v2.0 (SNIP:BUILT)";
     
     $invalidMsg .= "\n$codeVersion\n";
     $invalidMsg .= "\tUSAGE:";
@@ -75,8 +75,8 @@
     $illCharFileRegEx = "('|\"|\\\\|/|\\||<|>|:|\\*|\\?|\\&|\\;|`)";
 
 ##### Let's get this show on the road
-    echoPrint("Welcome to $codeVersion\n");
-    echoPrint("Staring Proccesing at $startTime $startDate\n\n");
+    echoPrint(" Welcome to $codeVersion\n");
+    echoPrint(" Staring Proccesing at $startTime $startDate\n\n");
     echoPrint("  + Executable   : $executable\n");
     echoPrint("  + EXE path     : $executablePath\n");
     
@@ -603,11 +603,11 @@
         my $ffmpegString  = encode('UTF-8',"\"".$binFiles->{lc("ffmpeg.exe")}."\" -dumpmetadata -v 2 -i \"$video\" 2>&1");
         my $ffmpegOutput = `$ffmpegString`;    
         my @ffmpegOutput = split(/(\n|\r)/,$ffmpegOutput);   
-
         
         $videoInfoHash->{lc("fileSize")} = (-s $video)/1024;
         
         echoPrint("$baseSpace+ Getting Video Info: ($video)(".$videoInfoHash->{lc("fileSize")}.")\n");
+        echoPrint("------\n".$ffmpegOutput."------\n",100);
 
         foreach (@ffmpegOutput)
         {
@@ -2240,7 +2240,7 @@
             }
         }
         
-        if ($toPrint =~ /.*\n.*\n.*\n.*\n/)
+        if ($toPrint =~ /.*\n.*\n.*\n.*\n/ && $level < 100)
         {
 			      $shortPrint =~ s/\n/ /g;
 			      $shortPrint = $shortPrint."\n";
@@ -2252,7 +2252,7 @@
             print {$fileHandles{$_}} $toPrint;
         }
         
-        if ($level <= $verboseLevel)
+        if ($level <= $verboseLevel || $level == 100)
         {
           print STDOUT $shortPrint;
         }
