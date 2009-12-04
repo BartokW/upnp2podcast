@@ -47,7 +47,7 @@
   }
 
   # Code version
-  my $codeVersion = "$executableEXE v1.6".($debug ? "(debug)" : "");
+  my $codeVersion = "$executableEXE v1.6 (SNIP:BUILT)".($debug ? "(debug)" : "");
   
   my $invalidMsg .= "\n$codeVersion\n";
   $invalidMsg .= "\tUSAGE:";
