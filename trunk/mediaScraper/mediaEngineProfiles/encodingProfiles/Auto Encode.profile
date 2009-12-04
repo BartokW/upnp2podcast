@@ -24,7 +24,7 @@
     Encoder #6        =/setOptions
     Encode CLI #8     =?>ORIGINAL:videoCodec=~mpeg2video&&!ORIGINAL:videoResolution=~(1280x|x720)&&!reverseTelecine<:>/deinterlace<?
     Encoder #8        =/setOptions
-    Encode CLI #9     =?>%%SNIP:HDTVCheck%%&&ORIGINAL:cropY>720<:>/verticalScale 720<?
+    Encode CLI #9     =?>%%SNIP:HDTVCheck%%&&ORIGINAL:cropY>720<:>/verticalScale 720<=>/verticalScale %%ORIGINAL:cropY%%<?
     Encoder #9        =/setOptions
     Encode CLI #10    =?>!burnSubtitles&&%%SNIP:SubtitleSuccess%%&&(>mkv||mp4<)<:>/addSubtitleTrack<?
     Encoder #10       =/setOptions
