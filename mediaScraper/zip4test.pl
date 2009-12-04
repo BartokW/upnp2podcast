@@ -27,7 +27,7 @@ $executable = $0;
 $executable =~ m#(\\|\/)(([^\\/]*)\.([a-zA-Z0-9]{2,}))$#;;
 $executablePath = $`;
 
-$filesToCatch = "avi|mpg|mkv|mp4|mpeg|VIDEO_TS|ts|ogm|skip|override";
+$filesToCatch = "avi|mpg|mkv|mp4|mpeg|VIDEO_TS|ts|ogm|skip|override|mp3|aac|flac|m4a|m4v|mpgts";
 
 if (-d $ARGV[0])
 {
