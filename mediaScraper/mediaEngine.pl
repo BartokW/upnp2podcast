@@ -30,17 +30,20 @@
     #use Win32::Process;
     #use Win32;
 
-    # Code version
-    $codeVersion = "mediaEngine v2.0 (SNIP:BUILT)";
-    
-    $invalidMsg .= "\n$codeVersion\n";
-    $invalidMsg .= "\tUSAGE:";
-    $invalidMsg .= "\tmediaEngine.exe (File|Folder) (File|Folder)...\n\n";
-
     # Get the directory the script is being called from
     $executable = $0;
     $executable =~ m#(\\|\/)(([^\\/]*)\.([a-zA-Z0-9]{2,}))$#;;
     $executablePath = $`;
+
+    # Code version
+    $codeVersion = "mediaEngine v2.0 (SNIP:BUILT)";
+
+    open(USAGE,"$executablePath\\mediaShrink.readme.txt");
+    $usage = "$codeVersion\n";
+    while(<USAGE>)
+    {
+        $usage .= $_;
+    }
     
     # Start at -1, elevate to 0 if nessisary
     $verboseLevel = -1; 
@@ -84,8 +87,16 @@
     my @parameters = @ARGV;
     if (@parameters == 0)
     {
-        echoPrint($ourStorySoFar,10);
-        die;
+        print "ERROR: No Parameters\n\n";
+        print $usage;
+        exit 1;
+    }
+
+    if ($parameter == 0)
+    {
+        print "ERROR: No Parameters\n\n";
+        print $usage;
+        exit 1;
     }
     
     # Initilize options data structures
@@ -110,6 +121,12 @@
         print STDOUT $ourStorySoFar;   
     }
     
+    if (exists $optionsHash{lc("help")} || exists $optionsHash{lc("usage")})
+    {
+        print $usage;
+        exit 1;
+    }
+    
     if (exists $optionsHash{lc("batch")})
     {
         $batchMode = 1;
@@ -129,7 +146,7 @@
     unless(-e "$executablePath\\mediaEngineProfiles")
     {
         echoPrint("! Failed!  Can't find profiles folder\n",2);
-        die "Can't find profiles folder";
+        exit 1;
     }
     
     $optionsHash{lc("profileFolder")} = "$executablePath\\mediaEngineProfiles";
@@ -227,7 +244,11 @@
         {
             $mainLogFile  = ($perRunOptionsHash{lc("inputFile")} =~ /VIDEO_TS/i ? getPath($perRunOptionsHash{lc("inputFile")}) : getFullFile($perRunOptionsHash{lc("inputFile")}));
             $mainLogFile .= ".".$perRunOptionsHash{lc("profile")}.".(".(scalar @perRunOptions).").log";
-            open($mainLog, ">".encode('ISO-8859-1',$mainLogFile) ) || die "Can't open create log file";
+            if (!open($mainLog, ">".encode('ISO-8859-1',$mainLogFile) ))
+            {
+                echoPrint("  ! Can't open create log file");
+                exit 1;
+            }
             print $mainLog $ourStorySoFar;
             select($mainLog);
             $fileHandles{$mainLogFile} = $mainLog;
@@ -237,7 +258,11 @@
             $mainLogFile = "$executablePath\\mediaEngine.log";
             echoPrint("  ! No input file found\n");
             echoPrint("    - Making Log File: $mainLogFile\n");
-            open($mainLog, ">".encode('ISO-8859-1',$mainLogFile) ) || die "Can't open create log file";
+            if (!open($mainLog, ">".encode('ISO-8859-1',$mainLogFile) ))
+            {
+                echoPrint("  ! Can't open create log file");
+                exit 1;
+            }
             print $mainLog $ourStorySoFar;
             select($mainLog);
             $fileHandles{$mainLogFile} = $mainLog;         
@@ -248,7 +273,8 @@
         unless(exists  $profiles{lc($perRunOptionsHash{lc("profile")})})
         {   # Check for profile in Hash
             $reason = "Couldn't find encode profile: ".$perRunOptionsHash{lc("profile")};
-            die $reason;    
+            echoPrint($reason);
+            exit 1;
         }
     
      ##### Pull out Profile information
@@ -344,9 +370,7 @@
                     {
                         $errorFileName = getFullFile($perRunOptionsHash{lc("inputFile")}).".err";
                         echoPrint("  ! Unable to detect video info, skipping to next video\n");
-                        open(ERRORFILE,">$errorFileName");
-                        print ERRORFILE "  ! Unable to detect video info, skipping to next video\n";
-                        close(ERRORFILE);                        
+                        $errorLevel++;                    
                         next;
                     }
                 }
@@ -457,8 +481,9 @@
                 
                 
                 if (exists $currentCommand{lc("die")})
-                {   # Die, for debugging      
-                    die;
+                {   # Die, for debugging
+                    echoPrint("      ! Exiting due to profile /die\n",2);       
+                    exit 1;
                 }
                 elsif (exists $currentCommand{lc("insertFunction")})
                 {   # Insert function
