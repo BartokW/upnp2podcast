@@ -29,20 +29,57 @@
     $executable =~ m#(\\|\/)(([^\\/]*)\.([a-zA-Z0-9]{2,}))$#;;
     $executablePath = $`;
     $executableEXE  = $3; 
-
-    # Code version
-    $codeVersion = "$executableEXE v1.0beta";
     
-    $invalidMsg .= "\n$codeVersion\n";
-    $invalidMsg .= "\tUSAGE:";
-    $invalidMsg .= "\t$executableEXE.exe (Options) (File|Folder) (File|Folder)...\n\n";
+    $codeVersion = "$executableEXE v2.0 (SNIP:BUILT)";
+    
+    if (!(-e "$executablePath\\$executableEXE.bat"))
+    {
+        if (open(BATFILE,">$executablePath\\$executableEXE.bat"))
+        {
+            print BATFILE "\@ECHO OFF\n";
+            print BATFILE "\n";
+            print BATFILE ":LOOP\n";
+            print BATFILE "IF (%1)==() GOTO NEXT\n";
+            print BATFILE "set COMMAND=%COMMAND% \"%~f1\"\n";
+            print BATFILE "shift\n";
+            print BATFILE "GOTO LOOP\n";
+            print BATFILE "\n";
+            print BATFILE ":NEXT\n";
+            print BATFILE "cd /D \"$executablePath\"\n";
+            print BATFILE "start /I /LOW /MIN /WAIT $executableEXE.exe %COMMAND%\n";
+            print BATFILE "GOTO EOF\n";
+            close(BATFILE);
+      }
+    }
+    
+    open(USEAGE,"$executablePath\\$executableEXE.readme.txt");
+    $usage = "$codeVersion\n";
+    while(<USEAGE>)
+    {
+        $usage .= $_;
+    }
+    close(USEAGE) ;
     
     # Move arguments into user array so we can modify it
     my @parameters = @ARGV;
+    
     if (@parameters == 0)
     {
-        print $invalidMsg;
-        exit;
+        print "ERROR: No Parameters\n\n";
+        print $usage;
+        exit 1;
+    }
+    
+    if ($parameters[0] eq "/help"  ||
+        $parameters[0] eq "-help"  ||
+        $parameters[0] eq "--help" ||
+        $parameters[0] eq "--usage" ||
+        $parameters[0] eq "-usage"  ||
+        $parameters[0] eq "/usage"  ||
+        $parameters[0] eq "/?")
+    {
+        print $usage;
+        exit 1;
     }
     
     foreach (@parameters)
