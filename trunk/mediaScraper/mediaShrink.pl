@@ -46,7 +46,7 @@
             print BATFILE "\n";
             print BATFILE ":NEXT\n";
             print BATFILE "cd /D \"$executablePath\"\n";
-            print BATFILE "start /I /LOW /MIN /WAIT $executableEXE.exe %COMMAND%\n";
+            print BATFILE "start /I /B /LOW /WAIT $executableEXE.exe %COMMAND%\n";
             print BATFILE "GOTO EOF\n";
             close(BATFILE);
       }
@@ -67,6 +67,8 @@
     {
         print "ERROR: No Parameters\n\n";
         print $usage;
+        print "Exiting in 5 seconds...\n";
+        sleep(5);
         exit 1;
     }
     
@@ -79,6 +81,8 @@
         $parameters[0] eq "/?")
     {
         print $usage;
+        print "Exiting in 5 seconds...\n";
+        sleep(5);
         exit 1;
     }
     
@@ -128,6 +132,7 @@
     $ProcessObj->Wait(1000 * 60 * 60 * 24);
     $ProcessObj->GetExitCode($exitcode);
     print "Exiting Code: ($exitcode)\n";
+    sleep(5);
     exit $exitcode; 
     
 
