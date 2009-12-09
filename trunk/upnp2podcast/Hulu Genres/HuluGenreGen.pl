@@ -323,6 +323,9 @@ $textFile =~ s/=Network/=By Network/g;
 # Hardcoded fix for FlashForward
 $textFile =~ s/show_thumbnail_flashforward/show_thumbnail_flash_forward/gi;
 
+# Hardcoded fix for InuYasha - The Final Act
+$textFile =~ s/show_thumbnail_inuyasha___the_final_act/inuyasha_the_final_act/gi;
+
 ($second, $minute, $hour, $dayOfMonth, $month, $yearOffset, $dayOfWeek, $dayOfYear, $daylightSavings) = localtime();
 $year = 1900 + $yearOffset;
 $theTime = sprintf("%04d%02d%02d",$year,($month+1),$dayOfMonth);
