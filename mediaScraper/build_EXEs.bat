@@ -9,6 +9,6 @@ ECHO on
 
 copy "%~f1" "%TEMP%\script.pl"
 perl -pi.bak -e "s/SNIP:BUILT/Built on %time% %date%/g" "%TEMP%\script.pl"
-pp -N=Comments="%~n1.exe v1.0 by evilpenguin (%time% %date%)" -o "%~dp1%~n1.exe" "%TEMP%\script.pl"
+pp -N=Comments="%~n1.exe v2.0 by evilpenguin (%time% %date%)" -o "%~dp1%~n1.exe" "%TEMP%\script.pl"
 
 pause
