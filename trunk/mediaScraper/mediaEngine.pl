@@ -49,6 +49,8 @@
     {
         print "ERROR: No Parameters\n\n";
         print $usage;
+        print "Exiting in 5 seconds...\n";
+        sleep(5);
         exit 1;
     }
 
@@ -61,6 +63,8 @@
         $parameters[0] eq "/?")
     {
         print $usage;
+        print "Exiting in 5 seconds...\n";
+        sleep(5);
         exit 1;
     }
     
@@ -124,12 +128,6 @@
         print STDOUT $ourStorySoFar;   
     }
     
-    if (exists $optionsHash{lc("help")} || exists $optionsHash{lc("usage")})
-    {
-        print $usage;
-        exit 1;
-    }
-    
     if (exists $optionsHash{lc("batch")})
     {
         $batchMode = 1;
@@ -149,6 +147,8 @@
     unless(-e "$executablePath\\mediaEngineProfiles")
     {
         echoPrint("! Failed!  Can't find profiles folder\n",2);
+        echoPrint("Exiting in 5 seconds...\n");
+        sleep(5);
         exit 1;
     }
     
@@ -253,6 +253,8 @@
             if (!open($mainLog, ">".encode('ISO-8859-1',$mainLogFile) ))
             {
                 echoPrint("  ! Can't open create log file");
+                echoPrint("Exiting in 5 seconds...\n");
+                sleep(5);
                 exit 1;
             }
             print $mainLog $ourStorySoFar;
@@ -267,6 +269,8 @@
             if (!open($mainLog, ">".encode('ISO-8859-1',$mainLogFile) ))
             {
                 echoPrint("  ! Can't open create log file");
+                echoPrint("Exiting in 5 seconds...\n");
+                sleep(5);
                 exit 1;
             }
             print $mainLog $ourStorySoFar;
@@ -280,6 +284,8 @@
         {   # Check for profile in Hash
             $reason = "Couldn't find encode profile: ".$perRunOptionsHash{lc("profile")};
             echoPrint($reason);
+            echoPrint("Exiting in 5 seconds...\n");
+            sleep(5);
             exit 1;
         }
     
@@ -488,7 +494,9 @@
                 
                 if (exists $currentCommand{lc("die")})
                 {   # Die, for debugging
-                    echoPrint("      ! Exiting due to profile /die\n",2);       
+                    echoPrint("      ! Exiting due to profile /die\n",2); 
+                    echoPrint("Exiting in 5 seconds...\n");
+                    sleep(5);      
                     exit 1;
                 }
                 elsif (exists $currentCommand{lc("insertFunction")})
@@ -652,7 +660,8 @@
     {
         deleteTempFiles(\@logFileToDelete);
     }
-    
+    print "Exiting in 5 seconds...\n";
+    sleep(5);    
     exit $errorLevel;
     
     
