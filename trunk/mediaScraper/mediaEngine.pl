@@ -38,12 +38,37 @@
     # Code version
     $codeVersion = "mediaEngine v2.0 (SNIP:BUILT)";
 
-    open(USAGE,"$executablePath\\mediaShrink.readme.txt");
-    $usage = "$codeVersion\n";
-    while(<USAGE>)
+    $usage  = "$codeVersion\n\n";
+    $usage .= "Usage: mediaEngine.exe should not be called directly.\n";
+    $usage .= "       Unless you know what you are doing please use\n";
+    $usage .= "       mediaShrink.exe instead.\n";
+    
+    # Move arguments into user array so we can modify it
+    my @parameters = @ARGV;
+    if (@parameters == 0)
     {
-        $usage .= $_;
+        print "ERROR: No Parameters\n\n";
+        print $usage;
+        exit 1;
     }
+
+    if ($parameters[0] eq "/help"  ||
+        $parameters[0] eq "-help"  ||
+        $parameters[0] eq "--help" ||
+        $parameters[0] eq "--usage" ||
+        $parameters[0] eq "-usage"  ||
+        $parameters[0] eq "/usage"  ||
+        $parameters[0] eq "/?")
+    {
+        print $usage;
+        exit 1;
+    }
+    
+##### Let's get this show on the road
+    echoPrint(" Welcome to $codeVersion\n");
+    echoPrint(" Staring Proccesing at $startTime $startDate\n\n");
+    echoPrint("  + Executable   : $executable\n");
+    echoPrint("  + EXE path     : $executablePath\n");
     
     # Start at -1, elevate to 0 if nessisary
     $verboseLevel = -1; 
@@ -76,28 +101,6 @@
     
     # Odds and ends
     $illCharFileRegEx = "('|\"|\\\\|/|\\||<|>|:|\\*|\\?|\\&|\\;|`)";
-
-##### Let's get this show on the road
-    echoPrint(" Welcome to $codeVersion\n");
-    echoPrint(" Staring Proccesing at $startTime $startDate\n\n");
-    echoPrint("  + Executable   : $executable\n");
-    echoPrint("  + EXE path     : $executablePath\n");
-    
-    # Move arguments into user array so we can modify it
-    my @parameters = @ARGV;
-    if (@parameters == 0)
-    {
-        print "ERROR: No Parameters\n\n";
-        print $usage;
-        exit 1;
-    }
-
-    if ($parameter == 0)
-    {
-        print "ERROR: No Parameters\n\n";
-        print $usage;
-        exit 1;
-    }
     
     # Initilize options data structures
     my %optionsHash;
@@ -111,7 +114,7 @@
     
     $parametersString = decode('ISO-8859-1' , $parametersString);
     
-    setOptions($parametersString,\@emptyArry,\%optionsHash,\@inputFiles,"  ");
+    setOptions($parametersString,\@emptyArry,\%optionsHash,\@inputFiles,\%emptyHash,"  ");
     
     my %passwords = ();
     
@@ -214,6 +217,9 @@
 ##### Run through files
     foreach $perRunOptions (@perRunOptions)
     {
+        # Get Finish Time
+        my ( $startSecond, $startMinute, $startHour, $dayOfMonth, $month, $yearOffset, $dayOfWeek, $dayOfYear, $daylightSavings ) = localtime();
+
         echoPrint("------------ Processing ----------------\n");
         echoPrint("  + Adding per run options: ($perRunOptions)(@perRunOptions)\n");
     ##### Initilizing run
@@ -227,7 +233,7 @@
         }
         
     ##### Add extra options to options hash        
-        setOptions($perRunOptions  ,"",\%perRunOptionsHash,\@inputFiles,"    ");               
+        setOptions($perRunOptions  ,"",\%perRunOptionsHash,\@inputFiles,\%emptyHash,"    ");               
         
         # Print out header
         if (exists $perRunOptionsHash{lc("inputFile")})
@@ -502,7 +508,7 @@
                 }
                 if (exists $currentCommand{lc("setOptions")})
                 {   # Insert function
-                    setOptions($currentTarget  ,""          ,\%perRunOptionsHash,\@inputFiles,"        ");           
+                    setOptions($currentTarget  ,""          ,\%perRunOptionsHash,\@inputFiles,\%currentCommand,"        ");           
                 }
                 elsif (exists $currentCommand{lc("exe")})
                 {   # Insert function
@@ -548,7 +554,7 @@
                         $perRunOptionsHash{lc($newKey)} = $newOutputFile;
                     }
                     echoPrint("  + $key -> $newKey ($newOutputFile)($reverse)($forward)($currentTarget)\n",2);
-                    getVideoInfo($perRunOptionsHash{lc($newKey)},"          ",\%perRunOptionsHash);
+                    getVideoInfo($perRunOptionsHash{lc($newKey)},"        ",\%perRunOptionsHash);
                     delete $perRunOptionsHash{$key};
                 }
             }
@@ -586,11 +592,46 @@
             }
             
         }
-        
+                
         if (!exists $perRunOptionsHash{lc("saveAll")})
         {
             deleteTempFiles(\@deleteFiles);
         }
+        
+        my ( $finishSecond, $finishMinute, $finishHour, $dayOfMonth, $month, $yearOffset, $dayOfWeek, $dayOfYear, $daylightSavings ) = localtime();
+    
+        # handle negative times
+        if ( $finishSecond < $startSecond )
+        {
+            $finishSecond += 60;
+            $finishMinute--;
+        }
+        if ( $finishMinute < $startMinute )
+        {
+            $finishMinute += 60;
+            $finishHour--;
+        }
+        if ( $finishHour < $startHour )
+        {
+            $finishHour += 24;
+        }
+    
+        $durHour = sprintf( "%02d", ( $finishHour - $startHour ) );
+        $durMin  = sprintf( "%02d", ( $finishMinute - $startMinute ) );
+        $durSec  = sprintf( "%02d", ( $finishSecond - $startSecond ) );
+        $transcodeTime = $durHour . ":" . $durMin . ":" . $durSec;
+        if (exists $perRunOptionsHash{lc("mediaShrink")})
+        {
+            my $originalSize = $perRunOptionsHash{videoInfo}{lc($perRunOptionsHash{lc("inputFile")})}{lc("filesize")}  / 1024;
+            my $finalSize    = $perRunOptionsHash{videoInfo}{lc($perRunOptionsHash{lc($newKey)})}{lc("filesize")} / 1024;
+            echoPrint("\n");
+            echoPrint(        "  + Total Time : $transcodeTime\n");
+            if ($finalSize != 0)
+            {
+            echoPrint(sprintf("  + Shrinkage  :%3d\% (%.1f MB / %.1f MB)\n",(100*($finalSize/$originalSize),$finalSize,$originalSize)));
+            }       
+        }
+
         
     }
     
@@ -626,13 +667,14 @@
         my $videoInfoHash = \%{$perRunOptionsHash->{videoInfo}{lc($video)}};
         my $binFiles      = \%{$perRunOptionsHash->{lc("mediaEngineBins")}};
         my $ffmpegString  = encode('UTF-8',"\"".$binFiles->{lc("ffmpeg.exe")}."\" -dumpmetadata -v 2 -i \"$video\" 2>&1");
-        my $ffmpegOutput = `$ffmpegString`;    
-        my @ffmpegOutput = split(/(\n|\r)/,$ffmpegOutput);   
+        my $ffmpegOutput = `$ffmpegString`;
+        $ffmpegOutput =~ s/\r//g ;   
+        my @ffmpegOutput = split(/\n/,$ffmpegOutput);   
         
         $videoInfoHash->{lc("fileSize")} = (-s $video)/1024;
         
-        echoPrint("$baseSpace+ Getting Video Info: ($video)(".$videoInfoHash->{lc("fileSize")}.")\n");
-        echoPrint("------\n".$ffmpegOutput."------\n",100);
+        echoPrint("$baseSpace- Getting Video Info: ($video)(".$videoInfoHash->{lc("fileSize")}.")\n");        
+        echoPrint(padLines("$baseSpace  - ",@ffmpegOutput),100);
 
         foreach (@ffmpegOutput)
         {
@@ -647,14 +689,14 @@
             {
                 $videoInfoHash->{lc("inputLine")} = $_;
                 $videoInfoHash->{lc("videoContainer")} = $1;
-                echoPrint("$baseSpace  - Input Line:          $_\n");
+                echoPrint("$baseSpace  - Input Line:          $_\n",2);
                 echoPrint("$baseSpace    + videoContainer = ".$videoInfoHash->{lc("videoContainer")}."\n",2);
             }
     
             if ( $_ =~ /Video:/ )
             {
                 $videoInfoHash->{lc("videoInfo")} = $_;
-                echoPrint("$baseSpace  - Video Info Line: ".$videoInfoHash->{lc("videoInfo")}."\n");
+                echoPrint("$baseSpace  - Video Info Line: ".$videoInfoHash->{lc("videoInfo")}."\n",2);
     
                 # Get Resolution
                 if ( $videoInfoHash->{lc("videoInfo")} =~ /AR: (([0-9]{1,3}):([0-9]{1,3})),/)
@@ -722,7 +764,7 @@
             elsif ( $_ =~ /Audio: ([a-zA-Z0-9]+)/ )
             {
                 $videoInfoHash->{lc("audioInfo")} = $_; 
-                echoPrint("$baseSpace  - Audio Info Line: ".$videoInfoHash->{lc("audioInfo")}."\n");
+                echoPrint("$baseSpace  - Audio Info Line: ".$videoInfoHash->{lc("audioInfo")}."\n",2);
     
                 if ($videoInfoHash->{lc("audioInfo")} =~ /Audio: ([a-zA-Z0-9]+)/)
                 {   # Get Audio Format
@@ -761,7 +803,7 @@
             }
             elsif ( $_ =~ /Duration: ([0-9][0-9]):([0-9][0-9]):([0-9][0-9])/ )
             {
-                echoPrint("$baseSpace  - Duration Line:     $_\n");
+                echoPrint("$baseSpace  - Duration Line:     $_\n",2);
                 $videoInfoHash->{lc("durationMin")} = int($1 * 60 + $2 + $3 / 60);
                 $videoInfoHash->{lc("durationSec")} = int($1 * 3600 + $2 * 60 + $3);
                 echoPrint("$baseSpace    + totalMin = ".$videoInfoHash->{lc("durationSec")}."\n",2);
@@ -1364,9 +1406,10 @@
 ##### Populate an options Hash
     sub setOptions
     {
-        my ($optionsString,$optionsArray,$optionsHash,$inputFiles,$logSpacing) = @_; 
+        my ($optionsString,$optionsArray,$optionsHash,$inputFiles,$commandHash,$logSpacing) = @_; 
         my @newOptions;
         my $key;
+        my $noOverwrite = 0;
         echoPrint("$logSpacing+ Parsing switches\n");
         echoPrint("$logSpacing  - optionsString: $optionsString\n");
         if (@{$optionsArray}) { echoPrint("$logSpacing  - optionsArray: @{$optionsArray}\n"); }
@@ -1375,6 +1418,10 @@
             @newOptions= splitWithQuotes($optionsString," ");
         }
         @newOptions = (@{$optionsArray},@newOptions,);
+        if (exists $commandHash->{lc("noOverwite")})
+        {
+            $noOverwrite = 1;
+        }
         while (@newOptions != 0)
         {
             if ($newOptions[0] =~ m#^/ERROR$#)
@@ -1392,17 +1439,25 @@
                 $getVideoInfoCheck = $1;
                 $key = $2;
                 echoPrint("$logSpacing    + Key: $key\n");
-                $optionsHash->{lc($key)} = "";
-                if ((!($newOptions[1] =~ m#^/# || $newOptions[1] eq "") || $newOptions[1] =~ m#^/.*/#))
-                {   # If the next parameter data for switch
-                    $optionsHash->{lc($key)} = $newOptions[1];
-                    echoPrint("$logSpacing    + Value: $optionsHash->{lc($key)}\n");
-                    shift(@newOptions);    # Remove next parameter also
-                    if ($getVideoInfoCheck eq "!")
-                    {
-                        getVideoInfo($optionsHash->{lc($key)},"     ",$optionsHash);
-                    }
-                }     
+                if (exists $optionsHash->{lc($key)} && $noOverwrite)
+                {
+                    echoPrint("$logSpacing      ! Already Exists, skipping: (".$optionsHash->{lc($key)}.")\n");
+                }
+                else
+                {
+                    $optionsHash->{lc($key)} = "";
+                    if ((!($newOptions[1] =~ m#^/# || $newOptions[1] eq "") || $newOptions[1] =~ m#^/.*/#))
+                    {   # If the next parameter data for switch
+                        $optionsHash->{lc($key)} = $newOptions[1];
+                        echoPrint("$logSpacing    + Value: $optionsHash->{lc($key)}\n");
+                        shift(@newOptions);    # Remove next parameter also
+                        if ($getVideoInfoCheck eq "!")
+                        {
+                            getVideoInfo($optionsHash->{lc($key)},"     ",$optionsHash);
+                        }
+                    }                 
+                }
+    
             }
             elsif ($newOptions[0] =~ m#^%([a-zA-Z0-9_]+)#i)
             {   # Generic remove sub string
@@ -1494,7 +1549,47 @@
             $runCommand = encode('ISO-8859-1',"$runCommand > \"$logFile.log\" 2>&1");
             echoPrint("        - Executing command: $runCommand\n");
             `$runCommand`;
+            if (-s "$logFile.log")
+            {
+                my $linesToSave = 30;
+                my $linesRead   = 0;
+                my @lines = ();
+                open(ENCODELOG,"$logFile.log");
+                while(<ENCODELOG>)
+                {
+                    my $line = $_;
+                    push(@lines,$_);
+                    if (@lines > $linesToSave)
+                    {
+                        shift(@lines);
+                    }
+                }
+                close(ENCODELOG);
+                $currentCommand->{lc("encodeLog")}  = "@lines";
+                unshift(@lines,"------ Last $linesToSave lines of log -------\n");
+                my $fullText = "@lines";
+                $fullText =~ s/\r/\n/g;
+                echoPrint(padLines("          + ",split(/\n/,$fullText)),100);                   
+            }
+            
         } 
+    }
+    
+    sub padLines
+    {
+        my ($padding,@arrayToPad) = @_;
+        my $line;
+        my $paddedString = "";
+        
+        foreach $line (@arrayToPad)
+        {
+            if (!($line =~ /\n$/))
+            {
+                $line .= "\n";
+            }
+            $paddedString .=  $padding.$line;       
+        }
+        return $paddedString;
     }
 
 ##### Write to a formated output file               
@@ -2403,7 +2498,7 @@ sub detectVideoProperties
         $encodeSettings = "-acodec mp2 -ac 2 -vcodec mpeg2video -y";
     }
 
-    ( $startSecond, $startMinute, $startHour, $dayOfMonth, $month, $yearOffset, $dayOfWeek, $dayOfYear, $daylightSavings ) = localtime();
+    my ( $startSecond, $startMinute, $startHour, $dayOfMonth, $month, $yearOffset, $dayOfWeek, $dayOfYear, $daylightSavings ) = localtime();
 
     $pullupEncodeSettings = "pullup,softskip -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:turbo";
     if ($videoInfoArray->{lc("videoResolution")} =~ /x720/ && $videoInfoArray->{lc("videoContainer")} =~ /mpeg/)
@@ -2628,9 +2723,18 @@ sub detectVideoProperties
             $videoInfoArray->{lc("autoCropHandBrake")} = "$topCrop[$cropIndex]:".($yRes - ($cropY+$topCrop[$cropIndex])).":$leftCrop[$cropIndex]:".($xRes - ($cropX+$leftCrop[$cropIndex]));  
             $videoInfoArray->{lc("autoCropMencoder")} =  "$cropX:$cropY:$leftCrop[$cropIndex]:$topCrop[$cropIndex]";
             $videoInfoArray->{lc("cropConfidence")} = $percentConfidence;
-            $videoInfoArray->{lc("cropRatioX")} = ($cropX/$xRes);
-            $videoInfoArray->{lc("cropRatioY")} = ($cropY/$yRes);  
             
+            # Check for letterbox and 4:3 crop
+            if (($xRes - $cropX) > 100)
+            {
+                $videoInfoArray->{lc("43in169")} = ($xRes - $cropX);
+                echoPrint("      + Detected 4:3 in 16:9 ($xRes -> $cropX)\n");    
+            }          
+            if (($yRes - $cropY) > 100)
+            {
+                $videoInfoArray->{lc("letterbox")} = ($yRes - $cropY);
+                echoPrint("      + Detected letterbox ($yRes -> $cropY)\n");    
+            }            
             $videoInfoArray->{lc("cropConfidence")} = $percentConfidence;
     
             if (abs($videoInfoArray->{lc("ffmpegARValue")} - $aspectRatioValue) > .05)
@@ -2670,7 +2774,7 @@ sub detectVideoProperties
     echoPrint("      + embeddedCC : " . $videoInfoArray->{lc("embeddedCCCount")} . "\n");
 
     # Get Finish Time
-    ( $finishSecond, $finishMinute, $finishHour, $dayOfMonth, $month, $yearOffset, $dayOfWeek, $dayOfYear, $daylightSavings ) = localtime();
+    my ( $finishSecond, $finishMinute, $finishHour, $dayOfMonth, $month, $yearOffset, $dayOfWeek, $dayOfYear, $daylightSavings ) = localtime();
 
     # handle negative times
     if ( $finishSecond < $startSecond )
