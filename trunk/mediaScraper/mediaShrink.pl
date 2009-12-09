@@ -29,6 +29,7 @@
     $executable =~ m#(\\|\/)(([^\\/]*)\.([a-zA-Z0-9]{2,}))$#;;
     $executablePath = $`;
     $executableEXE  = $3; 
+    $exitCode = 0;
     
     $codeVersion = "$executableEXE v2.0 (SNIP:BUILT)";
     
@@ -52,7 +53,7 @@
       }
     }
     
-    open(USEAGE,"$executablePath\\$executableEXE.readme.txt");
+    open(USEAGE,"$executablePath\\mediaShrink.readme.txt");
     $usage = "$codeVersion\n";
     while(<USEAGE>)
     {
@@ -92,21 +93,21 @@
     }
     
     
-    if (-e "$executablePath\\$executableEXE.defaults.extra.txt")
+    if (-e "$executablePath\\mediaShrink.defaults.extra.txt")
     {
-        open(DEFAULTS,"$executablePath\\$executableEXE.defaults.extra.txt");
+        open(DEFAULTS,"$executablePath\\mediaShrink.defaults.extra.txt");
         $defaultsOptions .= <DEFAULTS>; 
         close(DEFAULTS);    
     }
     $defaultsOptions .= " ";
-    if (-e "$executablePath\\$executableEXE.defaults.txt")
+    if (-e "$executablePath\\mediaShrink.defaults.txt")
     {
-        open(DEFAULTS,"$executablePath\\$executableEXE.defaults.txt");
+        open(DEFAULTS,"$executablePath\\mediaShrink.defaults.txt");
         $defaultsOptions .= <DEFAULTS>; 
         close(DEFAULTS);    
     }
     
-    $optionsForEngine = "$defaultsOptions /$executableEXE fixBug @quotedParameters";
+    $optionsForEngine = "$defaultsOptions /mediaShrink fixBug @quotedParameters";
     
     if ($executable =~ /\.pl$/)
     {
@@ -116,13 +117,10 @@
     {
         $mediaEngine = "$executablePath\\mediaEngine.exe";
     }
-    
-    #$mediaEngine = "$executablePath\\mediaEngine.exe";
-    #system("\"$mediaEngine\" $optionsForEngine");
-    #echoPrint("        - Executing command (new): $runCommand\n");
+
     $mediaEngine = "$executablePath\\mediaEngine.exe";   
     print " Executing command: \"$mediaEngine\" $optionsForEngine\n";
-    #system("\"$mediaEngine\" $optionsForEngine");
+    system("\"$mediaEngine\" $optionsForEngine");
     Win32::Process::Create($ProcessObj, 
             "$mediaEngine",
             getFile($mediaEngine)." $optionsForEngine",
@@ -131,7 +129,9 @@
             ".");
     $ProcessObj->Wait(1000 * 60 * 60 * 24);
     $ProcessObj->GetExitCode($exitcode);
+
     print "Exiting Code: ($exitcode)\n";
+    print "Exiting in 5 seconds...\n";
     sleep(5);
     exit $exitcode; 
     
