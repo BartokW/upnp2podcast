@@ -45,6 +45,8 @@
   {
       open($fLOGFILE,">$executablePath\\$executableEXE.log");  
   }
+  
+  binmode $fLOGFILE, ':encoding(UTF-8)';
 
   # Code version
   my $codeVersion = "$executableEXE v1.6 (SNIP:BUILT)".($debug ? "(debug)" : "");
@@ -272,7 +274,7 @@
      sub addItem {
         my ($content) = @_;
         my $id    = $content->getid();
-        my $title = decode('utf8' ,$content->gettitle());
+        my $title = $content->gettitle();
         my $url   = $content->geturl();
         my $size  = $content->getSize();
         my $date  = $content->getdate();
@@ -280,7 +282,7 @@
         my $userRating  = $content->getUserRating();
         my $dur  = $content->getDur();
         my $screenShot  = $content->getPicture();
-        my $desc = decode('utf8' ,$content->getDesc());
+        my $desc = $content->getDesc();
         my $newItem = $item;
 
         if ($title =~ /s([0-9]+)e([0-9]+): (.*)/)
@@ -434,7 +436,7 @@
     my $rv = 0;  
     # URL of file containing feed versions
     my $feedPath       = "$executablePath\\STVs\\SageTV3\\OnlineVideos\\";
-    my $feedVersionURL = 'http://upnp2podcast.googlecode.com/files/FeedVersions.txt';
+    my $feedVersionURL = 'http://upnp2podcast.googlecode.com/svn/trunk/upnp2podcast/Feeds/FeedVersions.txt';
     my ($updateFile, $propFileName, $propFileVersion, 
         $propFileMD5, $propFileURL, $topLine, $currentVersion,
         $updatedMD5, $propPlugIn);
@@ -443,7 +445,7 @@
 
     if ($debug)
     {
-        $feedVersionURL = 'http://upnp2podcast.googlecode.com/svn/trunk/FeedVersions.txt';
+        $feedVersionURL = 'http://upnp2podcast.googlecode.com/svn/trunk/upnp2podcast/Feeds/FeedVersionsTest.txt';
     }
 
     my $content = get $feedVersionURL;
