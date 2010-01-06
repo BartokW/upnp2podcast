@@ -47,6 +47,10 @@
   }
   
   binmode $fLOGFILE, ':encoding(UTF-8)';
+  
+  # Get Start Time
+  my ( $startSecond, $startMinute, $startHour, $dayOfMonth, $month, $yearOffset, $dayOfWeek, $dayOfYear, $daylightSavings ) = localtime();
+
 
   # Code version
   my $codeVersion = "$executableEXE v1.6 (SNIP:BUILT)".($debug ? "(debug)" : "");
@@ -265,11 +269,36 @@
 
     print encode("utf8", $podcastFeed); 
     
+    my ( $finishSecond, $finishMinute, $finishHour, $dayOfMonth, $month, $yearOffset, $dayOfWeek, $dayOfYear, $daylightSavings ) = localtime();
+
+    # handle negative times
+    if ( $finishSecond < $startSecond )
+    {
+        $finishSecond += 60;
+        $finishMinute--;
+    }
+    if ( $finishMinute < $startMinute )
+    {
+        $finishMinute += 60;
+        $finishHour--;
+    }
+    if ( $finishHour < $startHour )
+    {
+        $finishHour += 24;
+    }
+
+    $durHour = sprintf( "%02d", ( $finishHour - $startHour ) );
+    $durMin  = sprintf( "%02d", ( $finishMinute - $startMinute ) );
+    $durSec  = sprintf( "%02d", ( $finishSecond - $startSecond ) );
+    $runTime = $durHour . ":" . $durMin . ":" . $durSec;
+    
     if (!$debug)
     { 
         print $fLOGFILE "<----------------- Feed ------------------>\n";
         print $fLOGFILE encode("utf8", $podcastFeed);
     }
+    
+    print $fLOGFILE "Completed in ($runTime)!\n";
  
      sub addItem {
         my ($content) = @_;
