@@ -22,6 +22,8 @@
 ##### Import libraries
   use Encode qw(encode decode);
   use utf8;
+  use LWP::UserAgent;
+  use LWP::Simple;
   
   my $debug = 0;
 
@@ -36,13 +38,12 @@
   # Get Start Time
   my ( $startSecond, $startMinute, $startHour, $dayOfMonth, $month, $yearOffset, $dayOfWeek, $dayOfYear, $daylightSavings ) = localtime();
 
-
   # Code version
   my $codeVersion = "$executableEXE v1.0 (SNIP:BUILT)".($debug ? "(debug)" : "");
   
   my $invalidMsg .= "\n$codeVersion\n";
   $invalidMsg .= "\tUSAGE:";
-  $invalidMsg .= "\t$executableEXE.exe /audio <#> /video <#> /image <#> /text <#> /subcat <#>\n\n";
+  $invalidMsg .= "\t$executableEXE.exe /profile <Profile name>\n\n";
 
   my ($feed_begin, $feed_item, $feed_end, $textOnlyDescription) = populateFeedStrings();
 
@@ -64,136 +65,104 @@
       $parametersString .= "\"$_\" ";
   }
   
-  setOptions(decode('ISO-8859-1' , $parametersString),\@emptyArray,\%optionsHash,\@inputFiles,\%emptyHash,"  ");
-
-  if (@ARGV == 0)
-  {
-      echoPrint("  ! No Parameters: just printint one of each\n");
-      $optionsHash{lc("audio")}  = 1;
-      $optionsHash{lc("video")}  = 1; 
-      $optionsHash{lc("text")}   = 1; 
-      $optionsHash{lc("subcat")} = 1; 
-      $optionsHash{lc("image")}  = 1; 
-  }
-
+  #setOptions(decode('ISO-8859-1' , $parametersString),\@emptyArray,\%optionsHash,\@inputFiles,\%emptyHash,"  ");
+  
+  $url     = 'http://tasvideos.org/Movies-RatingY-Rec.html';
+  $content = decode('UTF-8', get $url);
+  $content =~ s/&amp;/&/g;
+  $content =~ s/&quot;/&/g;
+  $regExGroups   = '(http://www.archive.org/download/[^"]*)';
+  $regExGroups   = '(table.*?(youtube.com|archive.org|dailymotion.com).*?/table)';
+  $regExMovies   = 'http://www.archive.org/download/[^"]*';
+  $regExYoutube      = 'http://www.youtube.com/watch?[^"]*';
+  $regExDailyMotion  = 'http://www.dailymotion.com/(video|user)/[^"]*';
+  $regExTitle        = 'Movie #[0-9]+">([^<]*)';
+  $regExDesc     = 'class="blah" valign="top">(.*)</td>';
+  $regExThumb     = 'http://media.tasvideos.org/[^"]*png';
+  
+  $rv = "";
+  
   my @items = ();
   
+  while (matchShortest($content,$regExGroups))
+  {
+      $rv = matchShortest($content,$regExGroups);
+
+      if ($rv =~ /$regExTitle/sm)
+      {
+          $title = $1; 
+          echoPrint("--------------------------------\n\n    - Title  : ($title)\n");
+      }
+
+      if ($rv =~ /$regExDesc/sm)
+      {
+          $desc = $1;
+          $desc =~ s/<[^>]*>//gsm;
+          $desc =~ s/\n/ /gsm;
+          echoPrint("      + Description  : ($desc)\n");
+      }
+      
+      if ($rv =~ /$regExThumb/sm)
+      {
+          $thumbnail = $&;
+          echoPrint("      + Thumbnail  : ($thumbnail)\n");
+      }
+      
+      if ($rv =~ /$regExYoutube/sm)
+      {
+          $video = youtube($&);
+          echoPrint("      + Youtube: ($video)\n");
+      } 
+      elsif ($rv =~ /$regExDailyMotion/sm)
+      {
+          $video = dailyMotion($&);
+          echoPrint("      + DailyMotion: ($video)\n");
+      }          
+      elsif ($rv =~ /$regExMovies/sm)
+      {
+          $video = $&;
+          echoPrint("      + Movie  : ($video)\n");
+      }
+    
+      
+
   
-  for($i=0;$i<$optionsHash{lc("audio")};$i++)
-  {
-      $newItem = $feed_item;
+      my ($content_type, $document_length, $modified_time, $expires, $server) = head($video);  
+      echoPrint("        - Content Type : ($content_type)\n");
+      echoPrint("        - Length       : ($document_length)\n");
       
-      echoPrint("  + Adding Audio ($i)\n");
-      
-      $content     = 'http://hd.engadget.com/podcasts/EngadgetHD_Podcast_176.mp3';
-      $thumbnail   = 'http://www.blogcdn.com/www.engadget.com/media/2006/09/engadgetpodcastlogo.jpg';
-      $description = '<![CDATA['."\n + $codeVersion\n  - ($parametersString)\n\n".'No guests this week, but theres still plenty of HD related topics to talk about. Of course that includes 3D, but after that we had time to discuss a new Blu-ray player from Oppo, future possibilities for digital distribution and exactly what were expecting from NBCs costly Winter Olympics coverage. After that the talk turns to the legal aspects of the latest action from the FCC, and Microsofts patent infringement lawsuit. We wrap things up with an evaluation of DirecTVs multiroom beta, and just what happened to all the hype over connected HDTVs in 2010.]]>';
-      $type        = 'audio/mp3';
-
-      $newItem =~ s/%%ITEM_TITLE%%/Audio Item #$i/g;
-      $newItem =~ s/%%ITEM_DATE%%//g;
-      $newItem =~ s/%%ITEM_DESCRIPTION%%/$description/g;
-      $newItem =~ s/%%ITEM_URL%%/$content/g;
-      $newItem =~ s/%%ITEM_DUR%%//g;
-      $newItem =~ s/%%ITEM_SIZE%%//g;
-      $newItem =~ s/%%ITEM_TYPE%%/$type/g;
-      $newItem =~ s/%%ITEM_PICTURE%%/$thumbnail/g;
-      $newItem =~ s/%%ITEM_DUR_SEC%%//g;
-      push(@items,$newItem);
-  }
-
-  for($i=0;$i<$optionsHash{lc("video")};$i++)
-  {
       $newItem   = $feed_item;
       
-      echoPrint("  + Adding Video ($i)\n");
+      echoPrint("  + Adding Video ($title)\n");
       
-      $content     = 'http://www.podtrac.com/pts/redirect.mp4/bitcast-a.bitgravity.com/revision3/web/hdnation/0030/hdnation--0030--noveltyremote--hd.h264.mp4';
-      $thumbnail   = 'http://bitcast-a.bitgravity.com/revision3/images/shows/hdnation/hdnation_200x200.jpg';
-      $description = '<![CDATA['."\n + $codeVersion\n  - ($parametersString)\n\n".'Robert reveals his Silent Home Theater PC Parts, iPad: Is this the ultimate remote control? Recording Over The Air HDTV, Will your next HDTV be 21:9? The Blu-ray Releases for February 2, 2010.]]>';
-      $type        = 'video/mp4';
+      $videoXML       = ($video eq "" ? $videoYoutTube : $video );
+      $titleXML       = '<![CDATA['.$title.']]>';
+      $descriptionXML = '<![CDATA['.$desc.']]>';
+      $type           = $content_type;
       
-      $newItem =~ s/%%ITEM_TITLE%%/Video Item #$i/g;
+      $newItem =~ s/%%ITEM_TITLE%%/$titleXML/g;
       $newItem =~ s/%%ITEM_DATE%%//g;
-      $newItem =~ s/%%ITEM_DESCRIPTION%%/$description/g;
-      $newItem =~ s/%%ITEM_URL%%/$content/g;
+      $newItem =~ s/%%ITEM_DESCRIPTION%%/$descriptionXML/g;
+      $newItem =~ s/%%ITEM_URL%%/$videoXML/g;
       $newItem =~ s/%%ITEM_DUR%%//g;
-      $newItem =~ s/%%ITEM_SIZE%%//g;
+      $newItem =~ s/%%ITEM_SIZE%%/$document_length/g;
       $newItem =~ s/%%ITEM_TYPE%%/$type/g;
       $newItem =~ s/%%ITEM_PICTURE%%/$thumbnail/g;
       $newItem =~ s/%%ITEM_DUR_SEC%%//g;
       push(@items,$newItem);
+      
+      $video = "";
+      $videoYoutTube = "";
+      $thumbanil = "";
+      $desc = "";
+      $title = "";
+            
+      #echoPrint("\n\n$rv\n\n");
+      
+      $content =~ s/\Q$rv\E//gsm;
+      $rv = "";  
   }
-  
-  for($i=0;$i<$optionsHash{lc("subcat")};$i++)
-  {
-      $newItem   = $feed_item;
-      
-      echoPrint("  + Adding Subcategory ($i)(".$optionsHash{lc("subcat")}.")\n");
-      
-      $content     = 'external,onlineServicesTest';
-      $thumbnail   = 'http://upload.wikimedia.org/wikipedia/commons/thumb/4/43/Feed-icon.svg/128px-Feed-icon.svg.png';
-      $description = '<![CDATA['."\n + $codeVersion\n  - ($parametersString)\n\n".'Subcatagory #'.$i.']]>';
-      $type        = 'sagetv/subcategory';
-      
-      $newItem =~ s/%%ITEM_TITLE%%/Subcatagory Item #$i/g;
-      $newItem =~ s/%%ITEM_DATE%%//g;
-      $newItem =~ s/%%ITEM_DESCRIPTION%%/$description/g;
-      $newItem =~ s/%%ITEM_URL%%/$content/g;
-      $newItem =~ s/%%ITEM_DUR%%//g;
-      $newItem =~ s/%%ITEM_SIZE%%//g;
-      $newItem =~ s/%%ITEM_TYPE%%/$type/g;
-      $newItem =~ s/%%ITEM_PICTURE%%/$thumbnail/g;
-      $newItem =~ s/%%ITEM_DUR_SEC%%//g;
-      
-      push(@items,$newItem);
-  }
-  
-  for($i=0;$i<$optionsHash{lc("text")};$i++)
-  {
-      $newItem = $feed_item;
-      
-      echoPrint("  + Adding Text ($i)\n");
-      
-      $content     = '';
-      $thumbnail   = 'http://www.iconarchive.com/icons/deleket/sleek-xp-basic/256/Text-Bubble-icon.png';
-      $description = $textOnlyDescription;
-      $type        = 'sagetv/textonly';
-      
-      $newItem =~ s/%%ITEM_TITLE%%/Text Only Item (UTF-8) #$i/g;
-      $newItem =~ s/%%ITEM_DATE%%//g;
-      $newItem =~ s/%%ITEM_DESCRIPTION%%/$description/g;
-      $newItem =~ s/%%ITEM_URL%%/$content/g;
-      $newItem =~ s/%%ITEM_DUR%%//g;
-      $newItem =~ s/%%ITEM_SIZE%%//g;
-      $newItem =~ s/%%ITEM_TYPE%%/$type/g;
-      $newItem =~ s/%%ITEM_PICTURE%%/$thumbnail/g;
-      $newItem =~ s/%%ITEM_DUR_SEC%%//g;
-      push(@items,$newItem);
-  }
-  
-  for($i=0;$i<$optionsHash{lc("image")};$i++)
-  {
-      $newItem = $feed_item;
-      
-      echoPrint("  + Adding Image ($i)\n");
-      
-      $content     = 'http://microsoftfeed.com/wp-content/uploads/2009/11/LastFM1-972x1024.jpg';
-      $thumbnail   = 'http://i.zdnet.com/blogs/zdnet-iphoto.jpg';
-      $description = '<![CDATA['."\n + $codeVersion\n  - ($parametersString)\n\n".'Image #'.$i.']]>';
-      $type        = 'image/jpeg';
-      
-      $newItem =~ s/%%ITEM_TITLE%%/Image Item #$i/g;
-      $newItem =~ s/%%ITEM_DATE%%//g;
-      $newItem =~ s/%%ITEM_DESCRIPTION%%/$description/g;
-      $newItem =~ s/%%ITEM_URL%%/$content/g;
-      $newItem =~ s/%%ITEM_DUR%%//g;
-      $newItem =~ s/%%ITEM_SIZE%%//g;
-      $newItem =~ s/%%ITEM_TYPE%%/$type/g;
-      $newItem =~ s/%%ITEM_PICTURE%%/$thumbnail/g;
-      $newItem =~ s/%%ITEM_DUR_SEC%%//g;
-      push(@items,$newItem);
-  }
+
   
   #my ($feed_begin, $feed_item, $feed_end, $textOnlyDescription) = populateFeedStrings();
   $opening = $feed_begin;
@@ -205,6 +174,92 @@
       print encode('UTF-8', $_);
   }  
   print encode('UTF-8', $feed_end);
+
+   ##### Youtube Decoding
+    sub youtube
+    {
+        my ($url) = @_;
+        echoPrint("    + Decoding Youtube ($url)\n");
+        
+        my $content = decode('UTF-8', get $url);
+        my $videoIDRegEx = '"video_id": "([^"]*)"';
+        my $videoTRegEx = '"t": "([^"]*)"';
+      
+        
+        $content =~ /$videoIDRegEx/;
+        my $videoID = $1;
+        
+        $content =~ /$videoTRegEx/;
+        my $videoT = $1;
+        
+        my $videoURLBase = 'http://www.youtube.com/get_video?video_id='.$videoID.'&t='.$videoT;
+ 
+        $videoURLs =~ s/%2F/\//g;
+        $videoURLs =~ s/%3F/?/g;
+        $videoURLs =~ s/%3D/=/g;
+        $videoURLs =~ s/%40/@/g;
+        $videoURLs =~ s/%3A/:/g;
+        
+        my @youtubeQualities = (37,35,34,22,18,6);
+        
+        echoPrint("      - Found : $videoURL\n");
+
+        my $videoURL  = $videoURLBase;
+        foreach (@youtubeQualities)
+        {
+            echoPrint("        + Quality : $_\n");
+            echoPrint("          - Link         : ".$videoURLBase.'&fmt='.$_."\n");
+            my ($content_type, $document_length, $modified_time, $expires, $server) = head($videoURLBase.'&fmt='.$_);  
+            echoPrint("          - Content Type : ($content_type)\n");
+            echoPrint("          - Length       : ($document_length)\n");
+            if (!($content_type eq ""))
+            {
+                $videoURL = $videoURLBase.$_;
+                last;  
+            }
+        }        
+        return $videoURL;
+    }
+
+   ##### DailyMotion Decoding
+    sub dailyMotion
+    {
+        my ($url) = @_;
+        echoPrint("    + Decoding DailyMotion ($url)\n");
+        my $content = decode('UTF-8', get $url);
+        my $videoRegEx = 'addVariable\("video", "([^"]*)';
+        
+        $content =~ /$videoRegEx/;
+        $videoURLs = $1;
+        $videoURLs =~ s/%2F/\//g;
+        $videoURLs =~ s/%3F/?/g;
+        $videoURLs =~ s/%3D/=/g;
+        $videoURLs =~ s/%40/@/g;
+        $videoURLs =~ s/%3A/:/g;
+        
+        echoPrint("      - Found : ($videoURL)\n");
+
+        my @resolutions = split(/%7C%7C/,$videoURLs);
+        
+        my $biggest  = 0;
+        my $size     = 0;
+        my $videoURL = "";
+        foreach (@resolutions)
+        {
+            echoPrint("        + Quality : ($_)\n");
+            if (/([0-9]+)x([0-9]+)/)
+            {
+                echoPrint("        + Size : ($&)\n");
+                $size = $1 * $2;
+                if ($size > $biggest)
+                {
+                    $videoURL = $_;
+                }
+            }
+        }
+             
+        return $videoURL;
+    }
   
   ##### Overwrite echoPrint for compatability
     sub echoPrint
@@ -349,6 +404,21 @@
             }
         }
         return @splitWithQuotes;
+    }
+    
+    sub matchShortest
+    {
+        my ($string, $regEx,$rvRef) = @_;
+        my $shortest;
+        my $length = length $string;
+        
+        while ($string =~ /(?=$regEx)/gsm) {
+            $m_len = length $1;
+            # save the match if it's shorter than the last one
+            ($shortest, $length) = ($1, $m_len) if $m_len < $length;
+        }
+        $$rvRef = $shortest;
+        return $shortest;
     }
 
 
