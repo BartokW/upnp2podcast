@@ -30,6 +30,11 @@
   $executable =~ m#(\\|\/)(([^\\/]*)\.([a-zA-Z0-9]{2,}))$#;
   my $executablePath = $`;
   my $executableEXE  = $3; 
+  my $useExt         = 'exe';
+  if ($executable =~ /\.pl$/)
+  {
+      $useExt = 'pl';    
+  }
    
   open(LOGFILE,">$executablePath\\$executableEXE.log");
   
@@ -43,7 +48,7 @@
   $invalidMsg .= "\tUSAGE:";
   $invalidMsg .= "\t$executableEXE.exe\n\n";
 
-  my ($feed_begin, $feed_item, $feed_end, $textOnlyDescription) = populateFeedStrings();
+  my ($feed_begin, $feed_item, $feed_end) = populateFeedStrings();
 
   echoPrint("Welcome to $codeVersion!\n");
   echoPrint("  + Path: $executablePath\n");
@@ -66,7 +71,7 @@
   setOptions(decode('ISO-8859-1' , $parametersString),\@emptyArray,\%optionsHash,\@inputFiles,\%emptyHash,"  ");
   
   my $exeDir = "$executablePath\\SageOnlineServicesEXEs";  
-  my @onlineServicesEXEs = scanDir($exeDir,"exe");
+  my @onlineServicesEXEs = scanDir($exeDir,$useExt);
   my @items = ();
   
   foreach $exe (@onlineServicesEXEs)
@@ -105,21 +110,19 @@
       
       $newItem   = $feed_item;
       
-      echoPrint("  + Adding Executable (".getFile($exe).")\n");
+      echoPrint("  + Adding Executable (".getFile($exe).".".$useExt.")\n");
       echoPrint("    - Title          : $title\n");
       echoPrint("    - Description    : $description\n");
       echoPrint("    - Thumbnail      : $thumbnail\n");
       echoPrint("    - Parameters     : $parameters\n");      
       
-      $content     = 'external,'.getFullFile($exe).','.$parameters;
-      $thumbnail   = $thumbnail;
-      $titleXML    = '<![CDATA['.$title.']]>';
-      $descriptionXML = '<![CDATA['.$description.']]>';
+      $content     = toXML('external,"'.getFullFile($exe).'.'.$useExt.'",'.$parameters);
+      $thumbnail   = toXML($thumbnail);
       $type        = 'sagetv/subcategory';
       
-      $newItem =~ s/%%ITEM_TITLE%%/$titleXML/g;
+      $newItem =~ s/%%ITEM_TITLE%%/$title/g;
       $newItem =~ s/%%ITEM_DATE%%//g;
-      $newItem =~ s/%%ITEM_DESCRIPTION%%/$descriptionXML/g;
+      $newItem =~ s/%%ITEM_DESCRIPTION%%/$description/g;
       $newItem =~ s/%%ITEM_URL%%/$content/g;
       $newItem =~ s/%%ITEM_DUR%%//g;
       $newItem =~ s/%%ITEM_SIZE%%//g;
@@ -149,7 +152,18 @@
         $utf8String = encode('UTF-8', $stringToPrint);
         print stderr $utf8String;
         print LOGFILE $utf8String;
-    }   
+    }
+    
+  sub toXML
+  {
+      my ($string) = @_;
+      $string =~ s/\&/&amp;/g;
+      $string =~ s/"/&quot;/g; #"
+      $string =~ s/</&lt;/g;
+      $string =~ s/>/&gt;/g;
+      $string =~ s/'/&apos;/g;  #'
+      return $string;
+  }   
       
   ##### Populate an options Hash
     sub setOptions
@@ -297,24 +311,24 @@
 <rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd"
   xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel> 
-    <title>%%FEED_TITLE%%</title> 
-    <description>$codeVersion @ARGV</description> 
+    <title><![CDATA[%%FEED_TITLE%%]]></title> 
+    <description><![CDATA[$codeVersion @ARGV]]></description> 
     <language>en-us</language> 
-    <itunes:summary>%%FEED_DESCRIPTION%%</itunes:summary> 
-    <itunes:subtitle>%%FEED_DESCRIPTION%%</itunes:subtitle> 
+    <itunes:summary><![CDATA[%%FEED_DESCRIPTION%%]]></itunes:summary> 
+    <itunes:subtitle><![CDATA[%%FEED_DESCRIPTION%%]]></itunes:subtitle> 
 FEED_BEGIN
 
     my $feed_item = <<'PODCAST_ITEM';
     <item> 
-      <title>%%ITEM_TITLE%%</title> 
-      <description>%%ITEM_DESCRIPTION%%</description> 
+      <title><![CDATA[%%ITEM_TITLE%%]]></title> 
+      <description><![CDATA[%%ITEM_DESCRIPTION%%]]></description> 
       <pubDate>1981-09-15</pubDate> 
-      <itunes:subtitle>%%ITEM_DESCRIPTION%%</itunes:subtitle>
+      <itunes:subtitle><![CDATA[%%ITEM_DESCRIPTION%%]]></itunes:subtitle>
       <itunes:duration>%%ITEM_DUR%%</itunes:duration>
       <enclosure url="%%ITEM_URL%%" length="%%ITEM_SIZE%%" type="%%ITEM_TYPE%%" /> 
       <media:content duration="%%ITEM_DUR_SEC%%" medium="video" fileSize="%%ITEM_SIZE%%" url="%%ITEM_URL%%" type="%%ITEM_TYPE%%"> 
-       <media:title>%%ITEM_TITLE%%</media:title> 
-        <media:description>%%ITEM_DESCRIPTION%%</media:description> 
+       <media:title><![CDATA[%%ITEM_TITLE%%]]></media:title> 
+        <media:description><![CDATA[%%ITEM_DESCRIPTION%%]]></media:description> 
         <media:thumbnail url="%%ITEM_PICTURE%%"/> 
       </media:content> 
     </item> 
@@ -325,16 +339,7 @@ PODCAST_ITEM
 </rss> 
 FEED_END
 
-    my $textOnlyDescription = <<'TEXT_ITEM';    
-Τη γλώσσα μου έδωσαν ελληνική
-το σπίτι φτωχικό στις αμμουδιές του Ομήρου.
-Μονάχη έγνοια η γλώσσα μου στις αμμουδιές του Ομήρου.
-από το Άξιον Εστί
-του Οδυσσέα Ελύτη
-TEXT_ITEM
-    $textOnlyDescription = '<![CDATA['."\n + $codeVersion\n  - ($parametersString)\n\n".$textOnlyDescription."]]>";
-
-    return ($feed_begin, $feed_item, $feed_end, $textOnlyDescription);
+    return ($feed_begin, $feed_item, $feed_end);
   }
   
 ##### Scan a directory and return an array of the matching files
