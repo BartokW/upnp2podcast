@@ -22,10 +22,6 @@
 ##### Import libraries
   use Encode qw(encode decode);
   use utf8;
-  use LWP::Simple;
-  use MD5;
-  use Net::UPnP::ControlPoint;
-  use Net::UPnP::AV::MediaServer;
   
   my $debug = 0;
 
@@ -46,7 +42,7 @@
   
   my $invalidMsg .= "\n$codeVersion\n";
   $invalidMsg .= "\tUSAGE:";
-  $invalidMsg .= "\t$executableEXE.exe /audio <#> /video <#> /image <#> /text <#> /subcats <#>\n\n";
+  $invalidMsg .= "\t$executableEXE.exe /audio <#> /video <#> /image <#> /text <#> /subcat <#>\n\n";
 
   my ($feed_begin, $feed_item, $feed_end, $textOnlyDescription) = populateFeedStrings();
 
