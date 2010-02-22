@@ -22,19 +22,28 @@
 ##### Import libraries
   use Encode qw(encode decode);
   use utf8;
-  use LWP::UserAgent;
-  use LWP::Simple;
+  use LWP::Simple qw($ua get head);
+  use threads;
+  use threads::shared;
+  use Thread::Semaphore;
+  
+  $ua->timeout(30);
+  $ua->agent( 'Mozilla/4.0 (compatible; MSIE 5.12; Mac_PowerPC)' );
   
   my $debug = 0;
 
   # Get the directory the script is being called from
-  my $executable = $0;
+  $executable = $0;
   $executable =~ m#(\\|\/)(([^\\/]*)\.([a-zA-Z0-9]{2,}))$#;
-  my $executablePath = $`;
-  my $executableEXE  = $3; 
+  $executablePath = $`;
+  $executableEXE  = $3; 
+  
+  my $semaphoreDailyMotion = Thread::Semaphore->new(10);
+  my $semaphoreYoutube     = Thread::Semaphore->new(10);
+  my $semaphoreGeneric     = Thread::Semaphore->new();
    
   open(LOGFILE,">$executablePath\\$executableEXE.log");
-  
+
   # Get Start Time
   my ( $startSecond, $startMinute, $startHour, $dayOfMonth, $month, $yearOffset, $dayOfWeek, $dayOfYear, $daylightSavings ) = localtime();
 
@@ -45,7 +54,7 @@
   $invalidMsg .= "\tUSAGE:";
   $invalidMsg .= "\t$executableEXE.exe /profile <Profile name>\n\n";
 
-  my ($feed_begin, $feed_item, $feed_end, $textOnlyDescription) = populateFeedStrings();
+  my ($feed_begin, $feed_item, $feed_end) = populateFeedStrings();
 
   echoPrint("Welcome to $codeVersion!\n");
   echoPrint("  + Path: $executablePath\n");
@@ -65,123 +74,249 @@
       $parametersString .= "\"$_\" ";
   }
   
-  #setOptions(decode('ISO-8859-1' , $parametersString),\@emptyArray,\%optionsHash,\@inputFiles,\%emptyHash,"  ");
+  setOptions(decode('ISO-8859-1' , $parametersString),\@emptyArray,\%optionsHash,\@inputFiles,\%emptyHash,"  ");
   
-  $url     = 'http://tasvideos.org/Movies-RatingY-Rec.html';
-  $content = decode('UTF-8', get $url);
-  $content =~ s/&amp;/&/g;
-  $content =~ s/&quot;/&/g;
-  $regExGroups   = '(http://www.archive.org/download/[^"]*)';
-  $regExGroups   = '(table.*?(youtube.com|archive.org|dailymotion.com).*?/table)';
-  $regExMovies   = 'http://www.archive.org/download/[^"]*';
-  $regExYoutube      = 'http://www.youtube.com/watch?[^"]*';
-  $regExDailyMotion  = 'http://www.dailymotion.com/(video|user)/[^"]*';
-  $regExTitle        = 'Movie #[0-9]+">([^<]*)';
-  $regExDesc     = 'class="blah" valign="top">(.*)</td>';
-  $regExThumb     = 'http://media.tasvideos.org/[^"]*png';
-  
-  $rv = "";
-  
-  my @items = ();
-  
-  while (matchShortest($content,$regExGroups))
+  if (@parameters == 0)
   {
+      echoPrint("  + No Options!  Priting default menu\n");
+      outputMenu($feed_begin, $feed_item, $feed_end);
+      exit 0;
+  }
+  
+  if (exists $optionsHash{lc("url")})
+  {
+      $content = decode('UTF-8', get $optionsHash{lc("url")});
+      $content =~ s/&amp;/&/g;
+      $content =~ s/&quot;/&/g;
+      $regExGroups   = '(http://www.archive.org/download/[^"]*)';
+      $regExGroups   = '(table.*?(youtube.com\/watch?|archive.org|www.dailymotion.com\/(video|user)).*?/table)';
+      $regExMovies   = 'http://www.archive.org/download/[^"]*';
+      $regExYoutube      = 'http://www.youtube.com/watch?[^"]*';
+      $regExDailyMotion  = 'http://www.dailymotion.com/(video|user)/[^"]*';
+      $regExTitle        = 'Movie #[0-9]+">([^<]*)';
+      $regExDesc     = 'class="blah" valign="top">(.*)</td>';
+      $regExThumb     = 'http://media.tasvideos.org/[^"]*png';
+      
+      my @items = ();
+      
       $rv = matchShortest($content,$regExGroups);
-
-      if ($rv =~ /$regExTitle/sm)
+    
+      while (!($rv eq ""))
+      {       
+          $thr1 = threads->create(\&processBlock, $rv);
+          #push(@items,processBlock($rv));
+          $content =~ s/\Q$rv\E//gsm;
+          $rv = matchShortest($content,$regExGroups);
+          @threads = threads->list();
+      
+          # Wait for threads to finish
+          if (threads->list() > 20)
+          {
+              while (threads->list() > 15)
+              {
+                  # Wait for threads to finish
+                  foreach my $thr (threads->list(threads::joinable)) 
+                  {
+                      #push(@items,$thr->join());
+                      $item = $thr->join();
+                      $item =~ /&&&&&/sm;
+                      push(@items,$`);
+                      echoPrint("! Thread Finished (".threads->list().") :  $' \n");
+                  }
+              }
+          }
+          
+      }
+    
+      # Wait for threads to finish
+      while (threads->list())
       {
-          $title = $1; 
-          echoPrint("--------------------------------\n\n    - Title  : ($title)\n");
+          # Wait for threads to finish
+          foreach my $thr (threads->list(threads::joinable)) 
+          {
+                #push(@items,$thr->join());
+                $item = $thr->join();
+                $item =~ /&&&&&/sm;
+                push(@items,$`);
+                echoPrint("! Thread Finished (".threads->list().") :  $' \n");
+          }
+      }
+    
+      
+      #my ($feed_begin, $feed_item, $feed_end, $textOnlyDescription) = populateFeedStrings();
+      $opening = $feed_begin;
+      $opening =~ s/%%FEED_TITLE%%/Online Services Test/g;
+      $opening =~ s/%%FEED_DESCRIPTION%%/$codeVersion @ARGV/g;
+      print encode('UTF-8', $opening);
+      foreach (@items)
+      {
+          if (!($_ eq ""))
+          {
+              print encode('UTF-8', $_);
+          }
+      }  
+      print encode('UTF-8', $feed_end);
+  }
+  else
+  {
+      echoPrint("  ! No /url specificed, leaving blank\n");    
+  }
+  
+  my ( $finishSecond, $finishMinute, $finishHour, $dayOfMonth, $month, $yearOffset, $dayOfWeek, $dayOfYear, $daylightSavings ) = localtime();
+  
+  # handle negative times
+  if ( $finishSecond < $startSecond )
+  {
+      $finishSecond += 60;
+      $finishMinute--;
+  }
+  if ( $finishMinute < $startMinute )
+  {
+      $finishMinute += 60;
+      $finishHour--;
+  }
+  if ( $finishHour < $startHour )
+  {
+      $finishHour += 24;
+  }
+
+  $durHour = sprintf( "%02d", ( $finishHour - $startHour ) );
+  $durMin  = sprintf( "%02d", ( $finishMinute - $startMinute ) );
+  $durSec  = sprintf( "%02d", ( $finishSecond - $startSecond ) );
+  my $transcodeTime = $durHour . ":" . $durMin . ":" . $durSec;
+  echoPrint("  + Finished in ($transcodeTime)\n");
+  
+
+  sub processBlock
+  {
+      my ($block) = shift(@_);
+      my ($title, $desc, $thumbnail, $video, $newItem);
+      my ($content_type, $document_length, $modified_time, $expires, $server);
+      
+      # Get Start Time
+      my ( $startSecond, $startMinute, $startHour, $dayOfMonth, $month, $yearOffset, $dayOfWeek, $dayOfYear, $daylightSavings ) = localtime();
+    
+          
+      if ($block =~ /$regExYoutube/sm)
+      {
+          ($video , $content_type) = youtube($&);
+      } 
+      elsif ($block =~ /$regExDailyMotion/sm)
+      {
+          $video = dailyMotion($&);
+      }          
+      elsif ($block =~ /$regExMovies/sm)
+      {
+          $video = $&;
+      }
+      
+      if ($block =~ /$regExTitle/sm)
+      {
+          $title = $1;
+          #echoPrint("+ Analyzing: $title ($video)\n"); 
+      }
+      
+      if ($block =~ /$regExThumb/sm)
+      {
+          $thumbnail = $&;
       }
 
-      if ($rv =~ /$regExDesc/sm)
+      if ($block =~ /$regExDesc/sm)
       {
           $desc = $1;
           $desc =~ s/<[^>]*>//gsm;
           $desc =~ s/\n/ /gsm;
-          echoPrint("      + Description  : ($desc)\n");
-      }
-      
-      if ($rv =~ /$regExThumb/sm)
-      {
-          $thumbnail = $&;
-          echoPrint("      + Thumbnail  : ($thumbnail)\n");
-      }
-      
-      if ($rv =~ /$regExYoutube/sm)
-      {
-          $video = youtube($&);
-          echoPrint("      + Youtube: ($video)\n");
-      } 
-      elsif ($rv =~ /$regExDailyMotion/sm)
-      {
-          $video = dailyMotion($&);
-          echoPrint("      + DailyMotion: ($video)\n");
-      }          
-      elsif ($rv =~ /$regExMovies/sm)
-      {
-          $video = $&;
-          echoPrint("      + Movie  : ($video)\n");
       }
     
+        
+      if (!($video eq ""))
+      {
+          if ($content_type eq "")
+          {
+              if ($video =~ /youtube/i)
+              {
+                  $semaphoreYoutube->down();    
+              }
+              elsif ($video =~ /dailymotion/i)
+              {
+                  $semaphoreDailyMotion->down(); 
+              }
+              else
+              {
+                  $semaphoreGeneric->down();
+              }
+              ($content_type, $document_length, $modified_time, $expires, $server) = head($video);
+              if ($video =~ /youtube/i)
+              {
+                  $semaphoreYoutube->up();    
+              }
+              elsif ($video =~ /dailymotion/i)
+              {
+                  $semaphoreDailyMotion->up(); 
+              }
+              else
+              {
+                  $semaphoreGeneric->up();
+              }              
+              #$content_type = 'video/mp4'
+          }
       
+          $newItem   = $feed_item;
+      
+          my $videoXML       = toXML($video);
+          my $titleXML       = $title;
+          my $descriptionXML = $desc;
+          my $thumnailXML    = toXML($thumbnail);
+          
+          $newItem =~ s/%%ITEM_TITLE%%/$titleXML/g;
+          $newItem =~ s/%%ITEM_DATE%%//g;
+          $newItem =~ s/%%ITEM_DESCRIPTION%%/$descriptionXML/g;
+          $newItem =~ s/%%ITEM_URL%%/$videoXML/g;
+          $newItem =~ s/%%ITEM_DUR%%//g;
+          $newItem =~ s/%%ITEM_SIZE%%/$document_length/g;
+          $newItem =~ s/%%ITEM_TYPE%%/$content_type/g;
+          $newItem =~ s/%%ITEM_PICTURE%%/$thumbnail/g;
+          $newItem =~ s/%%ITEM_DUR_SEC%%//g;       
+      }
 
+      
+      # Get Finish Time
+      my ( $finishSecond, $finishMinute, $finishHour, $dayOfMonth, $month, $yearOffset, $dayOfWeek, $dayOfYear, $daylightSavings ) = localtime();
   
-      my ($content_type, $document_length, $modified_time, $expires, $server) = head($video);  
-      echoPrint("        - Content Type : ($content_type)\n");
-      echoPrint("        - Length       : ($document_length)\n");
-      
-      $newItem   = $feed_item;
-      
-      echoPrint("  + Adding Video ($title)\n");
-      
-      $videoXML       = ($video eq "" ? $videoYoutTube : $video );
-      $titleXML       = '<![CDATA['.$title.']]>';
-      $descriptionXML = '<![CDATA['.$desc.']]>';
-      $type           = $content_type;
-      
-      $newItem =~ s/%%ITEM_TITLE%%/$titleXML/g;
-      $newItem =~ s/%%ITEM_DATE%%//g;
-      $newItem =~ s/%%ITEM_DESCRIPTION%%/$descriptionXML/g;
-      $newItem =~ s/%%ITEM_URL%%/$videoXML/g;
-      $newItem =~ s/%%ITEM_DUR%%//g;
-      $newItem =~ s/%%ITEM_SIZE%%/$document_length/g;
-      $newItem =~ s/%%ITEM_TYPE%%/$type/g;
-      $newItem =~ s/%%ITEM_PICTURE%%/$thumbnail/g;
-      $newItem =~ s/%%ITEM_DUR_SEC%%//g;
-      push(@items,$newItem);
-      
-      $video = "";
-      $videoYoutTube = "";
-      $thumbanil = "";
-      $desc = "";
-      $title = "";
-            
-      #echoPrint("\n\n$rv\n\n");
-      
-      $content =~ s/\Q$rv\E//gsm;
-      $rv = "";  
+      # handle negative times
+      if ( $finishSecond < $startSecond )
+      {
+          $finishSecond += 60;
+          $finishMinute--;
+      }
+      if ( $finishMinute < $startMinute )
+      {
+          $finishMinute += 60;
+          $finishHour--;
+      }
+      if ( $finishHour < $startHour )
+      {
+          $finishHour += 24;
+      }
+  
+      $durHour = sprintf( "%02d", ( $finishHour - $startHour ) );
+      $durMin  = sprintf( "%02d", ( $finishMinute - $startMinute ) );
+      $durSec  = sprintf( "%02d", ( $finishSecond - $startSecond ) );
+      my $transcodeTime = $durHour . ":" . $durMin . ":" . $durSec;
+       
+      return sprintf($newItem."&&&&& %-50s (%9s) (%s)",$title,$transcodeTime,$video);
   }
-
-  
-  #my ($feed_begin, $feed_item, $feed_end, $textOnlyDescription) = populateFeedStrings();
-  $opening = $feed_begin;
-  $opening =~ s/%%FEED_TITLE%%/Online Services Test/g;
-  $opening =~ s/%%FEED_DESCRIPTION%%/$codeVersion @ARGV/g;
-  print encode('UTF-8', $opening);
-  foreach (@items)
-  {
-      print encode('UTF-8', $_);
-  }  
-  print encode('UTF-8', $feed_end);
 
    ##### Youtube Decoding
     sub youtube
     {
         my ($url) = @_;
-        echoPrint("    + Decoding Youtube ($url)\n");
-        
+        return ($url,'video/mp4'); 
+        #echoPrint("    + Decoding Youtube ($url)\n");
+        $semaphoreYoutube->down();
         my $content = decode('UTF-8', get $url);
+        #sleep(1);
+        $semaphoreYoutube->up();
         my $videoIDRegEx = '"video_id": "([^"]*)"';
         my $videoTRegEx = '"t": "([^"]*)"';
       
@@ -194,39 +329,44 @@
         
         my $videoURLBase = 'http://www.youtube.com/get_video?video_id='.$videoID.'&t='.$videoT;
  
-        $videoURLs =~ s/%2F/\//g;
-        $videoURLs =~ s/%3F/?/g;
-        $videoURLs =~ s/%3D/=/g;
-        $videoURLs =~ s/%40/@/g;
-        $videoURLs =~ s/%3A/:/g;
+        $videoURLBase =~ s/%2F/\//g;
+        $videoURLBase =~ s/%3F/?/g;
+        $videoURLBase =~ s/%3D/=/g;
+        $videoURLBase =~ s/%40/@/g;
+        $videoURLBase =~ s/%3A/:/g;
         
         my @youtubeQualities = (37,35,34,22,18,6);
         
-        echoPrint("      - Found : $videoURL\n");
+        #echoPrint("      - Found : $videoURL\n");
 
         my $videoURL  = $videoURLBase;
         foreach (@youtubeQualities)
         {
-            echoPrint("        + Quality : $_\n");
-            echoPrint("          - Link         : ".$videoURLBase.'&fmt='.$_."\n");
-            my ($content_type, $document_length, $modified_time, $expires, $server) = head($videoURLBase.'&fmt='.$_);  
-            echoPrint("          - Content Type : ($content_type)\n");
-            echoPrint("          - Length       : ($document_length)\n");
+            #echoPrint("        + Quality : $_\n");
+            #echoPrint("          - Link         : ".$videoURLBase.'&fmt='.$_."\n");
+            $semaphoreYoutube->down();
+            my ($content_type, $document_length, $modified_time, $expires, $server) = head($videoURLBase.'&fmt='.$_); 
+            $semaphoreYoutube->up(); 
+            #echoPrint("          - Content Type : ($content_type)\n");
+            #echoPrint("          - Length       : ($document_length)\n");
             if (!($content_type eq ""))
             {
-                $videoURL = $videoURLBase.$_;
+                $videoURL = $videoURLBase.'&fmt='.$_;
                 last;  
             }
         }        
-        return $videoURL;
+        return ($videoURL,$content_type);
     }
 
    ##### DailyMotion Decoding
     sub dailyMotion
     {
         my ($url) = @_;
-        echoPrint("    + Decoding DailyMotion ($url)\n");
+        #echoPrint("    + Decoding DailyMotion ($url)\n");
+        $semaphoreDailyMotion->down();
         my $content = decode('UTF-8', get $url);
+        #sleep(1);
+        $semaphoreDailyMotion->up();
         my $videoRegEx = 'addVariable\("video", "([^"]*)';
         
         $content =~ /$videoRegEx/;
@@ -237,7 +377,7 @@
         $videoURLs =~ s/%40/@/g;
         $videoURLs =~ s/%3A/:/g;
         
-        echoPrint("      - Found : ($videoURL)\n");
+        #echoPrint("      - Found : ($videoURL)\n");
 
         my @resolutions = split(/%7C%7C/,$videoURLs);
         
@@ -246,10 +386,10 @@
         my $videoURL = "";
         foreach (@resolutions)
         {
-            echoPrint("        + Quality : ($_)\n");
+            #echoPrint("        + Quality : ($_)\n");
             if (/([0-9]+)x([0-9]+)/)
             {
-                echoPrint("        + Size : ($&)\n");
+                #echoPrint("        + Size : ($&)\n");
                 $size = $1 * $2;
                 if ($size > $biggest)
                 {
@@ -408,14 +548,17 @@
     
     sub matchShortest
     {
-        my ($string, $regEx,$rvRef) = @_;
+        my ($string,$regEx,$rvRef) = @_;
         my $shortest;
         my $length = length $string;
+        my $i = 0;
         
         while ($string =~ /(?=$regEx)/gsm) {
+            $i++;
             $m_len = length $1;
             # save the match if it's shorter than the last one
             ($shortest, $length) = ($1, $m_len) if $m_len < $length;
+            last;
         }
         $$rvRef = $shortest;
         return $shortest;
@@ -431,24 +574,24 @@
 <rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd"
   xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel> 
-    <title>%%FEED_TITLE%%</title> 
-    <description>$codeVersion @ARGV</description> 
+    <title><![CDATA[%%FEED_TITLE%%]]></title> 
+    <description><![CDATA[$codeVersion @ARGV]]></description> 
     <language>en-us</language> 
-    <itunes:summary>%%FEED_DESCRIPTION%%</itunes:summary> 
-    <itunes:subtitle>%%FEED_DESCRIPTION%%</itunes:subtitle> 
+    <itunes:summary><![CDATA[%%FEED_DESCRIPTION%%]]></itunes:summary> 
+    <itunes:subtitle><![CDATA[%%FEED_DESCRIPTION%%]]></itunes:subtitle> 
 FEED_BEGIN
 
     my $feed_item = <<'PODCAST_ITEM';
     <item> 
-      <title>%%ITEM_TITLE%%</title> 
-      <description>%%ITEM_DESCRIPTION%%</description> 
+      <title><![CDATA[%%ITEM_TITLE%%]]></title> 
+      <description><![CDATA[%%ITEM_DESCRIPTION%%]]></description> 
       <pubDate>1981-09-15</pubDate> 
-      <itunes:subtitle>%%ITEM_DESCRIPTION%%</itunes:subtitle>
+      <itunes:subtitle><![CDATA[%%ITEM_DESCRIPTION%%]]></itunes:subtitle>
       <itunes:duration>%%ITEM_DUR%%</itunes:duration>
       <enclosure url="%%ITEM_URL%%" length="%%ITEM_SIZE%%" type="%%ITEM_TYPE%%" /> 
       <media:content duration="%%ITEM_DUR_SEC%%" medium="video" fileSize="%%ITEM_SIZE%%" url="%%ITEM_URL%%" type="%%ITEM_TYPE%%"> 
-       <media:title>%%ITEM_TITLE%%</media:title> 
-        <media:description>%%ITEM_DESCRIPTION%%</media:description> 
+       <media:title><![CDATA[%%ITEM_TITLE%%]]></media:title> 
+        <media:description><![CDATA[%%ITEM_DESCRIPTION%%]]></media:description> 
         <media:thumbnail url="%%ITEM_PICTURE%%"/> 
       </media:content> 
     </item> 
@@ -459,16 +602,140 @@ PODCAST_ITEM
 </rss> 
 FEED_END
 
-    my $textOnlyDescription = <<'TEXT_ITEM';    
-Τη γλώσσα μου έδωσαν ελληνική
-το σπίτι φτωχικό στις αμμουδιές του Ομήρου.
-Μονάχη έγνοια η γλώσσα μου στις αμμουδιές του Ομήρου.
-από το Άξιον Εστί
-του Οδυσσέα Ελύτη
-TEXT_ITEM
-    $textOnlyDescription = '<![CDATA['."\n + $codeVersion\n  - ($parametersString)\n\n".$textOnlyDescription."]]>";
-
-    return ($feed_begin, $feed_item, $feed_end, $textOnlyDescription);
+    return ($feed_begin, $feed_item, $feed_end);
   }
+  
+  
+    #$url     = 'http://tasvideos.org/Movies-RatingY-Rec.html';
+  #$url     = 'http://tasvideos.org/Movies-NES-FDS.html';
+  #$url     =  'http://tasvideos.org/Movies-SNES.html';
+  #$url     = 'http://tasvideos.org/Movies-GBA.html';
+  #$url = 'http://tasvideos.org/Movies-DS.html';
+  
+  sub outputMenu
+  {
+      my ($feed_begin, $feed_item, $feed_end) = @_;
+      my @items = ();
+      my $newItem, $video,$title,$description,$type;
+      my $opening;
+      
+      $opening = $feed_begin;
+      $opening =~ s/%%FEED_TITLE%%/Tool Assisted Speedruns/g;
+      $opening =~ s/%%FEED_DESCRIPTION%%/Tool Assisted Speedruns/g;
+      
+      $newItem = $feed_item;
+      $video             = toXML('external,"'.$executablePath.'\\tasVideos",/url||http://tasvideos.org/Movies-RatingY-Rec.html');
+      $title             = 'Recommended Videos';
+      $description       = 'Recommended videos from all systems';
+      $type              = 'sagetv/subcategory';
+      
+      $newItem =~ s/%%ITEM_TITLE%%/$title/g;
+      $newItem =~ s/%%ITEM_DATE%%//g;
+      $newItem =~ s/%%ITEM_DESCRIPTION%%/$description/g;
+      $newItem =~ s/%%ITEM_URL%%/$video/g;
+      $newItem =~ s/%%ITEM_DUR%%//g;
+      $newItem =~ s/%%ITEM_SIZE%%//g;
+      $newItem =~ s/%%ITEM_TYPE%%/$type/g;
+      $newItem =~ s/%%ITEM_PICTURE%%//g;
+      $newItem =~ s/%%ITEM_DUR_SEC%%//g; 
+      push(@items,$newItem);
+      
+      $newItem = $feed_item;
+      $video             = toXML('external,"'.$executablePath.'\\tasVideos",/url||http://tasvideos.org/Movies-NES-FDS.html');
+      $title             = 'NES Videos';
+      $description       = 'Tool assisted speedrun videos for NES';
+      $type              = 'sagetv/subcategory';
+      
+      $newItem =~ s/%%ITEM_TITLE%%/$title/g;
+      $newItem =~ s/%%ITEM_DATE%%//g;
+      $newItem =~ s/%%ITEM_DESCRIPTION%%/$description/g;
+      $newItem =~ s/%%ITEM_URL%%/$video/g;
+      $newItem =~ s/%%ITEM_DUR%%//g;
+      $newItem =~ s/%%ITEM_SIZE%%//g;
+      $newItem =~ s/%%ITEM_TYPE%%/$type/g;
+      $newItem =~ s/%%ITEM_PICTURE%%//g;
+      $newItem =~ s/%%ITEM_DUR_SEC%%//g; 
+      push(@items,$newItem);
+      
+      $newItem = $feed_item;
+      $video             = toXML('external,"'.$executablePath.'\\tasVideos",/url||http://tasvideos.org/Movies-SNES.html');
+      $title             = 'SNES Videos';
+      $description       = 'Tool assisted speedrun videos for SNES';
+      $type              = 'sagetv/subcategory';
+      
+      $newItem =~ s/%%ITEM_TITLE%%/$title/g;
+      $newItem =~ s/%%ITEM_DATE%%//g;
+      $newItem =~ s/%%ITEM_DESCRIPTION%%/$description/g;
+      $newItem =~ s/%%ITEM_URL%%/$video/g;
+      $newItem =~ s/%%ITEM_DUR%%//g;
+      $newItem =~ s/%%ITEM_SIZE%%//g;
+      $newItem =~ s/%%ITEM_TYPE%%/$type/g;
+      $newItem =~ s/%%ITEM_PICTURE%%//g;
+      $newItem =~ s/%%ITEM_DUR_SEC%%//g; 
+      push(@items,$newItem);
+      
+      $newItem = $feed_item;
+      $video             = toXML('external,"'.$executablePath.'\\tasVideos",/url||http://tasvideos.org/Movies-GBA.html');
+      $title             = 'Gameboy Videos';
+      $description       = 'Tool assisted speedrun videos for Gameboy';
+      $type              = 'sagetv/subcategory';
+      
+      $newItem =~ s/%%ITEM_TITLE%%/$title/g;
+      $newItem =~ s/%%ITEM_DATE%%//g;
+      $newItem =~ s/%%ITEM_DESCRIPTION%%/$description/g;
+      $newItem =~ s/%%ITEM_URL%%/$video/g;
+      $newItem =~ s/%%ITEM_DUR%%//g;
+      $newItem =~ s/%%ITEM_SIZE%%//g;
+      $newItem =~ s/%%ITEM_TYPE%%/$type/g;
+      $newItem =~ s/%%ITEM_PICTURE%%//g;
+      $newItem =~ s/%%ITEM_DUR_SEC%%//g; 
+      push(@items,$newItem);
+      
+      $newItem = $feed_item;
+      $video             = toXML('external,"'.$executablePath.'\\tasVideos",/url||http://tasvideos.org/Movies-DS.html');
+      $title             = 'DS Videos';
+      $description       = 'Tool assisted speedrun videos for Nintendo DS';
+      $type              = 'sagetv/subcategory';
+      
+      $newItem =~ s/%%ITEM_TITLE%%/$title/g;
+      $newItem =~ s/%%ITEM_DATE%%//g;
+      $newItem =~ s/%%ITEM_DESCRIPTION%%/$description/g;
+      $newItem =~ s/%%ITEM_URL%%/$video/g;
+      $newItem =~ s/%%ITEM_DUR%%//g;
+      $newItem =~ s/%%ITEM_SIZE%%//g;
+      $newItem =~ s/%%ITEM_TYPE%%/$type/g;
+      $newItem =~ s/%%ITEM_PICTURE%%//g;
+      $newItem =~ s/%%ITEM_DUR_SEC%%//g; 
+      push(@items,$newItem);      
+               
+      
+      print encode('UTF-8', $opening);
+      foreach (@items)
+      {
+          if (!($_ eq ""))
+          {
+              print encode('UTF-8', $_);
+          }
+      }  
+      print encode('UTF-8', $feed_end);
+  }
+  
+  sub toXML
+  {
+      my ($string) = @_;
+      $string =~ s/\&/&amp;/g;
+      $string =~ s/"/&quot;/g; #"
+      $string =~ s/</&lt;/g;
+      $string =~ s/>/&gt;/g;
+      $string =~ s/'/&apos;/g;  #'
+      return $string;
+  }
+  
+  exit;
+
+      
+      
+  
+  
   
   
