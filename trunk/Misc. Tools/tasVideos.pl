@@ -612,103 +612,66 @@ FEED_END
   #$url     = 'http://tasvideos.org/Movies-GBA.html';
   #$url = 'http://tasvideos.org/Movies-DS.html';
   
+
   sub outputMenu
   {
       my ($feed_begin, $feed_item, $feed_end) = @_;
       my @items = ();
-      my $newItem, $video,$title,$description,$type;
+      my $newItem,$video,$title,$description,$type,$thumbnail;
       my $opening;
+      
+      my @tasURLS = 
+             ( {url   => 'http://tasvideos.org/Movies-RatingY-Rec.html',
+                title => 'Recommended Videos',
+                desc  => 'Recommended videos from all systems',
+                thumbnail =>'http://1.bp.blogspot.com/_ssYnWk1K418/S4LbhnF6uyI/AAAAAAAAF5c/qBIXVpRYWTk/s1600-h/taser_year_xx.png'},
+                
+               {url   => 'http://tasvideos.org/Movies-NES-FDS.html',
+                title => 'NES Vidoes',
+                desc  => 'Tool assisted speedrun videos for NES',
+                thumbnail =>'http://4.bp.blogspot.com/_ssYnWk1K418/S4LamD7napI/AAAAAAAAF40/d176Ae9CD24/s1600-h/NES.png'},
+                
+               {url   => 'http://tasvideos.org/Movies-SNES.html',
+                title => 'SNES Videos',
+                desc  => 'Tool assisted speedrun videos for SNES',
+                thumbnail =>'http://4.bp.blogspot.com/_ssYnWk1K418/S4Lao-h0fJI/AAAAAAAAF48/URCU7pItKTA/s1600-h/SNES.jpg'},
+                               
+               {url   => 'http://tasvideos.org/Movies-CBA.html',
+                title => 'Gameboy Videos',
+                desc  => 'Tool assisted speedrun videos for Gameboy',
+                thumbnail =>'http://1.bp.blogspot.com/_ssYnWk1K418/S4LaqFTwCzI/AAAAAAAAF5E/ZhQXa9EM5BA/s1600-h/GBA.png'},
+               
+               {url   => 'http://tasvideos.org/Movies-DS.html',
+                title => 'DS Videos',
+                desc  => 'Tool assisted speedrun videos for DS',
+                thumbnail =>'http://2.bp.blogspot.com/_ssYnWk1K418/S4Lar1EanRI/AAAAAAAAF5M/Vhb6l8n20N8/s1600-h/DS.png'}
+              );
       
       $opening = $feed_begin;
       $opening =~ s/%%FEED_TITLE%%/Tool Assisted Speedruns/g;
       $opening =~ s/%%FEED_DESCRIPTION%%/Tool Assisted Speedruns/g;
       
-      $newItem = $feed_item;
-      $video             = toXML('external,"'.$executablePath.'\\tasVideos",/url||http://tasvideos.org/Movies-RatingY-Rec.html');
-      $title             = 'Recommended Videos';
-      $description       = 'Recommended videos from all systems';
-      $type              = 'sagetv/subcategory';
-      
-      $newItem =~ s/%%ITEM_TITLE%%/$title/g;
-      $newItem =~ s/%%ITEM_DATE%%//g;
-      $newItem =~ s/%%ITEM_DESCRIPTION%%/$description/g;
-      $newItem =~ s/%%ITEM_URL%%/$video/g;
-      $newItem =~ s/%%ITEM_DUR%%//g;
-      $newItem =~ s/%%ITEM_SIZE%%//g;
-      $newItem =~ s/%%ITEM_TYPE%%/$type/g;
-      $newItem =~ s/%%ITEM_PICTURE%%//g;
-      $newItem =~ s/%%ITEM_DUR_SEC%%//g; 
-      push(@items,$newItem);
-      
-      $newItem = $feed_item;
-      $video             = toXML('external,"'.$executablePath.'\\tasVideos",/url||http://tasvideos.org/Movies-NES-FDS.html');
-      $title             = 'NES Videos';
-      $description       = 'Tool assisted speedrun videos for NES';
-      $type              = 'sagetv/subcategory';
-      
-      $newItem =~ s/%%ITEM_TITLE%%/$title/g;
-      $newItem =~ s/%%ITEM_DATE%%//g;
-      $newItem =~ s/%%ITEM_DESCRIPTION%%/$description/g;
-      $newItem =~ s/%%ITEM_URL%%/$video/g;
-      $newItem =~ s/%%ITEM_DUR%%//g;
-      $newItem =~ s/%%ITEM_SIZE%%//g;
-      $newItem =~ s/%%ITEM_TYPE%%/$type/g;
-      $newItem =~ s/%%ITEM_PICTURE%%//g;
-      $newItem =~ s/%%ITEM_DUR_SEC%%//g; 
-      push(@items,$newItem);
-      
-      $newItem = $feed_item;
-      $video             = toXML('external,"'.$executablePath.'\\tasVideos",/url||http://tasvideos.org/Movies-SNES.html');
-      $title             = 'SNES Videos';
-      $description       = 'Tool assisted speedrun videos for SNES';
-      $type              = 'sagetv/subcategory';
-      
-      $newItem =~ s/%%ITEM_TITLE%%/$title/g;
-      $newItem =~ s/%%ITEM_DATE%%//g;
-      $newItem =~ s/%%ITEM_DESCRIPTION%%/$description/g;
-      $newItem =~ s/%%ITEM_URL%%/$video/g;
-      $newItem =~ s/%%ITEM_DUR%%//g;
-      $newItem =~ s/%%ITEM_SIZE%%//g;
-      $newItem =~ s/%%ITEM_TYPE%%/$type/g;
-      $newItem =~ s/%%ITEM_PICTURE%%//g;
-      $newItem =~ s/%%ITEM_DUR_SEC%%//g; 
-      push(@items,$newItem);
-      
-      $newItem = $feed_item;
-      $video             = toXML('external,"'.$executablePath.'\\tasVideos",/url||http://tasvideos.org/Movies-GBA.html');
-      $title             = 'Gameboy Videos';
-      $description       = 'Tool assisted speedrun videos for Gameboy';
-      $type              = 'sagetv/subcategory';
-      
-      $newItem =~ s/%%ITEM_TITLE%%/$title/g;
-      $newItem =~ s/%%ITEM_DATE%%//g;
-      $newItem =~ s/%%ITEM_DESCRIPTION%%/$description/g;
-      $newItem =~ s/%%ITEM_URL%%/$video/g;
-      $newItem =~ s/%%ITEM_DUR%%//g;
-      $newItem =~ s/%%ITEM_SIZE%%//g;
-      $newItem =~ s/%%ITEM_TYPE%%/$type/g;
-      $newItem =~ s/%%ITEM_PICTURE%%//g;
-      $newItem =~ s/%%ITEM_DUR_SEC%%//g; 
-      push(@items,$newItem);
-      
-      $newItem = $feed_item;
-      $video             = toXML('external,"'.$executablePath.'\\tasVideos",/url||http://tasvideos.org/Movies-DS.html');
-      $title             = 'DS Videos';
-      $description       = 'Tool assisted speedrun videos for Nintendo DS';
-      $type              = 'sagetv/subcategory';
-      
-      $newItem =~ s/%%ITEM_TITLE%%/$title/g;
-      $newItem =~ s/%%ITEM_DATE%%//g;
-      $newItem =~ s/%%ITEM_DESCRIPTION%%/$description/g;
-      $newItem =~ s/%%ITEM_URL%%/$video/g;
-      $newItem =~ s/%%ITEM_DUR%%//g;
-      $newItem =~ s/%%ITEM_SIZE%%//g;
-      $newItem =~ s/%%ITEM_TYPE%%/$type/g;
-      $newItem =~ s/%%ITEM_PICTURE%%//g;
-      $newItem =~ s/%%ITEM_DUR_SEC%%//g; 
-      push(@items,$newItem);      
-               
-      
+      foreach $urlHashRef (@tasURLS)
+      {
+          $newItem = $feed_item;
+          $video             = toXML('external,"'.$executable.'",/url||'.$urlHashRef->{url});
+          $title             = $urlHashRef->{title};
+          $description       = $urlHashRef->{desc};
+          $thumbnail         = toXML($urlHashRef->{thumbnail});
+          $type              = 'sagetv/subcategory';
+          
+          $newItem =~ s/%%ITEM_TITLE%%/$title/g;
+          $newItem =~ s/%%ITEM_DATE%%//g;
+          $newItem =~ s/%%ITEM_DESCRIPTION%%/$description/g;
+          $newItem =~ s/%%ITEM_URL%%/$video/g;
+          $newItem =~ s/%%ITEM_DUR%%//g;
+          $newItem =~ s/%%ITEM_SIZE%%//g;
+          $newItem =~ s/%%ITEM_TYPE%%/$type/g;
+          $newItem =~ s/%%ITEM_PICTURE%%/$thumbnail/g;
+          $newItem =~ s/%%ITEM_DUR_SEC%%//g; 
+          push(@items,$newItem);            
+      }
+            
       print encode('UTF-8', $opening);
       foreach (@items)
       {
