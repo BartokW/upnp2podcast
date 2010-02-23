@@ -624,27 +624,27 @@ FEED_END
              ( {url   => 'http://tasvideos.org/Movies-RatingY-Rec.html',
                 title => 'Recommended Videos',
                 desc  => 'Recommended videos from all systems',
-                thumbnail =>'http://1.bp.blogspot.com/_ssYnWk1K418/S4LbhnF6uyI/AAAAAAAAF5c/qBIXVpRYWTk/s1600-h/taser_year_xx.png'},
+                thumbnail =>'http://docs.google.com/uc?id=0B_sMJcYiGvN4MDE1MjFlYmUtZWMwMS00OWJlLTg0ZjctNDRmMDQ5NjU2MDI5&export=download&hl=en'},
                 
                {url   => 'http://tasvideos.org/Movies-NES-FDS.html',
                 title => 'NES Vidoes',
                 desc  => 'Tool assisted speedrun videos for NES',
-                thumbnail =>'http://4.bp.blogspot.com/_ssYnWk1K418/S4LamD7napI/AAAAAAAAF40/d176Ae9CD24/s1600-h/NES.png'},
+                thumbnail =>'http://docs.google.com/uc?id=0B_sMJcYiGvN4NjMyMWVmMTAtMTM5Ny00ZTM3LTg2YjctNWI2YTQ4NWUzNmQy&export=download&hl=en'},
                 
                {url   => 'http://tasvideos.org/Movies-SNES.html',
                 title => 'SNES Videos',
                 desc  => 'Tool assisted speedrun videos for SNES',
-                thumbnail =>'http://4.bp.blogspot.com/_ssYnWk1K418/S4Lao-h0fJI/AAAAAAAAF48/URCU7pItKTA/s1600-h/SNES.jpg'},
+                thumbnail =>'http://docs.google.com/uc?id=0B_sMJcYiGvN4ZGE0MjIxY2UtMTc0NS00NDI3LWEzODYtOGIwNGUzMGNhNjQ5&export=download&hl=en'},
                                
-               {url   => 'http://tasvideos.org/Movies-CBA.html',
+               {url   => 'http://tasvideos.org/Movies-GBA.html',
                 title => 'Gameboy Videos',
                 desc  => 'Tool assisted speedrun videos for Gameboy',
-                thumbnail =>'http://1.bp.blogspot.com/_ssYnWk1K418/S4LaqFTwCzI/AAAAAAAAF5E/ZhQXa9EM5BA/s1600-h/GBA.png'},
+                thumbnail =>'http://docs.google.com/uc?id=0B_sMJcYiGvN4OWY1YmJkZjctNzE2My00NDVmLTliYTctNzg4MTRlMGVkNDA3&export=download&hl=en'},
                
                {url   => 'http://tasvideos.org/Movies-DS.html',
                 title => 'DS Videos',
                 desc  => 'Tool assisted speedrun videos for DS',
-                thumbnail =>'http://2.bp.blogspot.com/_ssYnWk1K418/S4Lar1EanRI/AAAAAAAAF5M/Vhb6l8n20N8/s1600-h/DS.png'}
+                thumbnail =>'http://docs.google.com/uc?id=0B_sMJcYiGvN4NTMxYjllZmUtZDQ1Ny00NzdmLTljY2UtMTVjNDZlYjQ1NjQx&export=download&hl=en'}
               );
       
       $opening = $feed_begin;
