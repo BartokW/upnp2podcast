@@ -3,42 +3,28 @@
 # Select x264 encoding profile
 #
     Profile           =x264 Options
-    Encode CLI #1     =?>Animation<:>%%SNIP:x264 Animation%%<=>highProfile<:>%%SNIP:x264 HighProfile%%<=>film<:>%%SNIP:x264 Film%%<=>TV<:>%%SNIP:x264 TV%%<=>%%SNIP:x264 Normal%%<?
+    Encode CLI #1     =?>%%vprofile%%=~custom<:>%%x264Opts%%<=>%%vprofile%%=~HQ<:>%%SNIP:x264 HQ%%<=>%%vprofile%%=~portable<:>%%SNIP:x264 Portable%%<=>%%SNIP:x264 MQ%%<?
     Encoder #1        =
 
 #
-# HandBrake's settings for cartoons, anime, and CGI.
+#  High Quality (Taken from Handbrake 9.4)  
 #
-    Profile           =x264 Animation
-    Encode CLI #1     =ref=5:mixed-refs:bframes=2:weightb:direct=auto:me=umh:analyse=all:8x8dct:trellis=1:nr=150:no-fast-pskip:filter=2,2:psy-rd=1,1:subme=9
+    Profile           =x264 HQ
+    Encode CLI #1     =b-adapt=2:rc-lookahead=50
     Encoder #1        =
 
 #
-# HandBrake's preset for feature films.    
+#  Medium Quality (Taken from Handbrake 9.4)      
 #
-    Profile           =x264 Film
-    Encode CLI #1     =ref=3:mixed-refs:bframes=2:weightb:direct=auto:me=umh:subme=9:analyse=all:8x8dct:trellis=1:no-fast-pskip:psy-rd=1,1
+    Profile           =x264 MQ
+    Encode CLI #1     =ref=2:bframes=2:subme=6:mixed-refs=0:weightb=0:8x8dct=0:trellis=0
     Encoder #1        =
 
 #
-# HandBrake's preset for true high profile x264 quality. A good balance of quality and speed, based on community standards found in the wild. This preset will give you a much better sense of x264's capabilities than vanilla main profile.  
+# Portable Devices (Taken from Handbrake 9.4)      
 #
-    Profile           =x264 HighProfile
-    Encode CLI #1     =b-pyramid:b-adapt=2:me=umh:subme=9:analyse=all:trellis=0
-    Encoder #1        =
-
-#
-# HandBrake's normal, default settings.      
-#
-    Profile           =x264 Normal
-    Encode CLI #1     =ref=2:bframes=2:me=umh
-    Encoder #1        =
-
-#
-# HandBrake's settings for video from television.      
-#
-    Profile           =x264 TV
-    Encode CLI #1     =ref=3:mixed-refs:bframes=2:weightb:direct=auto:me=umh:subme=9:analyse=all:8x8dct:trellis=1:nr=150:no-fast-pskip=1:psy-rd=1,1
+    Profile           =x264 Portable
+    Encode CLI #1     =cabac=0:ref=2:me=umh:bframes=0:8x8dct=0:trellis=0:subme=6
     Encoder #1        =
 
 #

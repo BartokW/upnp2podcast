@@ -24,7 +24,7 @@
 #
 
     Profile           =mkvAttachExtras
-    Encode CLI #4     =?>!(>subtitleFile&&EXT:srt<)&&ORIGINAL:embeddedCCCount>10&&addSubtitleTrack&&!subtitleComplete<:>extractSubtitles<?
+    Encode CLI #4     =?>!(>subtitleFile&&EXT:srt<)&&ORIGINAL:embeddedCCCount>10&&addSubtitleTrack&&!subtitleComplete&&!handbrakeSubtitleTracks<:>extractSubtitles<?
     Encoder #4        =/insertFunction
     Encode CLI #5     =?>EXT:edl||EXISTS:%%ORIGINAL%%.properties||extractedSubtitles||EXT:srt<:>#add_extras_mkv#-o "%%OUTPUT_MAIN%%.mkv" "%%inputMain%%" ?>addSubtitleTrack&&!subtitleComplete<:>?>extractedSubtitles<:>"%%inputSub%%"<=>EXT:srt<:>"%%ORIGINAL_FULLFILE%%.srt"<?<? ?>EXT:edl<:>--attachment-mime-type text/plain --attachment-name "Comskip EDL" --attach-file "%%ORIGINAL_FULLFILE%%.edl"<? ?>EXISTS:%%ORIGINAL%%.properties<:>--attachment-mime-type text/plain --attachment-name "SageTV .properties metadata file" --attach-file "%%ORIGINAL%%.properties"<?<?
     Encoder #5        =/exe mkvmerge.exe
