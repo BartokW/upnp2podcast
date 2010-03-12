@@ -42,6 +42,9 @@
     $usage .= "Usage: mediaEngine.exe should not be called directly.\n";
     $usage .= "       Unless you know what you are doing please use\n";
     $usage .= "       mediaShrink.exe instead.\n";
+
+    $delString = "del \"$executablePath\\$executablePath.exit\"";
+    `$delString`;
     
     # Move arguments into user array so we can modify it
     my @parameters = @ARGV;
@@ -49,9 +52,7 @@
     {
         print "ERROR: No Parameters\n\n";
         print $usage;
-        print "Exiting in 5 seconds...\n";
-        sleep(5);
-        exit 1;
+        exitWithFile(1);
     }
 
     if ($parameters[0] eq "/help"  ||
@@ -63,9 +64,7 @@
         $parameters[0] eq "/?")
     {
         print $usage;
-        print "Exiting in 5 seconds...\n";
-        sleep(5);
-        exit 1;
+        exitWithFile(1);
     }
     
 ##### Let's get this show on the road
@@ -118,7 +117,7 @@
     
     $parametersString = decode('ISO-8859-1' , $parametersString);
     
-    setOptions($parametersString,\@emptyArry,\%optionsHash,\@inputFiles,\%emptyHash,"  ");
+    $noInputParameterString = setOptions($parametersString,\@emptyArry,\%optionsHash,\@inputFiles,\%emptyHash,"  ");
     
     my %passwords = ();
     
@@ -147,9 +146,7 @@
     unless(-e "$executablePath\\mediaEngineProfiles")
     {
         echoPrint("! Failed!  Can't find profiles folder\n",2);
-        echoPrint("Exiting in 5 seconds...\n");
-        sleep(5);
-        exit 1;
+        exitWithFile(1);
     }
     
     $optionsHash{lc("profileFolder")} = "$executablePath\\mediaEngineProfiles";
@@ -201,7 +198,7 @@
             if (exists $optionsHash{lc("mediaShrink")} &&
                 $file =~ /VIDEO_TS$/i)
             {
-                @perRunOptions = (@perRunOptions,dvdScanForTitles($file,"    ",\%optionsHash));
+                @perRunOptions = (@perRunOptions,dvdScanForTitles($file,"    ",\%optionsHash,"$noInputParameterString"));
             }
             else
             {
@@ -215,8 +212,11 @@
     }
 
 ##### Run through files
-    foreach $perRunOptions (@perRunOptions)
+    #foreach $perRunOptions (@perRunOptions)
+    #{
+    for($fileNumber=0;$fileNumber<@perRunOptions;$fileNumber++)
     {
+        $perRunOptions = $perRunOptions[$fileNumber];
         # Get Finish Time
         my ( $startSecond, $startMinute, $startHour, $dayOfMonth, $month, $yearOffset, $dayOfWeek, $dayOfYear, $daylightSavings ) = localtime();
 
@@ -253,9 +253,7 @@
             if (!open($mainLog, ">".encode('ISO-8859-1',$mainLogFile) ))
             {
                 echoPrint("  ! Can't open create log file");
-                echoPrint("Exiting in 5 seconds...\n");
-                sleep(5);
-                exit 1;
+                exitWithFile(1);
             }
             print $mainLog $ourStorySoFar;
             select($mainLog);
@@ -269,9 +267,7 @@
             if (!open($mainLog, ">".encode('ISO-8859-1',$mainLogFile) ))
             {
                 echoPrint("  ! Can't open create log file");
-                echoPrint("Exiting in 5 seconds...\n");
-                sleep(5);
-                exit 1;
+                exitWithFile(1);
             }
             print $mainLog $ourStorySoFar;
             select($mainLog);
@@ -284,9 +280,7 @@
         {   # Check for profile in Hash
             $reason = "Couldn't find encode profile: ".$perRunOptionsHash{lc("profile")};
             echoPrint($reason);
-            echoPrint("Exiting in 5 seconds...\n");
-            sleep(5);
-            exit 1;
+            exitWithFile(1);
         }
     
      ##### Pull out Profile information
@@ -339,7 +333,7 @@
         print DELETEME "Delete me to keep files from being deleted for debugging\n";
         close(DELETEME);
 
-        $perRunOptionsHash{lc("scratchName")}     = getFile($scratchName).".scratch";
+        $perRunOptionsHash{lc("scratchName")}     = getFile($scratchName).".scratch.$fileNumber";
         $perRunOptionsHash{lc("inputMain")}       = $scratchName;
         $perRunOptionsHash{lc("original")}        = $scratchName;
         $perRunOptionsHash{lc("passLogfile")}     = $perRunOptionsHash{lc("scratchPath")}."\\passLogFile.log";
@@ -494,10 +488,8 @@
                 
                 if (exists $currentCommand{lc("die")})
                 {   # Die, for debugging
-                    echoPrint("      ! Exiting due to profile /die\n",2); 
-                    echoPrint("Exiting in 5 seconds...\n");
-                    sleep(5);      
-                    exit 1;
+                    echoPrint("      ! Exiting due to profile /die\n",2);    
+                    exitWithFile(1);
                 }
                 elsif (exists $currentCommand{lc("insertFunction")})
                 {   # Insert function
@@ -600,11 +592,6 @@
             }
             
         }
-                
-        if (!exists $perRunOptionsHash{lc("saveAll")})
-        {
-            deleteTempFiles(\@deleteFiles);
-        }
         
         my ( $finishSecond, $finishMinute, $finishHour, $dayOfMonth, $month, $yearOffset, $dayOfWeek, $dayOfYear, $daylightSavings ) = localtime();
     
@@ -634,13 +621,16 @@
             my $finalSize    = $perRunOptionsHash{videoInfo}{lc($perRunOptionsHash{lc($newKey)})}{lc("filesize")} / 1024;
             echoPrint("\n");
             echoPrint(        "  + Total Time : $transcodeTime\n");
-            if ($finalSize != 0)
+            if ($finalSize != 0 && $originalSize != 0)
             {
-            echoPrint(sprintf("  + Shrinkage  :%3d\% (%.1f MB / %.1f MB)\n",(100*($finalSize/$originalSize),$finalSize,$originalSize)));
+                echoPrint(sprintf("  + Shrinkage  :%3d\% (%.1f MB / %.1f MB)\n",(100*($finalSize/$originalSize),$finalSize,$originalSize)));
             }       
         }
-
-        
+    }
+    
+    if (!exists $optionsHash{lc("saveAll")})
+    {
+        deleteTempFiles(\@deleteFiles);
     }
     
     foreach $fileHandleKeys (keys %fileHandles)
@@ -660,10 +650,8 @@
     {
         deleteTempFiles(\@logFileToDelete);
     }
-    print "Exiting in 5 seconds...\n";
-    sleep(5);    
-    exit $errorLevel;
     
+    exitWithFile($errorLevel);     
     
 ######################################################
 ###
@@ -675,16 +663,26 @@
         my ($video,$baseSpace,$perRunOptionsHash) = @_;
         my $videoInfoHash = \%{$perRunOptionsHash->{videoInfo}{lc($video)}};
         my $binFiles      = \%{$perRunOptionsHash->{lc("mediaEngineBins")}};
+        my $baseFileName  = $perRunOptionsHash->{lc("scratchPath")}."\\".getFile($video);
         my $ffmpegString  = encode('UTF-8',"\"".$binFiles->{lc("ffmpeg.exe")}."\" -dumpmetadata -v 2 -i \"$video\" 2>&1");
         my $ffmpegOutput = `$ffmpegString`;
-        $ffmpegOutput =~ s/\r//g ;   
+        $ffmpegOutput =~ s/\r/\n/g ;   
         my @ffmpegOutput = split(/\n/,$ffmpegOutput);   
         
-        $videoInfoHash->{lc("fileSize")} = (-s $video)/1024;
+        $videoInfoHash->{lc("fileSize")} = (-s $video)/1024;         
         
         echoPrint("$baseSpace- Getting Video Info: ($video)(".$videoInfoHash->{lc("fileSize")}.")\n");        
-        echoPrint(padLines("$baseSpace  - ",@ffmpegOutput),100);
+        echoPrint(padLines("$baseSpace    + ",30,@ffmpegOutput),100);
 
+        my $audioTrack = 0;
+        my $handbrakeAudioTracks    = "";
+        my $handbrakeAudioEncoders  = "";
+        my $handbrakeAudioBitrate   = "";
+        my $handbrakeAllAudioTracks    = "";
+        my $handbrakeAllAudioEncoders  = "";
+        my $handbrakeAllAudioBitrate   = "";
+        my $handbrakeSubtitleTracks = ""; 
+            
         foreach (@ffmpegOutput)
         {
             chomp;
@@ -772,43 +770,103 @@
             }
             elsif ( $_ =~ /Audio: ([a-zA-Z0-9]+)/ )
             {
-                $videoInfoHash->{lc("audioInfo")} = $_; 
-                echoPrint("$baseSpace  - Audio Info Line: ".$videoInfoHash->{lc("audioInfo")}."\n",2);
+                $audioTrack++; 
+                $videoInfoHash->{lc("audioInfo_$audioTrack")} = $_;
+                if ($audioTrack  == 1)
+                {
+                    $videoInfoHash->{lc("primaryAudio")} = $audioTrack; 
+                    $videoInfoHash->{lc("audioInfo")}    = $_;
+                } 
+                echoPrint("$baseSpace  - Audio Info Line: ".$videoInfoHash->{lc("audioInfo_$audioTrack")}."\n",2);
     
-                if ($videoInfoHash->{lc("audioInfo")} =~ /Audio: ([a-zA-Z0-9]+)/)
-                {   # Get Audio Format
-                    $videoInfoHash->{lc("audioCodec")} = $1;
-                    echoPrint("$baseSpace    + audioCodec     = ".$videoInfoHash->{lc("audioCodec")}."\n",2);
+                if ($videoInfoHash->{lc("audioInfo_$audioTrack")} =~ /Audio: ([a-zA-Z0-9]+)/)
+                {   # Get Audio Format  
+                    $videoInfoHash->{lc("audioCodec_$audioTrack")} = $1;
+                    if ($audioTrack  == 1)
+                    {
+                        $videoInfoHash->{lc("audioCodec")} = $_;
+                    } 
+                    echoPrint("$baseSpace    + $audioTrack) audioCodec     = ".$videoInfoHash->{lc("audioCodec_$audioTrack")}."\n",2);
                 }
       
-                if ($videoInfoHash->{lc("audioInfo")} =~ /(\d+) Hz/)
+                if ($videoInfoHash->{lc("audioInfo_$audioTrack")} =~ /(\d+) Hz/)
                 {   # Audio Sample Rate
-                    $videoInfoHash->{lc("audioSampleRate")} = $1;
-                    echoPrint("$baseSpace    + audioSampleRate = ".$videoInfoHash->{lc("audioSampleRate")}."\n",2);
+                    $videoInfoHash->{lc("audioSampleRate_$audioTrack")} = $1;
+                    if ($audioTrack  == 1)
+                    {
+                        $videoInfoHash->{lc("audioSampleRate")} = $_;
+                    } 
+                    echoPrint("$baseSpace    + $audioTrack) audioSampleRate = ".$videoInfoHash->{lc("audioSampleRate_$audioTrack")}."\n",2);
                 }
                 
-                if ($videoInfoHash->{lc("audioInfo")} =~ /(\d+) kb.s/)
-                {   # Audio Bitrate
-                    $videoInfoHash->{lc("audioBitRate")} = $1;
-                    echoPrint("$baseSpace    + audioBitRate    = ".$videoInfoHash->{lc("audioBitRate")}."\n",2);
+                if ($videoInfoHash->{lc("audioInfo_$audioTrack")} =~ /(\d+) kb.s/)
+                {   # Audio Bitrate 
+                    $videoInfoHash->{lc("audioBitRate_$audioTrack")}     = $1;
+                    $videoInfoHash->{lc("audioTrackScore_$audioTrack")}  = $1;
+                    if ($audioTrack  == 1)
+                    {
+                        $videoInfoHash->{lc("audioBitRate")} = $_;
+                    } 
+                    echoPrint("$baseSpace    + $audioTrack) audioBitRate    = ".$videoInfoHash->{lc("audioBitRate_$audioTrack")}."\n",2);
                 }
                 
-                if ($videoInfoHash->{lc("audioInfo")} =~ /\[0x([a-z0-9]{3})\]/)
-                {   # Audio PID
-                    $videoInfoHash->{lc("audioPID")} = $1;
-                    echoPrint("$baseSpace    + audioPID    = ".$videoInfoHash->{lc("audioPID")}."\n",2);
+                if ($videoInfoHash->{lc("audioInfo_$audioTrack")} =~ /\[0x([a-z0-9]{2,3})\]/i)
+                {   # Audio PID           
+                    $videoInfoHash->{lc("audioPID_$audioTrack")} = $1;
+                    if ($audioTrack  == 1)
+                    {
+                        $videoInfoHash->{lc("audioPID")} = $_;
+                    } 
+                    echoPrint("$baseSpace    + $audioTrack) audioPID    = ".$videoInfoHash->{lc("audioPID_$audioTrack")}."\n",2);
                 }
                 
-                if ($videoInfoHash->{lc("audioInfo")} =~ /5.1/)
-                {   # Get Audio Format
-                    $videoInfoHash->{lc("audioChannels")} = 6; 
-                    echoPrint("$baseSpace    + audioChannels  = ".$videoInfoHash->{lc("audioChannels")}."\n",2);
+                if ($videoInfoHash->{lc("audioInfo_$audioTrack")} =~ /5.1/)
+                {   # Get Audio Format 
+                    $videoInfoHash->{lc("audioChannels_$audioTrack")}    = 6;
+                    $videoInfoHash->{lc("audioTrackScore_$audioTrack")}  += 6;
+                    if ($audioTrack  == 1)
+                    {
+                        $videoInfoHash->{lc("audioChannels")} = $_;
+                    }  
+                    echoPrint("$baseSpace    + $audioTrack) audioChannels  = ".$videoInfoHash->{lc("audioChannels_$audioTrack")}."\n",2);
                 }           
-                elsif ($videoInfoHash->{lc("audioInfo")} =~ /stereo/)
+                elsif ($videoInfoHash->{lc("audioInfo_$audioTrack")} =~ /stereo/)
                 {
-                    $videoInfoHash->{lc("audioChannels")} = 2;
-                    echoPrint("$baseSpace    + audioChannels  = ".$videoInfoHash->{lc("audioChannels")}."\n",2);
-                }              
+                    $videoInfoHash->{lc("audioChannels_$audioTrack")}    = 2;
+                    $videoInfoHash->{lc("audioTrackScore_$audioTrack")}  += 2;
+                    if ($audioTrack  == 1)
+                    {
+                        $videoInfoHash->{lc("audioChannels")} = $_;
+                    }
+                     
+                    echoPrint("$baseSpace    + $audioTrack) audioChannels  = ".$videoInfoHash->{lc("audioChannels_$audioTrack")}."\n",2);
+                }
+
+                if ($audioTrack  == 1)
+                {
+                    $handbrakeAudioTracks   = "$audioTrack"; 
+                    $handbrakeAudioBitrate  = "auto"; 
+                }
+
+                $handbrakeAllAudioTracks   .= "$audioTrack,";
+                $handbrakeAllAudioBitrate  .= "auto,"; 
+                if ($videoInfoHash->{lc("audioChannels_$audioTrack")} == 6 && $videoInfoHash->{lc("audioCodec_$audioTrack")} =~ /(dts|ac3)/i)
+                {
+                    if ($audioTrack  == 1)
+                    {
+                        $handbrakeAudioEncoders = "$&";
+                    }
+                    $handbrakeAllAudioEncoders .= "$&,";      
+                }
+                else
+                {
+                    if ($audioTrack  == 1)
+                    {
+                        $handbrakeAudioEncoders = "faac";
+                    }
+                    $handbrakeAllAudioEncoders .= "faac,";  
+                }
+                             
             }
             elsif ( $_ =~ /Duration: ([0-9][0-9]):([0-9][0-9]):([0-9][0-9])/ )
             {
@@ -818,6 +876,117 @@
                 echoPrint("$baseSpace    + totalMin = ".$videoInfoHash->{lc("durationSec")}."\n",2);
             }
         }
+        
+        my $maxScore = $videoInfoHash->{lc("audioTrackScore_1")};
+        for ($i=2;$i<=$audioTrack;$i++)
+        {
+            echoPrint("$baseSpace    - Checking Audio Track #$i (".$videoInfoHash->{lc("audioTrackScore_$i")}." vs $maxScore)\n"); 
+            if ($videoInfoHash->{lc("audioTrackScore_$i")} > $maxScore)
+            {
+                $maxScore = $videoInfoHash->{lc("audioTrackScore_$1")};
+                $videoInfoHash->{lc("primaryAudio")} = $i;               
+                foreach $vidProperty (keys %{$videoInfoHash})
+                {
+                    if ($vidProperty =~ /^audio.*_$i/)
+                    {
+                        $vidProperty =~ /_/;
+                        my $baseProp = $`;
+                        $videoInfoHash->{lc("$baseProp")} = $videoInfoHash->{lc("$vidProperty")};
+                        #echoPrint("$baseSpace      + Setting Property ($baseProp) -> (".$videoInfoHash->{lc("$vidProperty")}.")\n");    
+                    }    
+                }
+                $handbrakeAudioTracks   = "$i"; 
+                $handbrakeAudioBitrate  = "auto"; 
+                if ($videoInfoHash->{lc("audioChannels_$i")} == 6 && $videoInfoHash->{lc("audioCodec_$i")} =~ /(dts|ac3)/i)
+                {
+                    $handbrakeAudioEncoders = "$&";     
+                }
+                else
+                {
+                    $handbrakeAudioEncoders = "faac"; 
+                }                
+            }
+            elsif ($videoInfoHash->{lc("audioTrackScore_$1")} == $maxScore)
+            {
+                echoPrint("$baseSpace      ! Detected audio score collision, defaulting to encode all audio\n");   
+                $videoInfoHash->{lc("allAudio")} = 1;   
+            }
+        }
+                          
+        if (lc($video) eq lc($perRunOptionsHash->{lc("original")}))
+        {   # Just do this for the original video    
+            my $handBrakeString = encode('UTF-8',"\"".$binFiles->{lc("HandBrakeCLI.exe")}."\" -i \"".reverseSlashes($video)."\" -t 0 2>&1");
+            my $handBrakeOutput = `$handBrakeString`;
+            $handBrakeOutput =~ s/\r/\n/g ;   
+            my @handBrakeOutput = split(/\n/,$handBrakeOutput); 
+                
+            my $nextAudio = 0;
+            my $nextSubs  = 0;
+            
+            $handbrakeAudioTracks        =~ s/,$//;
+            $handbrakeAudioEncoders      =~ s/,$//;
+            $handbrakeAudioBitrate       =~ s/,$//;
+            $handbrakeAllAudioTracks     =~ s/,$//;
+            $handbrakeAllAudioEncoders   =~ s/,$//;
+            $handbrakeAllAudioBitrate    =~ s/,$//;
+            $handbrakeSubtitleTracks     =~ s/,$//;
+            
+            echoPrint("$baseSpace      - Setting Primary Audio Track to ".$videoInfoHash->{lc("primaryAudio")}."\n");
+            echoPrint("$baseSpace        + Handbrake Settings       : -a $handbrakeAudioTracks -E $handbrakeAudioEncoders -B $handbrakeAudioBitrate\n");
+            echoPrint("$baseSpace        + Handbrake Settings (ALL) : -a $handbrakeAllAudioTracks -E $handbrakeAllAudioEncoders -B $handbrakeAllAudioBitrate\n"); 
+                
+            echoPrint("$baseSpace- Getting Handbrake info: $handBrakeString ($baseFileName.HandbrakeInfo)\n");
+            echoPrint(padLines("$baseSpace    + ",30,@handBrakeOutput),100);
+                    
+            foreach (@handBrakeOutput)
+            {
+                chomp;
+                if (/autocrop: (.*)/)
+                {
+                    echoPrint("$baseSpace      - Handbrake Autocrop:          $_\n",2);    
+                    $videoInfoHash->{lc("autoCropHandBrake")} = $1;
+                    $videoInfoHash->{lc("autoCropHandBrake")} =~ s/\//:/g;
+                }
+                
+                if (/audio tracks:/)
+                {
+                    $nextAudio = 1;
+                    $nextSubs  = 0;  
+                }
+                
+                if ($nextAudio && /\+ ([0-9])/)
+                {
+                    echoPrint("$baseSpace      - Handbrake Audio #$1:        $_\n",2);
+                }
+                
+                if (/subtitle tracks:/)
+                {
+                    $nextAudio = 0;
+                    $nextSubs  = 1;  
+                }
+                
+                if ($nextSubs && /\+ ([0-9])/)
+                {
+                    echoPrint("$baseSpace      - Handbrake Subtitle #$1:     $_\n",2);
+                    $handbrakeSubtitleTracks .= "$1,";
+                }
+            }
+            
+            if (!($handbrakeAudioTracks eq ""))
+            {
+                $perRunOptionsHash->{lc("handbrakeAudioTracks")}   = $handbrakeAudioTracks;
+                $perRunOptionsHash->{lc("handbrakeAudioEncoders")} = $handbrakeAudioEncoders;
+                $perRunOptionsHash->{lc("handbrakeAudioBitrate")}  = $handbrakeAudioBitrate;
+                $perRunOptionsHash->{lc("handbrakeAllAudioTracks")}   = $handbrakeAllAudioTracks;
+                $perRunOptionsHash->{lc("handbrakeAllAudioEncoders")} = $handbrakeAllAudioEncoders;
+                $perRunOptionsHash->{lc("handbrakeAllAudioBitrate")}  = $handbrakeAllAudioBitrate;
+            }
+            
+            if (!($handbrakeSubtitleTracks eq ""))
+            {
+                $perRunOptionsHash->{lc("handbrakeSubtitleTracks")}   = $handbrakeSubtitleTracks;
+            } 
+        }          
     }
 
 ##### Parse Profile Files
@@ -1045,7 +1214,7 @@
             {
                 $fileKey = lc($perRunOptionsHash->{lc($inputFile)});
             }
-            echoPrint("            - Does video info property ($check) exist?\n",2);
+            echoPrint("            - Does video info property ($check) exist? (".$perRunOptionsHash->{videoInfo}{lc($fileKey)}{lc($key)}.")\n",2);
             $condTrue = checkProfileCond((exists $perRunOptionsHash->{videoInfo}{lc($fileKey)}{lc($key)}?1:0), $negate, $text);
             $perRunOptionsHash->{lc("check")}  = $perRunOptionsHash->{videoInfo}{lc($fileKey)}{lc($key)};
         }
@@ -1419,17 +1588,22 @@
         my @newOptions;
         my $key;
         my $noOverwrite = 0;
+        my $parameterString = "";
+        
         echoPrint("$logSpacing+ Parsing switches\n");
         echoPrint("$logSpacing  - optionsString: $optionsString\n");
+        
         if (@{$optionsArray}) { echoPrint("$logSpacing  - optionsArray: @{$optionsArray}\n"); }
         if ($optionsString)
         {
             @newOptions= splitWithQuotes($optionsString," ");
         }
         @newOptions = (@{$optionsArray},@newOptions,);
-        if (exists $commandHash->{lc("noOverwite")})
+        if (exists $commandHash->{lc("noOverwrite")})
         {
             $noOverwrite = 1;
+            echoPrint("$logSpacing    + No Overwritting!\n");
+            
         }
         while (@newOptions != 0)
         {
@@ -1447,23 +1621,49 @@
                 echoPrint("$logSpacing  - Adding to to options Hash\n");
                 $getVideoInfoCheck = $1;
                 $key = $2;
-                echoPrint("$logSpacing    + Key: $key\n");
+                echoPrint("$logSpacing    + Key: $key ($optionsHash->{lc($key)})\n");
                 if (exists $optionsHash->{lc($key)} && $noOverwrite)
                 {
-                    echoPrint("$logSpacing      ! Already Exists, skipping: (".$optionsHash->{lc($key)}.")\n");
+                    if ((!($newOptions[1] =~ m#^[/%]# || $newOptions[1] eq "") || $newOptions[1] =~ m#^/.*/#))
+                    {
+                        echoPrint("$logSpacing      ! Already Exists, skipping: (".$newOptions[0]." ".$newOptions[1].")\n");
+                        shift(@newOptions);    # Remove next parameter also
+                    }
+                    else
+                    {
+                        echoPrint("$logSpacing      ! Already Exists, skipping: (".$newOptions[0].")\n");
+                    }
+                }
+                elsif (exists $optionsHash->{lc("no".$key)})
+                {
+                    if ((!($newOptions[1] =~ m#^[/%]# || $newOptions[1] eq "") || $newOptions[1] =~ m#^/.*/#))
+                    {
+                        echoPrint("$logSpacing      ! Found /no$key, skipping (".$newOptions[0]." ".$newOptions[1].")\n");
+                        shift(@newOptions);    # Remove next parameter also
+                    }
+                    else
+                    {
+                        echoPrint("$logSpacing      ! Found /no$key, skipping (".$newOptions[0].")\n");
+                    }
                 }
                 else
                 {
                     $optionsHash->{lc($key)} = "";
-                    if ((!($newOptions[1] =~ m#^/# || $newOptions[1] eq "") || $newOptions[1] =~ m#^/.*/#))
+                    if ((!($newOptions[1] =~ m#^[/%]# || $newOptions[1] eq "") || $newOptions[1] =~ m#^/.*/#))
                     {   # If the next parameter data for switch
                         $optionsHash->{lc($key)} = $newOptions[1];
                         echoPrint("$logSpacing    + Value: $optionsHash->{lc($key)}\n");
+                        $parameterString .= " $newOptions[0] \"$newOptions[1]\"";
                         shift(@newOptions);    # Remove next parameter also
                         if ($getVideoInfoCheck eq "!")
                         {
                             getVideoInfo($optionsHash->{lc($key)},"     ",$optionsHash);
                         }
+                        
+                    }
+                    else
+                    {
+                        $parameterString .= " $newOptions[0]";
                     }                 
                 }
     
@@ -1487,11 +1687,14 @@
             }
             shift(@newOptions); 
         }
-    }
+        #echoPrint("! Returing: ($parameterString)\n");
+        return $parameterString;
+    }   
 
 ##### Launch an EXE
     sub launchEXE
     {
+    
         my ($currentTarget,$currentCommand,$binFiles,$perRunOptionsHash) = @_;
         my $runCommand;
         my $teeOutput;
@@ -1567,6 +1770,10 @@
                 while(<ENCODELOG>)
                 {
                     my $line = $_;
+                    if ($line =~ /\r([^\r]*)\r$/)
+                    {
+                        $line = $1;
+                    }
                     push(@lines,$_);
                     if (@lines > $linesToSave)
                     {
@@ -1578,7 +1785,7 @@
                 unshift(@lines,"------ Last $linesToSave lines of log -------\n");
                 my $fullText = "@lines";
                 $fullText =~ s/\r/\n/g;
-                echoPrint(padLines("          + ",split(/\n/,$fullText)),100);                   
+                echoPrint(padLines("          + ",$linesToSave,split(/\n/,$fullText)),100);                   
             }
             
         } 
@@ -1586,17 +1793,17 @@
     
     sub padLines
     {
-        my ($padding,@arrayToPad) = @_;
+        my ($padding,$length,@arrayToPad) = @_;
         my $line;
         my $paddedString = "";
+        my $i;
         
-        foreach $line (@arrayToPad)
-        {
-            if (!($line =~ /\n$/))
-            {
-                $line .= "\n";
-            }
-            $paddedString .=  $padding.$line;       
+        for ($i=(@arrayToPad<$length?0:@arrayToPad-$length);$i<@arrayToPad;$i++)
+        {      
+            $line = $arrayToPad[$i];
+            chomp($line);
+            $line .= "\n";
+            $paddedString .=  $padding.$line;              
         }
         return $paddedString;
     }
@@ -2734,6 +2941,7 @@ sub detectVideoProperties
             $videoInfoArray->{lc("cropConfidence")} = $percentConfidence;
             
             # Check for letterbox and 4:3 crop
+            
             if (($xRes - $cropX) > 100)
             {
                 $videoInfoArray->{lc("43in169")} = ($xRes - $cropX);
@@ -2745,7 +2953,29 @@ sub detectVideoProperties
                 echoPrint("      + Detected letterbox ($yRes -> $cropY)\n");    
             }            
             $videoInfoArray->{lc("cropConfidence")} = $percentConfidence;
-    
+                
+            if (($cropX/$xRes)   < .72  || # Make sure its not getting shrunk too much
+                ($cropY/$yRes)   < .72  ||
+                ($cropX/$cropY)  > 1.8  || # Make it doesn't result in a weird aspect ratio
+                ($cropX/$cropY)  < 1.25 ||
+                abs($topCrop[$cropIndex] -  ($yRes - ($cropY+$topCrop[$cropIndex])))  > 30 || # Make sure left/right and top/bottom are about equal
+                abs($leftCrop[$cropIndex] - ($xRes - ($cropX+$leftCrop[$cropIndex]))) > 30)
+            {
+                $perRunOptionsHash->{lc("noAutoCrop")} = 1;
+                echoPrint("      ! Detected odd crop settings, disabling autocrop\n");
+      
+            }
+            else
+            {
+                echoPrint("      + Crop settings look ok to me!\n");              
+            }
+            
+            echoPrint("        - cropX/xRes (".$cropX/$xRes.")   > .72\n");
+            echoPrint("        - cropY/yRes(".$cropY/$yRes.")   > .72\n");
+            echoPrint("        - 1.25 < cropX/cropY (".$cropX/$cropY.")  < 1.8\n");
+            echoPrint("        - abs(TopCrop - BottomCrop) (".$topCrop[$cropIndex]." -  ".($yRes - ($cropY+$topCrop[$cropIndex])).")  < 30\n");
+            echoPrint("        - abs(RightCrop - LeftCrop) (".$leftCrop[$cropIndex]." - ".($xRes - ($cropX+$leftCrop[$cropIndex])).") < 30\n");    
+
             if (abs($videoInfoArray->{lc("ffmpegARValue")} - $aspectRatioValue) > .05)
             {   
                 $cropX = int($cropX * (($videoInfoArray->{lc("ffmpegARValue")} * $yRes)/$xRes));
@@ -2754,7 +2984,8 @@ sub detectVideoProperties
                     $cropX--;
                 }
                 echoPrint("      + Scaled for res for ".$videoInfoArray->{lc("ffmpegAR")}.": $cropX x $cropY (".($cropX/$cropY).") \n");    
-            }
+            }    
+                
             
             $videoInfoArray->{lc("cropX")} = $cropX;
             $videoInfoArray->{lc("cropY")} = $cropY;        
@@ -2808,6 +3039,19 @@ sub detectVideoProperties
     echoPrint("      + Analyzing Duration: $transcodeTime\n");
 }
 
+sub exitWithFile
+{
+    my ($exitCode) = @_;
+    print "Exiting in 5 seconds...\n";
+    sleep(5);   
+    if (open(EXITCODE,">$executablePath\\mediaEngine.exit"))
+    {
+        print EXITCODE $exitCode;    
+    }
+    close(EXITCODE);
+    exit $exitCode;
+}
+
 
 sub detectDVDTitleProperties
 {
@@ -2844,7 +3088,7 @@ sub detectDVDTitleProperties
 
 sub dvdScanForTitles
 {
-    my ($video,$baseSpace,$perRunOptionsHash) = @_;
+    my ($video,$baseSpace,$perRunOptionsHash,$defailtProfileString) = @_;
     my %titleHash = ();
     my %durHash   = ();
     my %soundHash = ();
@@ -2855,17 +3099,19 @@ sub dvdScanForTitles
     my @newPerRunOptions = ();
     my $videoInfoArray = \%{$perRunOptionsHash->{videoInfo}{lc($video)}};
     my $binFiles       = \%{$perRunOptionsHash->{lc("mediaEngineBins")}}; 
-    my $baseFile       = $video.".dvdInfo";  
+    my $baseFile       = $perRunOptionsHash->{lc("scratchPath")}."\\".getFile($video); 
     my $foundTitle = -1;
     my $longest    = 0;
     my $sum        = 0;
     
-    $handBrakeString = "\"".$binFiles->{lc("HandBrakeCLI.exe")}."\" -i \"".reverseSlashes($video)."\" -t 0 2>&1";
-    echoPrint("  + Getting DVD info: $handBrakeString\n");
-    $dvdLog = `$handBrakeString`;
-    @dvdLog = split(/(\n|\r)/,$dvdLog);  
+    $handBrakeString = encode('UTF-8',"\"".$binFiles->{lc("HandBrakeCLI.exe")}."\" -i \"".reverseSlashes($video)."\" -t 0 2>&1");
+    echoPrint("  + Getting DVD info: $handBrakeString ($defailtProfileString)\n");
+    my $handBrakeOutput = `$handBrakeString`;
+    $handBrakeOutput =~ s/\r/\n/g ;   
+    my @handBrakeOutput = split(/\n/,$handBrakeOutput); 
+    echoPrint(padLines("      + ",30,@handBrakeOutput),100); 
     echoPrint("    - Scanning DVD for titles\n",2);
-    foreach $line (@dvdLog)
+    foreach $line (@handBrakeOutput)
     {
         chomp($line);
         if ($line =~ /\+ title (\d+):/) 
@@ -2998,8 +3244,12 @@ sub dvdScanForTitles
                 $handbrakeAudioBitrate    =~ s/,$//;
                 $handbrakeSubtitleTracks  =~ s/,$//;
 
-            push(@newPerRunOptions,(exists $perRunOptionsHash->{lc("profile")} ? "" : " /profile ".$perRunOptionsHash->{lc("defaultProfile")})." /inputFile \"".($video)."\" /dvdTitle $checkingTitle /handBrakeAudioTracks \"$handbrakeAudioTracks\" /handBrakeAudioEncoders \"$handbrakeAudioEncoders\" /handbrakeAudioBitrate \"$handbrakeAudioBitrate\" /isDVD /handbrakeSubtitles $handbrakeSubtitleTracks");     
+            push(@newPerRunOptions,(exists $perRunOptionsHash->{lc("profile")} ? "" : " /profile ".$perRunOptionsHash->{lc("defaultProfile")})." /inputFile \"".($video)."\" /dvdTitle $checkingTitle /handBrakeAudioTracks \"$handbrakeAudioTracks\" /handBrakeAudioEncoders \"$handbrakeAudioEncoders\" /handbrakeAudioBitrate \"$handbrakeAudioBitrate\" /isDVD /handbrakeSubtitleTracks $handbrakeSubtitleTracks $defailtProfileString");     
         }
+    }
+    foreach (@newPerRunOptions)
+    {
+        #echoPrint("    +  Adding: $_\n");
     }
     return @newPerRunOptions;
 }
