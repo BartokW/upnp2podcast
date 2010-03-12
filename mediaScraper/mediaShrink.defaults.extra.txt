@@ -1,1 +1,0 @@
-/saveLog /cutComm /onlyWhenVprj /inPlace /batch /defaultProfile autoEncode /findFileRegEx "avi|mpg|mkv|mp4|mpeg|VIDEO_TS|ts|ogm|divx|mpts|dvr-ms"
