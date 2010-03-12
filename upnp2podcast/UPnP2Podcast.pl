@@ -43,7 +43,7 @@
 
 
   # Code version
-  my $codeVersion = "$executableEXE v1.6 (SNIP:BUILT)".($debug ? "(debug)" : "");
+  my $codeVersion = "$executableEXE v1.7 (SNIP:BUILT)".($debug ? "(debug)" : "");
   
   my $invalidMsg .= "\n$codeVersion\n";
   $invalidMsg .= "\tUSAGE:";
@@ -129,7 +129,32 @@
 
   my $userInput = $parameters[0]; 
   my @searchStrings = split("&&",$userInput);
-  my @dev_list = $obj->search();
+  my $dev;
+  my %serverCache = ();
+  #my @dev_list = $obj->search(st =>'upnp:rootdevice', mx => 1);
+  #my @dev_list = $obj->search();
+  
+    if (open(UPNPTREECACHE, "$executablePath\\$executableEXE.cache"))
+    {
+        echoPrint("  + Building Cache...\n");
+        while(<UPNPTREECACHE>)
+        {
+            chomp;
+            if (/===/)
+            {
+                $upnpFolder  = $`;
+                $upnpContent = $';
+                @upnpContent = split(/&&&/,$upnpContent);
+                echoPrint("    - $upnpFolder\n");
+                foreach (@upnpContent)
+                {
+                    #echoPrint("      + $_\n");
+                    push(@{$serverCache{lc($upnpFolder)}},$_)    
+                }
+            }
+        }
+        close(UPNPTREECACHE);    
+    }
              
     foreach (@searchStrings)    
     {
@@ -144,25 +169,54 @@
         my $foundDevice = 0;
         
         echoPrint("    - Looking for UPnP Server: $lookingFor\n");
-        foreach (@dev_list)
+        if (-s "$executablePath\\$lookingFor.cache")
         {
-            chomp;
-            echoPrint("      + Device: ".$_->getfriendlyname()."(".$_->getdevicetype().")\n");
-            if ($_->getfriendlyname() =~ /$lookingFor/i)
+            if (open(UPNPCACHE,"$executablePath\\$lookingFor.cache"))
             {
-                $mediaServer->setdevice($_);
                 $foundDevice = 1;
-                echoPrint("        - Found $lookingFor\n"); 
-                my $dirPath = $_->getfriendlyname()."\\";
-                last;
+                @cacheFull = <UPNPCACHE>;
+                $cacheText  = "@cacheFull";
+                $cacheText  =~ /=======================/;
+                $res_msg = $`;
+                $post_con = $';
+                $dev = Net::UPnP::Device->new();
+     		        $dev->setssdp($cacheText);
+    		        $dev->setdescription($post_con);
+		        }
+		        close(UPNPCACHE);
+        }
+        else
+        {
+            my @dev_list = $obj->search(st =>'upnp:rootdevice', mx => 1);
+            foreach (@dev_list)
+            {
+                chomp;
+                echoPrint("      + Device: ".$_->getfriendlyname()."(".$_->getdevicetype().")\n");
+                if ($_->getfriendlyname() =~ /$lookingFor/i)
+                {
+                    $dev = $_;
+                    if (open(UPNPCACHE,">$executablePath\\$lookingFor.cache"))
+                    {
+                        print UPNPCACHE $dev->getssdp()."=======================".$dev->getdescription();
+                    }
+                    close(UPNPCACHE);
+                    $foundDevice = 1;
+                    echoPrint("        - Found $lookingFor\n"); 
+                    my $dirPath = $dev->getfriendlyname()."\\";
+                    last;
+                }
             }
         }
-
+        
         
         if (!$foundDevice)
         {
             echoPrint("  ! Error! Couldn't find UPnP Device: ($lookingFor)\n");
             next;
+        }
+        else
+        {
+            $mediaServer->setdevice($dev);    
         }
         
         my $id    = 0;
@@ -180,7 +234,47 @@
             {
                 echoPrint("GetContent from: ".$lastContent->gettitle()." ($id)\n");
             }
-            my @content_list = $mediaServer->getcontentlist(ObjectID => $id);
+            
+            my @content_list = ();
+            if (exists $serverCache{lc($id)})
+            {
+                my @tempArray = $serverCache{lc($id)};
+                echoPrint("  + Adding from Cache: ($id)(".@{$serverCache{lc($id)}}.")\n");
+                foreach (@{$serverCache{lc($id)}})
+                {
+                    #echoPrint("    - (".$serverCache{lc($id)}[1].")\n");
+                    if($_ =~ /,,,/)
+                    {
+                        my $uid    = $`;
+                        my $title = $'; 
+                        #echoPrint("    - $title ($uid)\n");
+                        $container = Net::UPnP::AV::Container->new();
+                        $container->setid($uid);
+                        $container->settitle($title);
+                        push (@content_list,$container);
+
+                    }
+                }
+            }
+            else
+            {
+                @content_list = $mediaServer->getcontentlist(ObjectID => $id);
+                my $cacheString = "$id===";
+                my @content_list_cache = ();
+                foreach (@content_list)
+                {
+                    push(@content_list_cache,$_->getid().",".$_->gettitle());
+                    $cacheString .= $_->getid().",,,".$_->gettitle()."&&&";       
+                }
+                $cacheString .= "\n";
+                $serverCache{lc($id)} = @content_list_cache;               
+                if (open(UPNPTREECACHE, ">>$executablePath\\$executableEXE.cache"))
+                {
+                    print UPNPTREECACHE $cacheString; 
+                    close(UPNPTREECACHE);   
+                }
+                               
+            }
             
             # If we see the +[0-9] we're done  
             if ($lookingFor =~ /\+([0-9]+)([^:]*)/i)
