@@ -1,0 +1,5 @@
+Description=TASVideos.org is a website formed in 2003 for publishing Tool-Assisted Speedrun (TAS) movies of classic console games. These videos are created by using an emulator to record keypresses. Slowdown and savestates are used to overcome human limitations such as skill and reflex, which allows the game to be played with unlimited precision.
+Thumbnail=http://docs.google.com/uc?id=0B_sMJcYiGvN4NTA5NGZkOGUtN2VlYS00NDMxLThlOGItZDY1ZTFhMDI4ODdi&export=download&hl=en
+Title=TASVideos.org
+Parameters=
+Version=20100222
