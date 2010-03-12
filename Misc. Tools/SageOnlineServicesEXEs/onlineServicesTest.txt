@@ -1,5 +1,0 @@
-Description=Test code for online services menu (i.e. Nothing fun in here)
-Thumbnail=http://docs.google.com/uc?id=0B_sMJcYiGvN4YmU0M2E2MGYtYTgyOC00OGY5LWE1OWQtZTFlYzYxZjAzNzA5&export=download&hl=en
-Title=Online Services Test
-Parameters=
-Version=20100222

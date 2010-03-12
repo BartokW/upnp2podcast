@@ -1,5 +1,0 @@
-Description=View your photos and videos on Picasa Web Albums
-Thumbnail=http://docs.google.com/uc?id=0B_sMJcYiGvN4MWJlODQ5ZWQtZWQ3Zi00ZmI2LTg2MzYtODhiODE5N2M2NWFj&export=download&hl=en
-Title=Picasa Web
-Parameters=
-Version=20100306
