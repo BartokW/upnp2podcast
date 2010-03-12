@@ -23,7 +23,7 @@ GOTO LOOP
 
 :NEXT
 cd /D "%DIRECTORY%"
-mediaShrink.pl %COMMAND% /profile "autoEncode" /batch /vProfile HQ /saveLog /twoPass
+mediaShrink.pl %COMMAND% /profile "autoEncode" /batch  /saveLog /onePass /vcodec ffmpeg
 pause
 GOTO EOF
 
