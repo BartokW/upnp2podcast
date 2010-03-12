@@ -31,3 +31,12 @@
     Encoder #1        =/exe del
     Encode CLI #2     =?>ORIGINAL:embeddedCCCount>10<:>/extractedSubtitles<?
     Encoder #2        =/setOptions
+
+# SNIP: SNIP:SubtitleSuccess
+#
+# Snip to check for valid subtitles
+#
+
+    Profile           =SubtitleSuccess
+    Encode CLI #1     =(>(>EXT:smi||EXT:srt<)||ORIGINAL:embeddedCCCount>10<)
+    Encoder #1        =

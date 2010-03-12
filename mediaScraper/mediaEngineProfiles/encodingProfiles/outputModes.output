@@ -80,7 +80,7 @@
     Encode CLI #1     =?>isDVD<:>%%ORIGINAL_PATH_NAME%%<=>%%ORIGINAL_NAME%%<?.%%profile%%
     Encoder #1        =
 
-# FUnction: Touch - Matches the new file to the original files timestamps
+# Function: Touch - Matches the new file to the original files timestamps
 #
 # Input = %%inputMain%%
 #

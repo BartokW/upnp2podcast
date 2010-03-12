@@ -4,24 +4,16 @@
 #
 
     Profile           =HandBrake
-    Encode CLI #1     =?>!errorChecked<:>ErrorCheck<?
-    Encoder #1        =/insertFunction
-    Encode CLI #1     =SetDefaults
-    Encoder #1        =/insertFunction
-    Encode CLI #1     =?>forceMencoder<:>mencoder<?
-    Encoder #1        =/branch
     Encode CLI #1     =?>inputMain:videoContainer=~mpegts&&(>!cutComm||(>cutComm&&onlyWhenVprj&&!EXT:vprj<)<)<:>QuickStream Fix<?
     Encoder #1        =/insertFunction
     Encode CLI #1     =?>cutComm&&!isDVD<:>Cut Commercials<?
     Encoder #1        =/insertFunction
-    Encode CLI #2     =?>addSubtitleTrack&&0<:>extractSubtitles<?
+    Encode CLI #2     =?>addSubtitleTrack&&!isDVD&&!handbrakeSubtitleTracks<:>extractSubtitles<?
     Encoder #2        =/insertFunction
-    Encode CLI #1     =!#handbrake_1#-v -i "%%inputMain_REVSLASHES%%" -o "%%OUTPUT_MAIN_REVSLASHES%%.?>avi<:>avi<=>mp4<:>mp4<=>mkv<?" %%SNIP:Handbrake DVD%% %%SNIP:Handbrake Subtitles%% %%SNIP:Handbrake Video%% %%SNIP:Handbrake Audio%% %%SNIP:Handbrake Video Filters%%
+    Encode CLI #1     =!#handbrake_1#-v -i "%%inputMain_REVSLASHES%%" -o "%%OUTPUT_MAIN_REVSLASHES%%.%%container%%" %%SNIP:Handbrake DVD%% %%SNIP:Handbrake Subtitles%% %%SNIP:Handbrake Video%% %%SNIP:Handbrake Audio%% %%SNIP:Handbrake Video Filters%%
     Encoder #1        =/exe HandBrakeCLI.exe
     Encode CLI #5     =?>addSubtitleTrack&&INPUTSUB<:>/subtitleComplete<?
     Encoder #5        =/setOptions
-    Encode CLI #2     =?>aac51<:>HandBrakeAAC51<?
-    Encoder #2        =/insertFunction
     Encode CLI #2     =?>inputMain:videoContainer=~matroska<:>mkvAttachExtras<?
     Encoder #2        =/insertFunction
     Encode CLI #3     =outputModes

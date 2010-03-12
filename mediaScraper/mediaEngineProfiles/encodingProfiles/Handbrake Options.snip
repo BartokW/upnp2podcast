@@ -4,7 +4,7 @@
 #
 
     Profile           =Handbrake Audio
-    Encode CLI #1     =?>isDVD&&handBrakeAudioTracks<:> -a %%handBrakeAudioTracks%% -E %%handBrakeAudioEncoders%% -B %%handbrakeAudioBitrate%%<=>?>!(>aac51||ac3<)<:>?>ORIGINAL:audioBitrate<160<:>-B 128<=>-B 160<?<? -E ?>aac<:>?>avi<:>lame<=>faac<?<=>copyAudio||aac51||ac3||<:>ac3<=>?>mp4<:>faac<=>lame<?<?<?
+    Encode CLI #1     =?>handBrakeAllAudioTracks&&(>ORIGINAL:allAudio||allAudio<)<:> -a %%handBrakeAllAudioTracks%% -E %%handBrakeAllAudioEncoders%% -B %%handbrakeAllAudioBitrate%%<=>handBrakeAudioTracks<:> -a %%handBrakeAudioTracks%% -E %%handBrakeAudioEncoders%% -B %%handbrakeAudioBitrate%%<=>-E ?>%%acodec%%=~passthrough<:>?>ORIGINAL:audioCodec=~ac3<:>ac3<=>ORIGINAL:audioCodec=~dts<:>dts<=>aac<?<=>%%aCodec%%<? -B %%aBitrate%%<?
     Encoder #1        =
 
 # Snippit: HandBrake Video
@@ -13,7 +13,7 @@
 #
 
     Profile           =Handbrake Video
-    Encode CLI #1     =-e ?>xvid<:>xvid<=>divx<:>ffmpeg<=>x264 -T -x %%SNIP:x264 Options%%<? -b ?>cliBitrate<:>%%cliBitrate%%<=>1500<?
+    Encode CLI #1     =-e ?>vcodec<:>%%vcodec%%<=>x264<? ?>!vcodec||%%vcodec%%=~x264<:>-T -x %%SNIP:x264 Options%%<? -b ?>vbitrate<:>%%vbitrate%%<=>1500<?
     Encoder #1        =
 
 # Snippit: Handbrake DVD
@@ -31,7 +31,7 @@
 #
 
     Profile           =Handbrake Video Filters
-    Encode CLI #1     =?>deinterlace<:>--decomb<? ?>!onePass<:>-2<? ?>deNoise<:>-8<? ?>reverseTelecine||isDVD<:>--detelecine ?>!deinterlace<:>--decomb<?<? %%SNIP:Handbrake AutoCrop%%  
+    Encode CLI #1     =?>decomb<:>--decomb<? ?>deinterlace&&!decomb<:>--deinterlace<? ?>twoPass<:>-2<? ?>deNoise<:>-8<? %%SNIP:Handbrake AutoCrop%%  
     Encoder #1        =
 
 # Snippit: HandBrake AutoCrop
@@ -40,7 +40,7 @@
 #
 
     Profile           =Handbrake AutoCrop
-    Encode CLI #1     =?>autoCrop&&ORIGINAL:autoCropHandBrake&&!isDVD<:>--crop %%ORIGINAL:autoCropHandBrake%%<? ?>verticalScale<:>-l %%verticalScale%%<? ?>horizontalScale<:>-w %%horizontalScale%%<? ?>isDVD<:>--loose-anamorphic<?
+    Encode CLI #1     =?>autoCrop&&ORIGINAL:autoCropHandBrake&&!isDVD&&!ORIGINAL:badCrop<:>--crop %%ORIGINAL:autoCropHandBrake%%<? ?>yRes<:>-l %%yRes%%<? ?>xRes<:>-w %%xRes%%<? ?>isDVD<:>--loose-anamorphic<?
     Encoder #1        =
 
 # Snippit: HandBrake Subtitles
@@ -49,5 +49,5 @@
 #
 
     Profile           =Handbrake Subtitles
-    Encode CLI #1     =?>handbrakeSubtitles<:>--subtitle %%handbrakeSubtitles%%<=>EXISTS:%%INPUTSUB%%&&extractedSubtitles<:>--srt-file "%%INPUTSUB%%" --srt-codeset UTF-8 --srt-offset 0 --srt-lang eng<?
+    Encode CLI #1     =?>handbrakeSubtitleTracks<:>--subtitle %%handbrakeSubtitleTracks%%<=>EXISTS:%%INPUTSUB%%&&extractedSubtitles<:>--srt-file "%%INPUTSUB%%" --srt-codeset UTF-8 --srt-offset 0 --srt-lang eng<?
     Encoder #1        =
