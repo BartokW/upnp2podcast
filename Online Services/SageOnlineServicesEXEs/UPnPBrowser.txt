@@ -1,0 +1,5 @@
+Description=UPnP Broweser lets you browse any compliant UPnP server like PlayON or TVersity.
+Thumbnail=http://docs.google.com/uc?id=0B_sMJcYiGvN4NGUwMzliMzItNTNiYy00MDg4LWEyMmQtZDE1NDUxMWJmMzVm&export=download&hl=en
+Title=UPnP Browser
+Parameters=
+Version=20100224
