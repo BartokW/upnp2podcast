@@ -3,7 +3,7 @@ REM  MediaScraper.exe
 REM    Usage: TO use this batch file set this directory your mediaScraper directory
 REM           then drag and drop any number of files and/or directories.
 
-set DIRECTORY="G:\mediaScraper"
+set DIRECTORY="D:\upnp2podcast\mediaScraper"
 
 REM  Options:  
 REM    /genPropretyFile - Generate .properties file (default)
@@ -23,7 +23,7 @@ GOTO LOOP
 
 :NEXT
 cd /D "%DIRECTORY%"
-mediaScraper.pl %COMMAND% /tvSE /organizeFiles /organizeBaseFolder "G:\Videos"
+mediaScraper.pl %COMMAND% /organizeFiles /organizeBaseFolder "F:\NAS Backup\Videos"  /saveLog
 pause
 GOTO EOF
 
