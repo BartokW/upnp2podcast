@@ -83,12 +83,12 @@ $sourceNames .= "Source/xPodcastBrowseHulu/ShortName=Browse Hulu\n";
 
 @hardcodedShows = ('xPodcastABC_Current','xPodcastNBC_Current','xPodcastFOX_Current','xPodcastUSA_Current','xPodcastComedy_Central_Current','xPodcastSyFy_Current','xPodcastFX_Current');
 @{$currentShows{'xPodcastABC_Current'}} = ('Shaq Vs','Extreme Makeover: Home Edition','Eastwick','Shark Tank','Scrubs','Jimmy Kimmel Live','Supernanny','Brothers & Sisters','Dancing With The Stars','Hank','Ugly Betty','FlashForward','The Forgotten','Desperate Housewives','Modern Family','Wipeout','Lost','Better Off Ted','Defying Gravity','Grey.s Anatomy','Castle','Cougar Town','The Middle','Crash Course','Private Practice','V');
-@{$currentShows{'xPodcastNBC_Current'}} = ('Community','Late Night with Jimmy Fallon','Mercy','Parks and Recreation','Heroes','The Office','30 Rock','Saturday Night Live','The Biggest Loser','The Jay Leno Show','Trauma','Chuck','The Tonight Show with Conan O.Brien');#'
-@{$currentShows{'xPodcastFOX_Current'}} = ('House','Bones','Lie To Me','The Cleveland Show','Brothers','Glee','The Simpsons','Fringe','.Til Death','Kitchen Nightmares','Dollhouse','Family Guy','American Dad.','Hell.s Kitchen');#'
-@{$currentShows{'xPodcastUSA_Current'}} = ('White Collar','Psych','The Starter Wife','In Plain Sight','Royal Pains','Burn Notice','Monk');#'
-@{$currentShows{'xPodcastComedy_Central_Current'}} = ('The Colbert Report','The Daily Show with Jon Stewart');#'
-@{$currentShows{'xPodcastSyFy_Current'}} = ('Stargate Universe','Scare Tactics','Ghost Hunters International','Ghost Hunters','Sanctuary','Stargate Atlantis','Stargate SG.1');#'
-@{$currentShows{'xPodcastFX_Current'}} = ('30 Days','It.s Always Sunny in Philadelphia','The League','Nip.Tuck','The Riches','Sons of Anarchy');#'
+@{$currentShows{'xPodcastNBC_Current'}} = ('The Biggest Loser','Community','Late Night with Jimmy Fallon','Mercy','Parks and Recreation','Heroes','The Office','30 Rock','Saturday Night Live','The Biggest Loser','The Jay Leno Show','Trauma','Chuck','The Tonight Show with Conan O.Brien');#'
+@{$currentShows{'xPodcastFOX_Current'}} = ('24','Human Target','House','Bones','Lie To Me','The Cleveland Show','Brothers','Glee','The Simpsons','Fringe','.Til Death','Kitchen Nightmares','Dollhouse','Family Guy','American Dad.','Hell.s Kitchen');#'
+@{$currentShows{'xPodcastUSA_Current'}} = ('Burn Notice','White Collar','Psych','The Starter Wife','In Plain Sight','Royal Pains','Burn Notice','Monk');#'
+#@{$currentShows{'xPodcastComedy_Central_Current'}} = ('The Colbert Report','The Daily Show with Jon Stewart');#'
+@{$currentShows{'xPodcastSyFy_Current'}} = ('Caprica','Stargate Universe','Scare Tactics','Ghost Hunters International','Ghost Hunters','Sanctuary','Stargate Atlantis','Stargate SG.1');#'
+@{$currentShows{'xPodcastFX_Current'}}   = ('30 Days','It.s Always Sunny in Philadelphia','The League','Nip.Tuck','The Riches','Sons of Anarchy');#'
 
 
 foreach (@hardcodedShows)
@@ -109,13 +109,13 @@ foreach (@hardcodedShows)
 $linksFile  .= <<HARDCODED_LINKS;
 # Hulu
 xFeedPodcastCustom/aaHuluUserQueue=xPodcastBrowseHulu;external,UPnP2Podcast,PlayOn:Hulu:User Queue:By Name:+2
-xFeedPodcastCustom/zaHuluRecentEpisodes=xPodcastBrowseHulu;external,UPnP2Podcast,PlayOn:Hulu:Recently Added Episodes:+2
-xFeedPodcastCustom/zbHuluRecentMovies=xPodcastBrowseHulu;external,UPnP2Podcast,PlayOn:Hulu:Recently Added Feature Films:+2
-xFeedPodcastCustom/zcHuluPopularToday=xPodcastBrowseHulu;external,UPnP2Podcast,PlayOn:Hulu:Popular Videos Today:+2
-xFeedPodcastCustom/zdHuluPopularThisWeek=xPodcastBrowseHulu;external,UPnP2Podcast,PlayOn:Hulu:Popular Videos This Week:+2
-xFeedPodcastCustom/zeHuluPopularThisMonth=xPodcastBrowseHulu;external,UPnP2Podcast,PlayOn:Hulu:Popular Videos This Month:+2
-xFeedPodcastCustom/zfHuluPopularAllTime=xPodcastBrowseHulu;external,UPnP2Podcast,PlayOn:Hulu:Popular Videos All Time:+2
+xFeedPodcastCustom/zaHuluRecentEpisodes=xPodcastBrowseHulu;external,UPnP2Podcast,PlayOn:Hulu:Recently Added:Episodes:+2
+xFeedPodcastCustom/zbHuluRecentMovies=xPodcastBrowseHulu;external,UPnP2Podcast,PlayOn:Hulu:Recently Added:Feature Films:+2
+xFeedPodcastCustom/zcHuluPopularToday=xPodcastBrowseHulu;external,UPnP2Podcast,PlayOn:Hulu:Popular:Popular Episodes:+2
+xFeedPodcastCustom/zdHuluPopularMovies=xPodcastBrowseHulu;external,UPnP2Podcast,PlayOn:Hulu:Popular:Popular Feature Films:+2
 
+xFeedPodcastCustom/ComedyCentralScriptColbertReport=xPodcastComedy_Central_Current;external,UPnP2Podcast,PlayOn:Scripts:Comedy Central:Full Episodes:The Colbert Report:+4
+xFeedPodcastCustom/ComedyCentralScriptDailyShow=xPodcastComedy_Central_Current;external,UPnP2Podcast,PlayOn:Scripts:Comedy Central:Full Episodes:The Daily Show With Jon Stewart:+4
 HARDCODED_LINKS
 
 $textFile  .= <<HARDCODED_CATS;
@@ -128,17 +128,19 @@ Category/zaHuluRecentEpisodes/ShortName=Recently Added Episodes
 Category/zbHuluRecentMovies/LongName=Recently Added Movies
 Category/zbHuluRecentMovies/ShortName=Recently Added Movies
 
-Category/zcHuluPopularToday/LongName=Popular Today
-Category/zcHuluPopularToday/ShortName=Popular Today
+Category/zcHuluPopularToday/LongName=Popular TV Shows
+Category/zcHuluPopularToday/ShortName=Popular TV Shows
 
-Category/zdHuluPopularThisWeek/LongName=Popular This Week
-Category/zdHuluPopularThisWeek/ShortName=Popular This Week
+Category/zdHuluPopularMovies/LongName=Popular Movies
+Category/zdHuluPopularMovies/ShortName=Popular Movies
 
-Category/zeHuluPopularThisMonth/LongName=Popular This Month
-Category/zeHuluPopularThisMonth/ShortName=Popular This Month
+Category/ComedyCentralScriptColbertReport/ThumbURL=http://www.thetvdb.com/banners/_cache/posters/79274-1.jpg
+Category/ComedyCentralScriptColbertReport/LongName=The Colbert Report
+Category/ComedyCentralScriptColbertReport/ShortName=Colbert Report
 
-Category/zfHuluPopularAllTime/LongName=Popular All Time
-Category/zfHuluPopularAllTime/ShortName=Popular All Time
+Category/ComedyCentralScriptDailyShow/ThumbURL=http://www.thetvdb.com/banners/_cache/fanart/original/71256-4.jpg
+Category/ComedyCentralScriptDailyShow/LongName=The Daily Show With Jon Stewart
+Category/ComedyCentralScriptDailyShow/ShortName=The Daily Show
 HARDCODED_CATS
 
 foreach $category (sort { lc ($a) cmp lc($b) } keys %categories)
@@ -297,7 +299,11 @@ foreach $show (keys %shows)
         $linksFile .= "xPodcast_".$subCatName.","; 
     }  
     chop($linksFile);
-    $linksFile .=   ",xFlagTitleNone;external,UPnP2Podcast,PlayOn:Hulu:TV Episodes:".uc($showFirstLetter).":^".$showRegEx."\$:+2\n"; 
+    if ($showFirstLetter =~ /[0-9]/)
+    {
+        $showFirstLetter = "#";    
+    }
+    $linksFile .=   ",xFlagTitleNone;external,UPnP2Podcast,PlayOn:Hulu:TV:Full Episodes:".uc($showFirstLetter).":^".$showRegEx."\$:Episodes:+2\n"; 
 }
 
 open (LINKS,">CustomOnlineVideoLinks_UPnP2Podcast_Hulu.properties");
