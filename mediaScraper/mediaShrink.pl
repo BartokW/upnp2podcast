@@ -87,9 +87,19 @@
         exit 1;
     }
     
+    $useAltLaunch = 0;
     foreach (@parameters)
     {
-        push (@quotedParameters, "\"$_\"")
+        if (/useAltlaunch/i)
+        {
+            $useAltLaunch = 1;
+            print "  + /useAltLaunch : Using alternative launching method\n";
+        }
+        else
+        {
+            push (@quotedParameters, "\"$_\"")
+        }
+        
     }
     
     
@@ -115,20 +125,34 @@
     }
     else
     {
-        $mediaEngine = "$executablePath\\mediaEngine.exe";
+        $mediaEngine = "$executablePath\\mediaEngine.exe";                    
     }
 
-    $mediaEngine = "$executablePath\\mediaEngine.exe";   
     print " Executing command: \"$mediaEngine\" $optionsForEngine\n";
-    system("\"$mediaEngine\" $optionsForEngine");
-    Win32::Process::Create($ProcessObj, 
-            "$mediaEngine",
-            getFile($mediaEngine)." $optionsForEngine",
-            0,
-            IDLE_PRIORITY_CLASS,
-            ".");
-    $ProcessObj->Wait(1000 * 60 * 60 * 24);
-    $ProcessObj->GetExitCode($exitcode);
+    if($useAltLaunch)
+    {
+        $mediaEngine = "$executablePath\\mediaEngine.exe";   
+        Win32::Process::Create($ProcessObj, 
+                "$mediaEngine",
+                getFile($mediaEngine)." $optionsForEngine",
+                0,
+                IDLE_PRIORITY_CLASS,
+                ".");
+        $ProcessObj->Wait(1000 * 60 * 60 * 24);
+        $ProcessObj->GetExitCode($exitcode);   
+    }
+    else
+    {
+        system("\"$mediaEngine\" $optionsForEngine");
+        $exitcode = 1;
+        if (open(EXITCODE,"$executablePath\\mediaEngine.exit"))
+        {
+            $exitcode = <EXITCODE>;    
+        }
+        close(EXITCODE); 
+        $delString = "del \"$executablePath\\mediaEngine.exit\"";
+        `$delString`;
+    }
 
     print "Exiting Code: ($exitcode)\n";
     print "Exiting in 5 seconds...\n";
