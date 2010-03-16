@@ -36,7 +36,7 @@
     $executablePath = $`;
 
     # Code version
-    $codeVersion = "mediaEngine v2.0 (SNIP:BUILT)";
+    $codeVersion = "mediaEngine v3.0 (SNIP:BUILT)";
 
     $usage  = "$codeVersion\n\n";
     $usage .= "Usage: mediaEngine.exe should not be called directly.\n";
