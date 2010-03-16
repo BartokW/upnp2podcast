@@ -448,8 +448,18 @@
             {
                 $snippitName = $1;
                 $snipToReplace = $&;
-                $currentTarget =~ s#\Q$snipToReplace\E#$profiles{lc($snippitName)}{"targets"}[0]#g;
-                echoPrint("      + Replacing snippit $snippitName : $currentTarget\n",2);
+                if ($snippitName =~ /\$(.*)/)
+                {
+                    my $propName = $1;
+                    $currentTarget =~ s#\Q$snipToReplace\E#$profiles{lc($perRunOptionsHash{lc($propName)})}{"targets"}[0]#g;
+                    echoPrint("      + Replacing * snippit $snippitName (".$perRunOptionsHash{lc($propName)}.") : $currentTarget\n",2);
+                }
+                else
+                {
+                    $currentTarget =~ s#\Q$snipToReplace\E#$profiles{lc($snippitName)}{"targets"}[0]#g;
+                    echoPrint("      + Replacing snippit ? $snippitName : $currentTarget\n",2);
+                }
+    
             }
                   
             # Remove Comments
@@ -767,6 +777,16 @@
                     $videoInfoHash->{lc("$1")} = 1;
                     echoPrint("$baseSpace    + ffmpeg reports $1\n",2);
                 }
+            }
+            elsif ( $_ =~ /Stream.* Subtitle:/ )
+            {
+                $videoInfoHash->{lc("subtitleInfo")} = $_;
+                echoPrint("$baseSpace  - Subtitle Info Line: ".$videoInfoHash->{lc("subtitleInfo")}."\n",2);
+                if ($videoInfoHash->{lc("subtitleInfo")} =~ /Stream #([0-9.]+)/)
+                {   # Get Subtitle Stream Number 
+                    $videoInfoHash->{lc("subtitleTrack")} = $1;
+                    echoPrint("$baseSpace    +  Subtitle Track     = ".$videoInfoHash->{lc("subtitleTrack")}."\n",2);
+                }        
             }
             elsif ( $_ =~ /Audio: ([a-zA-Z0-9]+)/ )
             {
@@ -1112,7 +1132,7 @@
             $checkFile = encode('ISO-8859-1' , $1);
             echoPrint("            - Does file ($checkFile) exist?\n",2);
             $condTrue = checkProfileCond((((-e "$checkFile" || 
-                                            -e $perRunOptionsHash->{lc("SAGE_DIR")}."\\$checkFile"))?1:0), $negate, $text); 
+                                            -e $perRunOptionsHash->{lc("SAGE_DIR")}."\\$checkFile") && !($checkFile eq ""))?1:0), $negate, $text); 
             $perRunOptionsHash->{lc("check")} = $checkFile;
         }
         elsif ($check =~ /NOTEMPTY:(.*)/i)
@@ -1120,21 +1140,21 @@
             $checkFile = encode('ISO-8859-1' , $1);
             echoPrint("            - Does file ($checkFile) exist?\n",2);
             $condTrue = checkProfileCond((((-s "$checkFile" || 
-                                            -s $perRunOptionsHash->{lc("SAGE_DIR")}."\\$checkFile"))?1:0), $negate, $text); 
+                                            -s $perRunOptionsHash->{lc("SAGE_DIR")}."\\$checkFile") && !($checkFile eq ""))?1:0), $negate, $text); 
             $perRunOptionsHash->{lc("check")} = $checkFile;
         }
         elsif ($check =~ /PATH:(.*)/i)
         {
             $checkDirectory = encode('ISO-8859-1' , $1);
             echoPrint("            - Does path to ($checkDirectory) exist?\n",2);
-            $condTrue = checkProfileCond(((-d getPath("$checkDirectory"))?1:0), $negate, $text);
+            $condTrue = checkProfileCond(((-d getPath("$checkDirectory") && !($checkDirectory eq ""))?1:0), $negate, $text);
             $customSubStringArray->{lc("check")} = $checkDirectory;
         }
         elsif ($check =~ /DIRECTORY:(.*)/i)
         {
             $checkDirectory = encode('ISO-8859-1' , $1);
             echoPrint("            - Does file ($checkDirectory) exist?\n",2);
-            $condTrue = checkProfileCond((((-d "$checkDirectory" || -d $perRunOptionsHash->{lc("SAGE_DIR")}."\\$checkDirectory" || -d $perRunOptionsHash->{lc("SAGE_DIR")}."\\mediaEngineBins\\$checkDirectory"))?1:0), $negate, $text); 
+            $condTrue = checkProfileCond((((-d "$checkDirectory" || -d $perRunOptionsHash->{lc("SAGE_DIR")}."\\$checkDirectory" || -d $perRunOptionsHash->{lc("SAGE_DIR")}."\\mediaEngineBins\\$checkDirectory") && !($checkDirectory eq ""))?1:0), $negate, $text); 
             $perRunOptionsHash->{lc("check")} = $checkDirectory;
         }
         elsif ($check =~ /(.*)(=eq=|=~|>|<|>=|<=|==)(.*)/i)
@@ -1288,8 +1308,17 @@
         {
             $snippitName = $1;
             $snipToReplace = $&;
-            $currentTarget =~ s#\Q$snipToReplace\E#$profiles->{lc($snippitName)}{"targets"}[0]#g;
-            echoPrint("      + Replacing snippit $snippitName : $currentTarget\n",2);
+            if ($snippitName =~ /\$(.*)/)
+            {
+                my $propName = $1;
+                $currentTarget =~ s#\Q$snipToReplace\E#$profiles->{lc($perRunOptionsHash->{lc($propName)})}{"targets"}[0]#g;
+                echoPrint("      + Replacing * snippit $snippitName (".$perRunOptionsHash->{lc($propName)}.") : $currentTarget\n",2);
+            }
+            else
+            {
+                $currentTarget =~ s#\Q$snipToReplace\E#$profiles->{lc($snippitName)}{"targets"}[0]#g;
+                echoPrint("      + Replacing snippit ? $snippitName : $currentTarget\n",2);
+            }
         }
         
         while($currentTarget =~ /%%RAND([0-9]+)_([0-9]+)%%/i)
