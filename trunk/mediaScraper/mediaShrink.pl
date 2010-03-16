@@ -31,7 +31,7 @@
     $executableEXE  = $3; 
     $exitCode = 0;
     
-    $codeVersion = "$executableEXE v2.0 (SNIP:BUILT)";
+    $codeVersion = "$executableEXE v3.0 (SNIP:BUILT)";
     
     if (!(-e "$executablePath\\$executableEXE.bat"))
     {
@@ -53,7 +53,7 @@
       }
     }
     
-    open(USEAGE,"$executablePath\\mediaShrink.readme.txt");
+    open(USEAGE,"$executablePath\\$executableEXE.readme.txt");
     $usage = "$codeVersion\n";
     while(<USEAGE>)
     {
@@ -103,21 +103,21 @@
     }
     
     
-    if (-e "$executablePath\\mediaShrink.defaults.extra.txt")
+    if (-e "$executablePath\\$executableEXE.defaults.extra.txt")
     {
-        open(DEFAULTS,"$executablePath\\mediaShrink.defaults.extra.txt");
+        open(DEFAULTS,"$executablePath\\$executableEXE.defaults.extra.txt");
         $defaultsOptions .= <DEFAULTS>; 
         close(DEFAULTS);    
     }
     $defaultsOptions .= " ";
-    if (-e "$executablePath\\mediaShrink.defaults.txt")
+    if (-e "$executablePath\\$executableEXE.defaults.txt")
     {
-        open(DEFAULTS,"$executablePath\\mediaShrink.defaults.txt");
+        open(DEFAULTS,"$executablePath\\$executableEXE.defaults.txt");
         $defaultsOptions .= <DEFAULTS>; 
         close(DEFAULTS);    
     }
     
-    $optionsForEngine = "$defaultsOptions /mediaShrink fixBug @quotedParameters";
+    $optionsForEngine = "$defaultsOptions /$executableEXE fixBug @quotedParameters";
     
     if ($executable =~ /\.pl$/)
     {
