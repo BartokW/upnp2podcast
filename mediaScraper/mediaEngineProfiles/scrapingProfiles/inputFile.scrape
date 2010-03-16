@@ -83,7 +83,7 @@
 #
 
     Profile           =BareFile
-    Encode CLI #1     =?>!showTitle||!seasonNum||!episodeNum<:>?>!showTitle<:>($$showTitle$$[\p{L}0-9 \.\_()\-\&'`]+)[ ]?[\-\. ]{1}[ ]?<?S?($$seasonNum$$[0-9]{1,2})[ \.\-]?[xE]($$episodeNum$$[0-9]{2})[^pi0-9]<?
+    Encode CLI #1     =?>!showTitle||!seasonNum||!episodeNum<:>?>!showTitle<:>($$showTitle$$[\p{L}0-9 \.\_()\-\&'`]+)[ ]?[\-\. ]{1}[ \[\.]?<?S?($$seasonNum$$[0-9]{1,2})[ \.\-]?[xE]($$episodeNum$$[0-9]{2})[^pi0-9]<?
     Encoder #1        =/use "%%inputFile_NAME%% " /noOverWrite
     Encode CLI #1     =?>!showTitle||!seasonNum||!episodeNum<:>?>!showTitle<:>($$showTitle$$[\p{L}0-9 \.\_()\-\&'`]+)[ ]?[\-\. ]{1}[ ]?<?($$seasonNum$$[0-9]?>4digitTV<:>{1,2}<=>{1}<?)($$episodeNum$$[0-9]{2})[^pi0-9]<?
     Encoder #1        =/use "%%inputFile_NAME%% " /noOverWrite
