@@ -1,12 +1,18 @@
+mediaShrink v3.0 -
 
-Simple Usage: Drag and drop videos on MediaShrink.exe 
+Simple Usage: Drag and drop videos on MediaShrink.exe or MediaShink.bat 
 CLI Syntax  : mediaShrink.exe [options] <File|Folder> <File|Folder>
 
 ### Basic Options-----------------------------------------------------------
 
+    /help                   Show these options
     /saveLog                Save log file when complete (default)
     /saveAll                Save all temp files when complete
     /batch                  Run in batch mode, intended for Dirmon2/SJQ (default)
+    
+    /altLaunch              Use alternate launching meathod.  Should only be
+                              used if you're having problems and I ask you to 
+                              try it.
 
 ### Output Options-----------------------------------------------------------
 
@@ -15,52 +21,70 @@ CLI Syntax  : mediaShrink.exe [options] <File|Folder> <File|Folder>
                             with new extention.
     /outputDirectory <path> Directory to place encoded video.  Default is same
                             path as original.
-
-  /centralWorkFolder <path> Do all of the encoding work in a specified folder
-                            rather than next to the original video.
-
-### Standard Options ------------------------------------------------------------
-
-    /x264                   Use x264 encoder (default)
-    /divx                   Use ffmpeg encoder, roughly divx
-    
-    /cliBitrate <kbs>       Set video bitrate 
-                              - 2500 kbs if HDTV 
-                              - Otherwise 1500 kbs
-    
-    /onePass                Do a one-pass encode, faster
-    /twoPass                Do a two-pass encode, slower/higher quality
-                              - two-pass if HDTV
-                              - Otherwise one-pass
-    
-    /autoCrop               Auto detect crop settings using comskip (default)
-    
-    /reverseTelecine        Uses Handbrakes variable frame rate encoding
-                              - Default for DVD
-                              - Autodetected for 1080i HDTV
-                              - Otherwise disabled
+                            
+    /centralWorkFolder <path> Directory to do all temp work, useful if your 
+                              videos are stored on a NAS or recording drive
+                              that you don't want affected by encoding work.
                               
-    /denoise                Uses Hanbrakes denoise filter
+    /container <container>  A/V container to use
+                              - mkv : Uses mkv container (default)
+                              - mp4 : Uses mp4 container
 
-    /mkv                    Use the mkv container (default)
-    /mp4                    Use the mp4 container
-    
-    /verticalScale   <#>    Set the vertical Scale, horizontal adjusted to match
-    /horizontalScale <#>    Set the horizontal Scale, vertical adjusted to match
-                              - Handbrake decides for DVD's
-                              - ####x720 for HDTV
-                              - Otherwise same as original
+### Video Options ---------------------------------------------------------
 
-    /ac3                    Pass though original audio
-    /aac                    Encode audio to aac, mix down if nessiary
-    /mp3                    Encode audio to mpg, mix down if nessiary
-                              - AC3 for DVD/HDTV
-                              - 160 kbs AAC if original only has two channels
-                              
-    /audioBitrate <#>       Set audio bitrate (default: 160 kbs)
+    /vcodec <encoder>      Set the video encoder
+                            - x264   : Uses x264 encoder (default)
+                            - ffmpeg : Uses ffmpeg encoder, roughly divx
     
-    /attachSubtitles        Attach subtitle track if available
-                              - Default Autodetected
+    /vbitrate <kbs>        Set video bitrate (Default 1500)
+
+    /vProfile <profile>    Sets the video encoding profile
+                             - HQ       : Slow and pretty
+                             - MQ       : A nice mix of speed and quality (default)
+                             - LQ       : Fast enough for slow machines
+                             - portable : For playback on portable devices
+                             - custom   : Uses custom parameters from /x264opts
+
+   /x264opts <options>     Sets custom x264 options
+                             - ex: ref=2:bframes=2:subme=6:mixed-refs=0
+                             
+   /onePass                Performs a one-pass encode (default)
+   /twoPass                Performs a two-pass encode                         
+                                 
+   /xRes <###>             Scale video to ????x#### (Y Res is auto-calculated)
+   /yRes <###>             Scale video to ####x???? (X Res is auto-calculated)
+   
+   /IVTC                   Uses Handbrakes variable frame rate encoding
+   /noIVTC                 Blocks usage of IVTC by autoEncode
+    
+   /denoise                Uses Hanbrakes denoise filter
+   /noDenoise              Blocks usage of denoise by autoEncode
+
+   /decomb                 Uses Hanbrakes decomb filter (Selective Deinterlace)
+   /noDecomb               Blocks usage of decomb by autoEncode
+
+   /deinterlace            Uses Hanbrakes deinterlace filter
+   /noDeinterlace          Blocks usage of denoise by autoEncode
+
+   /autoCrop               Automatically crop videos to remove black bars
+   /noAutoCrop             Disable Automatic Cropping
+    
+   /noSubtitles            MediaShrink will automatically attempt to attach
+                            all subtitle/CC tracks it finds since its a pretty
+                            harmless operation.  Set this if you want to disable
+                            
+### Audio Options --------------------------------------------------------------
+
+    /acodec <encoder>      Set the audio encoder
+                              - faac   : AAC codec (Default Stereo/SDTV)
+                              - lame   : MP3 codec
+                              - vorbis : OGG codec
+                              - ac3    : AC3 passthough (Default HDTV)
+                              - dts    : DTS passthough
+
+    /abitrate <kbs>        Set audio bitrate in kbs (Default 160)
+    
+    /allAudio              Force mediaSrhink to encode all audio tracks      
 
 ### DVD Options ------------------------------------------------------------
 
