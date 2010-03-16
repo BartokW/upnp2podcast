@@ -3,27 +3,34 @@
 # Select x264 encoding profile
 #
     Profile           =x264 Options
-    Encode CLI #1     =?>%%vprofile%%=~custom<:>%%x264Opts%%<=>%%vprofile%%=~HQ<:>%%SNIP:x264 HQ%%<=>%%vprofile%%=~portable<:>%%SNIP:x264 Portable%%<=>%%SNIP:x264 MQ%%<?
+    Encode CLI #1     =?>%%vprofile%%=~custom<:>%%x264Opts%%<=>%%vprofile%%=~(HQ|LQ|MQ|Portable)<:>%%SNIP:$vprofile%%<=>%%SNIP:MQ%%<?
     Encoder #1        =
 
 #
 #  High Quality (Taken from Handbrake 9.4)  
 #
-    Profile           =x264 HQ
+    Profile           =HQ
     Encode CLI #1     =b-adapt=2:rc-lookahead=50
     Encoder #1        =
 
 #
 #  Medium Quality (Taken from Handbrake 9.4)      
 #
-    Profile           =x264 MQ
+    Profile           =MQ
     Encode CLI #1     =ref=2:bframes=2:subme=6:mixed-refs=0:weightb=0:8x8dct=0:trellis=0
+    Encoder #1        =
+
+#
+#  Low/Fask Quality (Taken from Doom 9 forums)      
+#
+    Profile           =LQ
+    Encode CLI #1     =mixed-refs=0:ref=2:subme=5
     Encoder #1        =
 
 #
 # Portable Devices (Taken from Handbrake 9.4)      
 #
-    Profile           =x264 Portable
+    Profile           =Portable
     Encode CLI #1     =cabac=0:ref=2:me=umh:bframes=0:8x8dct=0:trellis=0:subme=6
     Encoder #1        =
 
