@@ -9,7 +9,7 @@ $executablePath = $`;
 opendir(FEEDS,$executablePath);
 @feedFiles = readdir(FEEDS);
 
-@builtIn = ('aRecent','Hulu','Netflix','zExtras','zzPlayONSettings');
+@builtIn = ('aRecent','Hulu','Netflix','zExtras','zzPlayONSettings','MarchMadness','MLBtv','Pandora');
 
 foreach (@feedFiles)
 {
