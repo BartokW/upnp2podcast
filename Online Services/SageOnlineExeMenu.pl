@@ -32,9 +32,9 @@
   my $executablePath = $`;
   my $executableEXE  = $3; 
   my $useExt         = 'exe';
-  if ($executable =~ /\.pl$/)
+  if ($executable =~ /\.out$/)
   {
-      $useExt = 'pl';    
+      $useExt = 'out';    
   }
    
   open(LOGFILE,">$executablePath/$executableEXE.log");
@@ -58,10 +58,10 @@
   my @parameters = @ARGV;
 
   # Initilize options data structures
-  my %optionsHash;
-  my @inputFiles;
-  my @emptyArray = ();
-  my %emptyHash  = ();
+  my %optionsHash = ();
+  my @inputFiles  = ();
+  my @emptyArray  = ();
+  my %emptyHash   = ();
   
   # Setting cli options
   $parametersString = "";
