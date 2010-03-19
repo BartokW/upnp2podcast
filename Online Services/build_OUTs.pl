@@ -11,20 +11,26 @@ if (@ARGV == 0)
     exit 0;
 }
 
-my $script = $1;
-$script =~ m#(\\|\/)(([^\\/]*)\.([a-zA-Z0-9]{2,}))$#;
+my $script = $ARGV[0];
+$script =~ m#(\\|\/)?(([^\\/]*)\.([a-zA-Z0-9]{2,}))$#;
 my $scriptPath = $`;
 my $scriptEXE  = $3; 
 
+print "  + Script : ($script)\n";
 
 my $cwd  = `pwd`;
 my $date = `date`;
+chomp $date;
 
-$cpString = "cp $scipt script.pl";
+$cpString = "cp ./$script ./script.pl";
+print "  + Copying Script : ($cpString)\n";
 `$cpString`;
-$perlString = "perl -pi.bak -e \"s/SNIP:BUILT/Built on $date/g\" script.pl";
+$perlString = "perl -pi.bak -e \"s/SNIP:BUILT/Built on $date/g\" ./script.pl";
+print "  + editing temp Script : ($perlString)\n";
 `$perlString`;
-$ppString = "pp -N=Comments=\"$scriptEXE.out v1.0 by evilpenguin ($date)\" -c -o $scriptEXE.out script.pl";
+$ppString = "pp -N=Comments=\"$scriptEXE.out v1.0 by evilpenguin ($date)\" -c -o ./$scriptEXE.out ./script.pl";
+print "  + packing : ($ppString)\n";
 `$ppString`;
-$delString = "del script.pl";
+$delString = "rm ./script.pl";
+print "  + Deleting : ($delString)\n";
 `$delString`;
