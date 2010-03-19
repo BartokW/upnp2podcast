@@ -7,7 +7,7 @@ package Net::UPnP::HTTP;
 use strict;
 use warnings;
 
-use Socket; 
+use Socket;
 
 use Net::UPnP;
 use Net::UPnP::HTTPResponse;
@@ -55,10 +55,7 @@ sub post {
 		$res_content,
 		$res,
 		);
-		
-		#print "POST: ($method,$path,$post_addr)\n";
-		#print "Content:\n$req_content\n";
-
+  print STDERR "--------------------- HTTP GET IN: ".localtime()."\n";
 	# Thanks for miz <miz999 at gmail.com> (2009/02/13)
 	$req_content =~ s/\r//g;
 	$req_content =~ s/\n/\r\n/g;
@@ -71,6 +68,9 @@ Host: $post_addr:$post_port
 Content-Length: $req_content_len
 REQUEST_HEADER
 
+  my ( $finishSecond, $finishMinute, $finishHour, $dayOfMonth, $month, $yearOffset, $dayOfWeek, $dayOfYear, $daylightSavings ) = localtime();
+  #print STDERR "--------------------- HTTP GET: ".localtime()."\n";
+  #print STDERR "$req_content";
 	#print "header = " . %{$add_header} . "\n";
 	#%add_header = %{$add_header_ref};
 	if (ref $add_header) {
@@ -140,7 +140,7 @@ REQUEST_HEADER
 		print $res_header;
 		print $res_content;
 	}
-
+    print STDERR "--------------------- HTTP GET OUT: ".localtime()."\n";
 	return $res;
 }
 
