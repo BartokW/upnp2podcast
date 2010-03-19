@@ -19,7 +19,12 @@ my $scriptEXE  = $3;
 
 my $cwd  = `pwd`;
 my $date = `date`;
-`cp "$script" "script.pl"`;
-`perl -pi.bak -e "s/SNIP:BUILT/Built on $date/g" "script.pl"`;
-`pp -N=Comments="$scriptEXE.out v1.0 by evilpenguin ($date)" -c-o "$scriptEXE.out" "script.pl"`
-`del "script.pl"`;
+
+$cpString = "cp $scipt script.pl";
+`$cpString`;
+$perlString = "perl -pi.bak -e \"s/SNIP:BUILT/Built on $date/g\" script.pl";
+`$perlString`;
+$ppString = "pp -N=Comments=\"$scriptEXE.out v1.0 by evilpenguin ($date)\" -c -o $scriptEXE.out script.pl";
+`$ppString`;
+$delString = "del script.pl";
+`$delString`;
