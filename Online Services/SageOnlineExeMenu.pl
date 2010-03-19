@@ -1,6 +1,5 @@
 #!/usr/bin/perl -w
-#
-##    UPnP2Podcast.pl - Display UPnP servers as podcasts
+# 
 ##    Copyright (C) 2009    Scott Zadigian  zadigian(at)gmail
 ##
 ##    This program is free software; you can redistribute it and/or modify
