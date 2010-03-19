@@ -20,7 +20,7 @@
 #
   #use strict;
 ##### Import libraries
-  use Encode qw(encode decode);
+  use Encode;
   use utf8;
   
   my $debug = 0;
