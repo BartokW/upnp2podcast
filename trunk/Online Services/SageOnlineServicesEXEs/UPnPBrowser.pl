@@ -1,4 +1,5 @@
-##    UPnP2Podcast.pl - Display UPnP servers as podcasts
+#!/usr/bin/perl -w
+#
 ##    Copyright (C) 2009    Scott Zadigian  zadigian(at)gmail
 ##
 ##    This program is free software; you can redistribute it and/or modify
@@ -16,11 +17,10 @@
 ##    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 ##    02111-1307, USA
 ##---------------------------------------------------------------------------##
-#! /user/bin/perl
 #
   #use strict;
 ##### Import libraries
-  use Encode qw(encode decode);
+  use Encode;
   use utf8;
   use LWP::Simple qw($ua get head);
   use Net::UPnP::ControlPoint;
@@ -40,7 +40,7 @@
   $executablePath = $`;
   $executableEXE  = $3; 
    
-  open(LOGFILE,">$executablePath\\$executableEXE.log");
+  open(LOGFILE,">$executablePath/$executableEXE.log");
 
   # Get Start Time
   my ( $startSecond, $startMinute, $startHour, $dayOfMonth, $month, $yearOffset, $dayOfWeek, $dayOfYear, $daylightSavings ) = localtime();
@@ -58,7 +58,7 @@
   echoPrint("  + Path: $executablePath\n");
 
   # Check Versions
-  if (open(PROPERTIES,"$executablePath\\Sage.properties"))
+  if (open(PROPERTIES,"$executablePath/Sage.properties"))
   {
       while (<PROPERTIES>)
       {
@@ -79,19 +79,20 @@
   }
   else
   {
-      echoPrint("  ? Warning: Couldn't open ($executablePath\\sage.properties)\n");    
+      echoPrint("  ? Warning: Couldn't open ($executablePath/sage.properties)\n");    
   }
 
   # Move arguments into user array so we can modify it
   my @parameters = @ARGV;
 
   # Initilize options data structures
-  my %optionsHash;
-  my @inputFiles;
+  my %optionsHash = ();
+  my @inputFiles = ();
   my @emptyArray = ();
   my %emptyHash  = ();
   
   # Setting cli options
+  $parametersString = "";
   foreach (@parameters)
   {
       $parametersString .= "\"$_\" ";
