@@ -6,13 +6,12 @@ package Net::UPnP::AV::MediaServer;
 
 use strict;
 use warnings;
-use Encode qw(encode decode);
 
 use Net::UPnP::HTTP;
 use Net::UPnP::Device;
 use Net::UPnP::Service;
 use Net::UPnP::AV::Container;
-use Net::UPnP::AV::Item; 
+use Net::UPnP::AV::Item;
 
 use vars qw($_DEVICE $DEVICE_TYPE $CONTENTDIRECTORY_SERVICE_TYPE);
 
@@ -162,7 +161,7 @@ sub getcontentlist {
 			);
 	if ($action_res->getstatuscode() != 200) {
 	  print "!! Error: statusCode (".$action_res->getstatuscode().")\n";
-		return @content_list;
+		return ("!! Error: ".$action_res->getstatuscode());
 	}
 	$arg_list = $action_res->getargumentlist();
 	unless ($arg_list->{'Result'}) {
@@ -178,7 +177,7 @@ sub getcontentlist {
 			$container->setid($1);
 		}
 		if ($content =~ m/<dc:title>(.*)<\/dc:title>/si) {
-			$container->settitle($1); 
+			$container->settitle($1);
 		}
 		if ($content =~ m/<dc:date>(.*)<\/dc:date>/si) {
 			$container->setdate($1);
@@ -198,7 +197,7 @@ sub getcontentlist {
 			$item->setid($1);
 		}
 		if ($content =~ m/<dc:title>(.*)<\/dc:title>/si) {
-			$item->settitle($1); 
+			$item->settitle($1);
 		}
 		if ($content =~ m/<dc:description>(.*)<\/dc:description>/si) {
 			$item->setDesc($1);
