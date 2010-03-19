@@ -114,8 +114,8 @@ xFeedPodcastCustom/zbHuluRecentMovies=xPodcastBrowseHulu;external,UPnP2Podcast,P
 xFeedPodcastCustom/zcHuluPopularToday=xPodcastBrowseHulu;external,UPnP2Podcast,PlayOn:Hulu:Popular:Popular Episodes:+2
 xFeedPodcastCustom/zdHuluPopularMovies=xPodcastBrowseHulu;external,UPnP2Podcast,PlayOn:Hulu:Popular:Popular Feature Films:+2
 
-xFeedPodcastCustom/ComedyCentralScriptColbertReport=xPodcastComedy_Central_Current;external,UPnP2Podcast,PlayOn:Scripts:Comedy Central:Full Episodes:The Colbert Report:+4
-xFeedPodcastCustom/ComedyCentralScriptDailyShow=xPodcastComedy_Central_Current;external,UPnP2Podcast,PlayOn:Scripts:Comedy Central:Full Episodes:The Daily Show With Jon Stewart:+4
+xFeedPodcastCustom/ComedyCentralScriptColbertReport=xPodcastComedy_Central_Current;external,UPnP2Podcast,PlayOn:Comedy Central:The Colbert Report Episodes:+2
+xFeedPodcastCustom/ComedyCentralScriptDailyShow=xPodcastComedy_Central_Current;external,UPnP2Podcast,PlayOn:Comedy Central:The Daily Show Episodes:+2
 HARDCODED_LINKS
 
 $textFile  .= <<HARDCODED_CATS;
