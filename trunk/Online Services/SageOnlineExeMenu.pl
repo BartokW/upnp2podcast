@@ -1,3 +1,5 @@
+#!/usr/bin/perl -w
+#
 ##    UPnP2Podcast.pl - Display UPnP servers as podcasts
 ##    Copyright (C) 2009    Scott Zadigian  zadigian(at)gmail
 ##
@@ -16,8 +18,7 @@
 ##    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
 ##    02111-1307, USA
 ##---------------------------------------------------------------------------##
-#! /user/bin/perl
-#
+
   #use strict;
 ##### Import libraries
   use Encode;
@@ -36,7 +37,7 @@
       $useExt = 'pl';    
   }
    
-  open(LOGFILE,">$executablePath\\$executableEXE.log");
+  open(LOGFILE,">$executablePath/$executableEXE.log");
   
   # Get Start Time
   my ( $startSecond, $startMinute, $startHour, $dayOfMonth, $month, $yearOffset, $dayOfWeek, $dayOfYear, $daylightSavings ) = localtime();
@@ -63,6 +64,7 @@
   my %emptyHash  = ();
   
   # Setting cli options
+  $parametersString = "";
   foreach (@parameters)
   {
       $parametersString .= "\"$_\" ";
@@ -70,7 +72,7 @@
   
   setOptions(decode('ISO-8859-1' , $parametersString),\@emptyArray,\%optionsHash,\@inputFiles,\%emptyHash,"  ");
   
-  my $exeDir = "$executablePath\\SageOnlineServicesEXEs";  
+  my $exeDir = "$executablePath/SageOnlineServicesEXEs";  
   my @onlineServicesEXEs = scanDir($exeDir,$useExt);
   my @items = ();
   
