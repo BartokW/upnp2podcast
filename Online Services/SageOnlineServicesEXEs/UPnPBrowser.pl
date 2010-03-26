@@ -22,6 +22,7 @@
 ##### Import libraries
   use Encode;
   use utf8;
+  use MD5;
   use LWP::Simple qw($ua get head);
   use Net::UPnP::ControlPoint;
   use Net::UPnP::AV::MediaServer;
@@ -31,22 +32,19 @@
   
   $ua->timeout(30);
   $ua->agent( 'Mozilla/4.0 (compatible; MSIE 5.12; Mac_PowerPC)' );
-  
-  my $debug = 0;
 
   # Get the directory the script is being called from
   $executable = $0;
-  $executable =~ m#(\\|\/)(([^\\/]*)\.([a-zA-Z0-9]{2,}))$#;
-  $executablePath = $`;
-  $executableEXE  = $3; 
+  $executablePath = getPath($executable);
+  $executableEXE  = getFile($executable); 
    
   open(LOGFILE,">$executablePath/$executableEXE.log");
 
   # Get Start Time
-  my ( $startSecond, $startMinute, $startHour, $dayOfMonth, $month, $yearOffset, $dayOfWeek, $dayOfYear, $daylightSavings ) = localtime();
+  my ( $startSecond, $startMinute, $startHour) = localtime();
 
   # Code version
-  my $codeVersion = "$executableEXE v1.0 (SNIP:BUILT)".($debug ? "(debug)" : "");
+  my $codeVersion = "$executableEXE v1.0 (SNIP:BUILT)";
   
   my $invalidMsg .= "\n$codeVersion\n";
   $invalidMsg .= "\tUSAGE:";
@@ -54,12 +52,29 @@
 
   my ($feed_begin, $feed_item, $feed_end) = populateFeedStrings();
 
-  echoPrint("Welcome to $codeVersion!\n");
+  echoPrint("Welcome to $codeVersion! (".localtime()."\n");
   echoPrint("  + Path: $executablePath\n");
-
-  # Check Versions
-  if (open(PROPERTIES,"$executablePath/Sage.properties"))
+  
+  # Find SageTV Directory and check version
+  my @checkPaths = ($executablePath,
+                    getParentDir($executablePath),
+                    'C:/Program Files/SageTV/SageTV',
+                    '/opt/sagetv/server/');
+  
+  my $sageDir = $executablePath;                
+  foreach (@checkPaths)
   {
+      echoPrint("  + Checking: ($_)\n");
+      if (-e "$_/Sage.properties")
+      {
+          $sageDir = $_;
+          last;
+      }
+  }
+  
+  if (open(PROPERTIES,"$sageDir/Sage.properties"))
+  {
+      echoPrint("  + Found SageTV Dir: ($sageDir)\n");
       while (<PROPERTIES>)
       {
           chomp;
@@ -74,12 +89,12 @@
           }          
       }
       close(PROPERTIES);
-      echoPrint("  + SageTV Version: ($sageVersion)\n");
-      echoPrint("    - STV Version : ($stvVersions)\n");
+      echoPrint("    - SageTV Version: ($sageVersion)\n");
+      echoPrint("    - STV Version   : ($stvVersions)\n");
   }
   else
   {
-      echoPrint("  ? Warning: Couldn't open ($executablePath/sage.properties)\n");    
+      echoPrint("  ? Warning, couldn't find SageTV Directory\n");    
   }
 
   # Move arguments into user array so we can modify it
@@ -91,22 +106,54 @@
   my @emptyArray = ();
   my %emptyHash  = ();
   
-  # Setting cli options
-  $parametersString = "";
-  foreach (@parameters)
+  my $updateSuccess;
+  if ((@parameters == 0 || int(rand(10)) > 5))  
   {
-      $parametersString .= "\"$_\" ";
+      updateFeedFiles($executablePath);
   }
   
-  setOptions(decode('ISO-8859-1' , $parametersString),\@emptyArray,\%optionsHash,\@inputFiles,\%emptyHash,"  ");
+  if (@parameters == 1 &&  $parameters[0] =~ /:/)
+  {
+      echoPrint("  + Detected v1 parameter string, converting to v2 ($parameters[0])\n");
+      my @v1sting = split(/:/, $parameters[0]);
+      
+      $optionsHash{lc("device")} = shift @v1sting;
+      echoPrint("    - /device : (".$optionsHash{lc("device")}.")\n");
+      
+      my $v1Depth = pop @v1sting;
+      $v1Depth =~ /\+([0-9])/;
+      $optionsHash{lc("depth")} = $1-1;
+      echoPrint("    - /depth : (".$optionsHash{lc("depth")}.")\n");
+      
+      my $v1path = $optionsHash{lc("device")}."/"; 
+      foreach (@v1sting)
+      {
+          $v1path .= $_."/";   
+      }
+      $optionsHash{lc("path")} = $v1path;
+      echoPrint("    - /path  : (".$optionsHash{lc("path")}.")\n");
+
+      #disabling subcats
+      $optionsHash{lc("disableSubcats")} = 1;
+      echoPrint("    - /disableSubcats\n");          
+  }
+  else
+  {
+      # Setting cli options
+      $parametersString = "";
+      foreach (@parameters)
+      {
+          $parametersString .= "\"$_\" ";
+      }
+      
+      setOptions(decode('ISO-8859-1' , $parametersString),\@emptyArray,\%optionsHash,\@inputFiles,\%emptyHash,"  ");
+  }
   
   if (@parameters == 0)
   {
-      echoPrint("  + No Options!  Printing available UPnP Servers\n");
+      echoPrint("  + /mainMenu : Printing available UPnP Servers\n");
       my @dev_list = $obj->search(st =>'upnp:rootdevice', mx => 1);
-      my $opening;
-      my @items = ();
-      my $newItem,$video,$title,$description,$type,$thumbnail;
+      my (@items, $opening, $newItem, $video, $title, $description, $type, $thumbnail);
   
       $opening = $feed_begin;
       $opening =~ s/%%FEED_TITLE%%/UPnP Browser/g;
@@ -149,12 +196,34 @@
       exit 0;
   }
 
+  my %serverCache = ();
+  if (open(UPNPTREECACHE, "$executablePath\\$executableEXE.cache"))
+  {
+      echoPrint("  + Building Cache UPnP Server Cache...\n");
+      while(<UPNPTREECACHE>)
+      {
+          chomp;
+          if (/===/)
+          {
+              $upnpFolder  = $`;
+              $upnpContent = $';
+              @upnpContent = split(/&&&/,$upnpContent);
+              echoPrint("    - $upnpFolder\n");
+              foreach (@upnpContent)
+              {
+                  #echoPrint("      + $_\n");
+                  push(@{$serverCache{lc($upnpFolder)}},$_)    
+              }
+          }
+      }
+      close(UPNPTREECACHE);    
+  }
   
   if (exists $optionsHash{lc("device")})
   {
       my $lookingFor = $optionsHash{lc("device")};
       echoPrint("  + Looking for UPnP Server: ".$lookingFor."\n");
-      if (-s "$executablePath\\$lookingFor.cache")
+      if (-s "$executablePath\\$executableEXE.$lookingFor.cache")
       {
           echoPrint("    - Found Cache ($executablePath\\$lookingFor.cache)\n");
           if (open(UPNPCACHE,"$executablePath\\$executableEXE.$lookingFor.cache"))
@@ -163,7 +232,6 @@
               @cacheFull = <UPNPCACHE>;
               $cacheText  = "@cacheFull";
               $cacheText  =~ /=======================/;
-              $res_msg = $`;
               $post_con = $';
               $dev = Net::UPnP::Device->new();              
    		        $dev->setssdp($cacheText);
@@ -200,14 +268,14 @@
           echoPrint("  ! Error! Couldn't find UPnP Device: ($lookingFor)\n");
           my $opening;
           my @items = ();
-          my $newItem,$video,$title,$description,$type,$thumbnail;
+          my ($newItem, $video, $title, $description, $type, $thumbnail);
       
           $opening = $feed_begin;
           $opening =~ s/%%FEED_TITLE%%/UPnP Browser (Error!)/g;
           $opening =~ s/%%FEED_DESCRIPTION%%/UPnP Browser (Error!)/g;
           
           $newItem = $feed_item;
-          $video             = toXML('external,"'.$executable.'",/device||'.$_->getfriendlyname()."||/uid||0");
+          $video             = toXML('external,'.$executable.',/device||'.$_->getfriendlyname()."||/uid||0");
           $title             = "UPnP Browser Error!";
           $description       = "UPnP Browser Error!  Unable to find UPnP Device ($lookingFor)";
           $thumbnail         = '';
@@ -236,154 +304,110 @@
           exit 0;
       }
       
+      if (exists $optionsHash{lc("path")} && $foundDevice == 1 &&!exists $optionsHash{lc("uid")})
+      {  # if all we get is a path, serach the tree for the uid
+          $optionsHash{lc("uid")} = 0;
+          my @splitString = split(/\//,$optionsHash{lc("path")});
+          echoPrint("  + GetContent from: ".(shift @splitString)."\n");
+          
+          foreach $lookingFor (@splitString)
+          {         
+              echoPrint("    - Looking for : ".$lookingFor."\n");
+              
+              # Checking Cache
+              my @content_list = ();
+              if (exists $serverCache{lc($optionsHash{lc("uid")})})
+              {
+                  my @tempArray = $serverCache{lc($optionsHash{lc("uid")})};
+                  
+                  echoPrint("  + Adding from Cache: (".$optionsHash{lc("uid")}.")(".@{$serverCache{lc($optionsHash{lc("uid")})}}.")\n");
+                  foreach (@{$serverCache{lc($optionsHash{lc("uid")})}})
+                  {
+                      #echoPrint("    - (".$serverCache{lc($optionsHash{lc("uid")})}[1].")\n");
+                      if($_ =~ /,,,/)
+                      {
+                          my $uid    = $`;
+                          my $title = $'; 
+                          #echoPrint("    - $title ($uid)\n");
+                          $container = Net::UPnP::AV::Container->new();
+                          $container->setid($uid);
+                          $container->settitle($title);
+                          push (@content_list,$container);
+  
+                      }
+                  }
+              }
+              else
+              {
+                  @content_list = $mediaServer->getcontentlist(ObjectID => $optionsHash{lc("uid")});
+                  my $cacheString = $optionsHash{lc("uid")}."===";
+                  my @content_list_cache = ();
+                  foreach (@content_list)
+                  {
+                      push(@content_list_cache,$_->getid().",".$_->gettitle());
+                      $cacheString .= $_->getid().",,,".$_->gettitle()."&&&";       
+                  }
+                  $cacheString .= "\n";
+                  $serverCache{lc($optionsHash{lc("uid")})} = @content_list_cache;               
+                  if (open(UPNPTREECACHE, ">>$executablePath\\$executableEXE.cache"))
+                  {
+                      print UPNPTREECACHE $cacheString; 
+                      close(UPNPTREECACHE);   
+                  }
+                                 
+              }
+
+              my $found  = 0;
+              foreach $content (@content_list)
+              {
+                  echoPrint("      + ".($content->iscontainer() ? "/" : "")."".$content->gettitle()." (".$content->getid().")\n");
+                  if ($content->gettitle() =~ /$lookingFor/i)
+                  {
+                      echoPrint("        - Found! : $`(".$&.")$'\n");
+                      $optionsHash{lc("uid")} = $content->getid();
+                      $found = 1;
+                      #last;    
+                  }    
+              }              
+              if ($found == 0)
+              {
+                  echoPrint("    ! Couldn't find : ".$lookingFor."\n");
+                  exit 0; 
+              }
+          }
+
+      }
+      #die;  
+      
       if (exists $optionsHash{lc("uid")} && $foundDevice == 1)
       {
+                             
+          my @items = ();
+          @items    = (@items, addItems($mediaServer, 
+                                        $optionsHash{lc("uid")}, 
+                                        $optionsHash{lc("path")}, 
+                                        $optionsHash{lc("device")}, 
+                                        !(exists $optionsHash{lc("disableSubcats")}), 
+                                        (exists $optionsHash{lc("depth")} ? $optionsHash{lc("depth")} : 0) ));
           
-          my @content_list = ();
-          my $id = $optionsHash{lc("uid")};
-          echoPrint("  + Looking for UID: ($id)\n");
-          @content_list = $mediaServer->getcontentlist(ObjectID => $id);
-          if ($content_list[0] =~ /^!!/)
-          {
-              echoPrint("    - Error UID invalid, trying full path search\n");
-              exit 0;
-          }
-          else
-          {
-            echoPrint("    - Found UID ($id), outputing directory\n");
-            my $opening;
-            my @items = ();
-            my $newItem,$video,$title,$description,$type,$thumbnail;
-        
-            $opening = $feed_begin;
-            $opening =~ s/%%FEED_TITLE%%/UPnP Browser ($lookingFor)/g;
-            $opening =~ s/%%FEED_DESCRIPTION%%/UPnP Browser ($lookingFor)/g;
+          my $opening = $feed_begin;;
+          $opening =~ s/%%FEED_TITLE%%/UPnP Browser ($lookingFor)/g;
+          $opening =~ s/%%FEED_DESCRIPTION%%/UPnP Browser ($lookingFor)/g;
 
-            foreach (@content_list)
-            {
-                if ($_->iscontainer())
-                {     
-                    $newItem = $feed_item;
-                    $video             = toXML('external,"'.$executable."\",/device||$lookingFor||/uid||".$_->getid()."||/path||".$optionsHash{lc("path")}."\\".$_->gettitle());
-                    $title             = $_->gettitle();
-                    $description       = $optionsHash{lc("path")}."\\".$_->gettitle();
-                    $thumbnail         = '';
-                    $type              = 'sagetv/subcategory';
-                    
-                    if ($optionsHash{lc("path")} =~ /hulu.*networks$/i)
-                    {
-                      	$networkHuluBanner = $title;
-                    		$networkHuluBanner =~ s/&//g;
-                    		$networkHuluBanner =~ s/[ \-]/_/g;
-                    		$networkHuluBanner =~ s/[.:'`"!]//g; #"
-                    		$thumbnail = toXML("http://assets.hulu.com/companies/company_thumbnail_".lc($networkHuluBanner).".jpg");                    
-                    }
-                    elsif ($optionsHash{lc("path")} =~ /hulu/i)
-                    {   # Try and drop in show thumbnails in Hulu, there's gotta be a better way to handle this
-                    		$showHuluBanner = $title;
-                    		$showHuluBanner =~ s/&/and/g;
-                    		$showHuluBanner =~ s/[ \-]/_/g;
-                    		$showHuluBanner =~ s/[.:'`"!\\\/]//g; #"
-                    		$thumbnail = toXML("http://assets.hulu.com/shows/show_thumbnail_".lc($showHuluBanner).".jpg");
-                    }
-                    
-                    $newItem =~ s/%%ITEM_TITLE%%/$title/g;
-                    $newItem =~ s/%%ITEM_DATE%%//g;
-                    $newItem =~ s/%%ITEM_DESCRIPTION%%/$description/g;
-                    $newItem =~ s/%%ITEM_URL%%/$video/g;
-                    $newItem =~ s/%%ITEM_DUR%%//g;
-                    $newItem =~ s/%%ITEM_SIZE%%//g;
-                    $newItem =~ s/%%ITEM_TYPE%%/$type/g;
-                    $newItem =~ s/%%ITEM_PICTURE%%/$thumbnail/g;
-                    $newItem =~ s/%%ITEM_DUR_SEC%%//g; 
-                    push(@items,$newItem);
-                }
-                elsif ($_->isitem())
-                {
-                    my $newItem = $feed_item;
-                    my $content = $_;
-                    my $id    = $content->getid();
-                    my $title = $content->gettitle();
-                    my $video = toXML($content->geturl());
-                    my $size  = $content->getSize();
-                    my $date  = $content->getdate();
-                    my $rating      = $content->getRating();
-                    my $userRating  = $content->getUserRating();
-                    my $dur  = $content->getDur();
-                    my $thumbnail  = toXML($content->getPicture());
-                    my $description = $content->getDesc();
-                    my $type = 'video/mpeg2';
-            
-                    if ($title =~ /s([0-9]+)e([0-9]+): (.*)/)
-                    {
-                        my $season  = $1;
-                        my $episode = $2;
-                        my $episodeTitle = $3;
-                        $description        = "Season $season Episode $episode - $description"; 
-                        $title = $episodeTitle;
-                    }
-                    
-                    $dur    =~ /([0-9]+):([0-9]+):([0-9]+).([0-9]+)/;
-                    my $durTotalSec = $1*60*60 + $2*60 + $3;
-                    my $durTotalMin = $durTotalSec/60;
-                    
-                    if ($url =~ /(hulu|cbs)/i)
-                    {   # Roughly Account for commercials
-                        while($durTotalMin > 0)
-                        {
-                            $durTotalMin -= 7;
-                            $durTotalSec += 30;    
-                        }  
-                    }
-                    
-                    my $durDisSec  = $durTotalSec;
-                    my $durDisMin  = 0;
-                    my $durDisHour = 0;
-                    
-                    while ($durDisSec > 60)
-                    {
-                        $durDisSec -= 60;
-                        $durDisMin   += 1;
-                        if ($durDisMin == 60)
-                        {
-                            $durDisHour += 1;
-                            $durDisMin   = 0;
-                        }
-                    }
-            
-                    my $durDisplay = sprintf("%02d:%02d:%02d", $durDisHour, $durDisMin, $durDisSec);       
-                    
-                    $date  =~ /^(.*)T/;
-                    $date  = $1;                    
-                    
-                    $newItem =~ s/%%ITEM_TITLE%%/$title/g;
-                    $newItem =~ s/%%ITEM_DATE%%/$date/g;
-                    $newItem =~ s/%%ITEM_DESCRIPTION%%/$description/g;
-                    $newItem =~ s/%%ITEM_URL%%/$video/g;
-                    $newItem =~ s/%%ITEM_DUR%%/$durDisplay/g;
-                    $newItem =~ s/%%ITEM_SIZE%%/$size/g;
-                    $newItem =~ s/%%ITEM_TYPE%%/$type/g;
-                    $newItem =~ s/%%ITEM_PICTURE%%/$thumbnail/g;
-                    $newItem =~ s/%%ITEM_DUR_SEC%%/$durTotalSec/g;
-                    push(@items,$newItem);                
-                } 
-           }           
-  
-            print encode('UTF-8', $opening);
-            foreach (@items)
-            {
-                if (!($_ eq ""))
-                {
-                    print encode('UTF-8', $_);
-                }
-            }  
-            print encode('UTF-8', $feed_end);
-            exit 0;  
-          }               
+          print encode('UTF-8', $opening);
+          foreach (@items)
+          {
+              if (!($_ eq ""))
+              {
+                  print encode('UTF-8', $_);
+              }
+          }  
+          print encode('UTF-8', $feed_end);
+          exit 0;               
       }     
   }
   
-  my ( $finishSecond, $finishMinute, $finishHour, $dayOfMonth, $month, $yearOffset, $dayOfWeek, $dayOfYear, $daylightSavings ) = localtime();
+  my ( $finishSecond, $finishMinute, $finishHour ) = localtime();
   
   # handle negative times
   if ( $finishSecond < $startSecond )
@@ -443,21 +467,12 @@
         }
         while (@newOptions != 0)
         {
-            if ($newOptions[0] =~ m#^/ERROR$#)
-            {   # Message from profile that an unrecoverable error has occured
-                $reason = "Error reported from profile file: $newOptions[1]";
-                echoPrint("    ! $reason\n");
-                echoPrint("    ! Moving onto next file");
-                $optionsHash->{lc("wereDoneHere")} = $reason;
-                $errorLevel++;
-                return;
-            }
-            elsif ($newOptions[0] =~ m#^/(!?)([a-zA-Z0-9_]+)#i)
+            if ($newOptions[0] =~ m#^/(!?)([a-zA-Z0-9_]+)#i)
             {   # Generic add sub string
                 echoPrint("$logSpacing  - Adding to to options Hash\n");
                 $getVideoInfoCheck = $1;
                 $key = $2;
-                echoPrint("$logSpacing    + Key: $key ($optionsHash->{lc($key)})\n");
+                echoPrint("$logSpacing    + Key: $key (".(exists $optionsHash->{lc($key)} ? $optionsHash->{lc($key)} : "" ).")\n");
                 if (exists $optionsHash->{lc($key)} && $noOverwrite)
                 {
                     if ((!($newOptions[1] =~ m#^[/%]# || $newOptions[1] eq "") || $newOptions[1] =~ m#^/.*/#))
@@ -468,18 +483,6 @@
                     else
                     {
                         echoPrint("$logSpacing      ! Already Exists, skipping: (".$newOptions[0].")\n");
-                    }
-                }
-                elsif (exists $optionsHash->{lc("no".$key)})
-                {
-                    if ((!($newOptions[1] =~ m#^[/%]# || $newOptions[1] eq "") || $newOptions[1] =~ m#^/.*/#))
-                    {
-                        echoPrint("$logSpacing      ! Found /no$key, skipping (".$newOptions[0]." ".$newOptions[1].")\n");
-                        shift(@newOptions);    # Remove next parameter also
-                    }
-                    else
-                    {
-                        echoPrint("$logSpacing      ! Found /no$key, skipping (".$newOptions[0].")\n");
                     }
                 }
                 else
@@ -523,7 +526,6 @@
             }
             shift(@newOptions); 
         }
-        #echoPrint("! Returing: ($parameterString)\n");
         return $parameterString;
     }
 ##### Split a line of text ignoring quoted text
@@ -532,7 +534,7 @@
         my ($originalLine,$split) = @_;
         # Handle Quotes
         my @splitWithQuotes = ();
-        my %quoteHash = {};
+        my %quoteHash = ();
         my $quoteNum = 0;
         while($originalLine =~ /"([^"]*)"/)#"
         {
@@ -572,11 +574,8 @@
     }
 
 
-  sub populateFeedStrings()
+  sub populateFeedStrings
   {
-    my ($second, $minute, $hour, $dayOfMonth, $month, $yearOffset, $dayOfWeek, $dayOfYear, $daylightSavings) = localtime();
-    my $year = 1900 + $yearOffset;
-    $month++;
     my $feed_begin = <<FEED_BEGIN;
 <rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd"
   xmlns:content="http://purl.org/rss/1.0/modules/content/">
@@ -623,8 +622,334 @@ FEED_END
       $string =~ s/'/&apos;/g;  #'
       return $string;
   }
+
+
+  sub addItems
+  {
+      my $mediaServer    = shift;
+      my $uid            = shift;
+      my $path           = shift;
+      my $device         = shift;
+      my $disableSubcats = shift;
+      my $depth          = shift;
+
+      my ($newItem, $video, $title, $description ,$type, $thumbnail);       
+      my @content_list = $mediaServer->getcontentlist(ObjectID => $uid);
+      my @items = ();
+      
+      if ($content_list[0] =~ /^!!/)
+      {
+        echoPrint("    - Error UID invalid, trying full path search\n");
+      }
+      else
+      {
+        echoPrint("    - Found UID ($uid), outputing directory\n");          
+        foreach (@content_list)
+        {
+            if ($_->iscontainer())
+            {
+                echoPrint("      / ".$_->gettitle()."\n");
+                if ($depth != 0)
+                {
+                    @items = (@items, addItems($mediaServer, $_->getid(), $path."\\".$_->gettitle(), $device, $disableSubcats, ($depth - 1)));        
+                }
+                elsif ($disableSubcats == 1)
+                {                        
+                    $newItem = $feed_item;
+                    $video             = toXML('external,'.$executable.",/device||".$device."||/uid||".$_->getid()."||/path||".$path."\\".$_->gettitle());
+                    $title             = $_->gettitle();
+                    $description       = $path."\\".$_->gettitle();
+                    $thumbnail         = '';
+                    $type              = 'sagetv/subcategory';
+                    
+                    if ($path =~ /hulu.*networks$/i)
+                    {
+                      	$networkHuluBanner = $title;
+                    		$networkHuluBanner =~ s/&//g;
+                    		$networkHuluBanner =~ s/[ \-]/_/g;
+                    		$networkHuluBanner =~ s/[.:'`"!]//g; #"
+                    		$thumbnail = toXML("http://assets.hulu.com/companies/company_thumbnail_".lc($networkHuluBanner).".jpg");                    
+                    }
+                    elsif ($path =~ /hulu/i)
+                    {   # Try and drop in show thumbnails in Hulu, there's gotta be a better way to handle this
+                    		$showHuluBanner = $title;
+                    		$showHuluBanner =~ s/&/and/g;
+                    		$showHuluBanner =~ s/[ \-]/_/g;
+                    		$showHuluBanner =~ s/[.:'`"!\\\/]//g; #"
+                    		$thumbnail = toXML("http://assets.hulu.com/shows/show_thumbnail_".lc($showHuluBanner).".jpg");
+                    }
+                    
+                    $newItem =~ s/%%ITEM_TITLE%%/$title/g;
+                    $newItem =~ s/%%ITEM_DATE%%//g;
+                    $newItem =~ s/%%ITEM_DESCRIPTION%%/$description/g;
+                    $newItem =~ s/%%ITEM_URL%%/$video/g;
+                    $newItem =~ s/%%ITEM_DUR%%//g;
+                    $newItem =~ s/%%ITEM_SIZE%%//g;
+                    $newItem =~ s/%%ITEM_TYPE%%/$type/g;
+                    $newItem =~ s/%%ITEM_PICTURE%%/$thumbnail/g;
+                    $newItem =~ s/%%ITEM_DUR_SEC%%//g; 
+                    push(@items,$newItem);
+                }                   
+            }
+            elsif ($_->isitem())
+            {
+                echoPrint("      + ".$_->gettitle()."\n"); 
+                my $newItem = $feed_item;
+                my $content = $_;
+                my $id    = $content->getid();
+                my $title = $content->gettitle();
+                my $video = toXML($content->geturl());
+                my $size  = $content->getSize();
+                my $date  = $content->getdate();
+                my $rating      = $content->getRating();
+                my $userRating  = $content->getUserRating();
+                my $dur  = $content->getDur();
+                my $thumbnail  = toXML($content->getPicture());
+                my $description = $content->getDesc();
+                my $type = 'video/mpeg2';
+        
+                if ($title =~ /s([0-9]+)e([0-9]+): (.*)/)
+                {
+                    my $season  = $1;
+                    my $episode = $2;
+                    my $episodeTitle = $3;
+                    $description        = "Season $season Episode $episode - $description"; 
+                    $title = $episodeTitle;
+                }
+                
+                $dur    =~ /([0-9]+):([0-9]+):([0-9]+).([0-9]+)/;
+                my $durTotalSec = $1*60*60 + $2*60 + $3;
+                my $durTotalMin = $durTotalSec/60;
+                
+                if ($video =~ /(hulu|cbs)/i)
+                {   # Roughly Account for commercials
+                    while($durTotalMin > 0)
+                    {
+                        $durTotalMin -= 7;
+                        $durTotalSec += 30;    
+                    }  
+                }
+                
+                my $durDisSec  = $durTotalSec;
+                my $durDisMin  = 0;
+                my $durDisHour = 0;
+                
+                while ($durDisSec > 60)
+                {
+                    $durDisSec -= 60;
+                    $durDisMin   += 1;
+                    if ($durDisMin == 60)
+                    {
+                        $durDisHour += 1;
+                        $durDisMin   = 0;
+                    }
+                }
+        
+                my $durDisplay = sprintf("%02d:%02d:%02d", $durDisHour, $durDisMin, $durDisSec);       
+                
+                $date  =~ /^(.*)T/;
+                $date  = $1;                    
+                
+                $newItem =~ s/%%ITEM_TITLE%%/$title/g;
+                $newItem =~ s/%%ITEM_DATE%%/$date/g;
+                $newItem =~ s/%%ITEM_DESCRIPTION%%/$description/g;
+                $newItem =~ s/%%ITEM_URL%%/$video/g;
+                $newItem =~ s/%%ITEM_DUR%%/$durDisplay/g;
+                $newItem =~ s/%%ITEM_SIZE%%/$size/g;
+                $newItem =~ s/%%ITEM_TYPE%%/$type/g;
+                $newItem =~ s/%%ITEM_PICTURE%%/$thumbnail/g;
+                $newItem =~ s/%%ITEM_DUR_SEC%%/$durTotalSec/g;
+                push(@items,$newItem);                
+            } 
+       }
+    }          
+    return @items;
+  }
   
-  exit;
+  sub updateFeedFiles
+  {
+    my ($executablePath) = @_;
+    my $rv = 0;  
+    # URL of file containing feed versions
+    my $feedPath       = "$executablePath\\STVs\\SageTV3\\OnlineVideos\\";
+    my $feedVersionURL = 'http://upnp2podcast.googlecode.com/svn/trunk/upnp2podcast/Feeds/FeedVersions.txt';
+    my ($updateFile, $propFileName, $propFileVersion, 
+        $propFileMD5, $propFileURL, $topLine, $currentVersion,
+        $updatedMD5, $propPlugIn);
+    $feedVersionURL    =~ /http:\/\/[^\/]/;
+    my $feedBaseURL    = $&;
+
+    echoPrint("  + Checking for feed updates\n");
+
+    my $content = get $feedVersionURL;
+    $content =~ s/\r//g;
+    if (defined $content)
+    {
+        my @plugIns = ();
+        if (open(PLUGINS,"UPnP2Podcast.plugins"))
+        {
+            @plugIns = <PLUGINS>;
+            chomp(@plugIns);
+            close(PLUGINS);  
+        }
+
+       
+        my @content = split(/\n/,$content);
+        echoPrint("  + Downloaded FeedVersions.txt (".MD5->hexhash($content)."), checking for updates(".$feedVersionURL.")\n");
+        foreach (@content)
+        {
+            $updateFile      = 0;
+            if (/(.*),(.*),(.*),(.*),(.*)/)
+            {
+                ($propFileName, $propFileVersion, $propFileMD5, $propFileURL, $propPlugIn) = ($1,$2,$3,$4,$5);
+                echoPrint("    - File      : $propFileName\n");
+                echoPrint("      - Version : $propFileVersion\n");
+                echoPrint("      - URL     : $propFileURL\n");
+                echoPrint("      - MD5     : $propFileMD5\n");
+                echoPrint("      - Plugin  : $propPlugIn\n");
+                if (grep(/\Q$propPlugIn\E/,@plugIns) || $propPlugIn eq "")
+                {
+                    if ($propFileURL =~ /\Q^$feedBaseURL\E/ || 1)
+                    {   # Make sure it comes from my google code account
+                        if (-e "$feedPath$propFileName")
+                        {
+                            open(FEED,"$feedPath$propFileName");
+                            $topLine = <FEED>;
+                            chomp($topLine);
+                            close(FEED);
+                            $currentVersion = "";
+                            if ($topLine =~ /Version=([0-9]+)/i)
+                            {
+                                $currentVersion = $1;
+                            }
+                            echoPrint("      - Local Version : $currentVersion\n");
+                            if ($propFileVersion > $currentVersion)
+                            {
+                                $updateFile = 1;    
+                            }
+                        }
+                        else
+                        {
+                            $updateFile = 1;
+                        }
+                    }
+                }
+                else
+                {
+                    echoPrint("        + PlayOn Plug-in ($propPlugIn) not installed, skipping (@plugIns)\n");    
+                }
+                                
+                if ($updateFile)
+                {
+                    echoPrint("      - Updating File!\n");             
+                    $content = get $propFileURL;
+                    if (!($content eq ""))
+                    {
+                        $content =~ s/\r//g;
+                        $updatedMD5 = MD5->hexhash($content);
+                        echoPrint("        + MD5 URL : $updatedMD5 ($propFileMD5)($feedPath$propFileName)\n");
+                        if ($updatedMD5 eq $propFileMD5)
+                        {
+                            if (open(FEED,">$feedPath$propFileName"))
+                            {
+                                print FEED $content;
+                                close(FEED);
+                            }
+                            else
+                            {
+                                echoPrint("        ! Couldn't open file for write ($feedPath$propFileName)\n");
+                            }    
+                            $rv++;
+                        }
+                        else
+                        {
+                            echoPrint("        - MD5 check failed, skipping!\n");    
+                        }
+                    }
+                } 
+            }
+        }  
+    }
+    else
+    {
+        echoPrint("  ! Failed to get FeedVersions.txt, skipping updates\n");
+    } 
+    return $rv;   
+  }
+  
+##### Helper Functions
+    sub getExt
+    {   # G:\videos\filename(.avi)
+        my ( $fileName ) = @_;
+        my $rv = "";
+        if ($fileName =~ m#(([^\\/]*)\.([a-zA-Z0-9]{2,}))$#)
+        {
+            $rv = ".$3";
+        }
+        return $rv;
+    }
+
+    sub getDriveLetter
+    {   # (G:)\videos\filename.avi
+        my ( $fileName ) = @_;
+        my $rv = "";
+        if ($fileName =~ /([a-zA-Z]:|\\\\)/)
+        {
+            $rv = $&;
+        }
+        return $rv;
+    }
+    
+    sub getFullFile
+    {   # (G:\videos\filename).avi
+        my ( $fileName ) = @_;
+        my $rv = getPath($fileName)."/".getFile($fileName);
+        return $rv;
+    }
+    
+    sub getFile
+    {   # G:\videos\(filename).avi
+        my ( $fileName ) = @_;
+        my $rv = "";
+        
+        if ($fileName =~ m#(([^\\/]*)\.([a-zA-Z0-9]{2,}))$#)
+        {
+            $rv = $2;
+        }
+        elsif ($fileName =~ m#[^\\/]*$#)
+        {
+          $rv = $&;      
+        }
+    
+        return $rv;
+    }
+    
+    sub getFileWExt
+    {   # G:\videos\(filename.avi)
+        my ( $fileName ) = @_;
+        my $rv = getFile($fileName).getExt($fileName);    
+        return $rv;
+    }
+    
+    sub getPath
+    {   # (G:\videos\)filename.avi
+        my ( $fileName ) = @_;
+        my $rv = "";
+        if ($fileName =~ m#([^\\/]*)$#)
+        {
+            $rv = $`;
+        }
+      
+        $rv =~ s#(\\|/)$##;
+        return $rv;
+    }
+    
+    sub getParentDir
+    {   # (C:\some\path)\name\
+        my $fileName = shift;
+        my $rv = getPath(getPath($fileName));
+        return $rv;
+    } 
 
       
       
