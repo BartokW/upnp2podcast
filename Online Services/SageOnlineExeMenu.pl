@@ -112,7 +112,7 @@
       echoPrint("    - Thumbnail      : $thumbnail\n");
       echoPrint("    - Parameters     : $parameters\n");      
       
-      $content     = toXML('external,"'.getFullFile($exe).$useExt.'",'.$parameters);
+      $content     = toXML('external,'.getFullFile($exe).$useExt.','.$parameters);
       $thumbnail   = toXML($thumbnail);
       $type        = 'sagetv/subcategory';
       
