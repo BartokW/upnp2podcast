@@ -28,7 +28,7 @@ print "  + Copying Script : ($cpString)\n";
 $perlString = "perl -pi.bak -e \"s/SNIP:BUILT/Built on $date/g\" ./script.pl";
 print "  + editing temp Script : ($perlString)\n";
 `$perlString`;
-$ppString = "pp -N=Comments=\"$scriptEXE.out v1.0 by evilpenguin ($date)\" -c -o ./$scriptEXE.out ./script.pl";
+$ppString = "pp -N=Comments=\"$scriptEXE.out v1.0 by evilpenguin ($date)\" -c -M PerlIO.pm -o ./$scriptEXE.out ./script.pl";
 print "  + packing : ($ppString)\n";
 `$ppString`;
 $delString = "rm ./script.pl";
