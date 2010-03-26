@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 #
 ##    Copyright (C) 2009    Scott Zadigian  zadigian(at)gmail
 ##
@@ -42,6 +42,7 @@
 
   # Get Start Time
   my ( $startSecond, $startMinute, $startHour) = localtime();
+  my @startTime = ( $startSecond, $startMinute, $startHour);
 
   # Code version
   my $codeVersion = "$executableEXE v1.0 (SNIP:BUILT)";
@@ -109,7 +110,7 @@
   my $updateSuccess;
   if ((@parameters == 0 || int(rand(10)) > 5))  
   {
-      updateFeedFiles($executablePath);
+      updateFeedFiles($sageDir);
   }
   
   if (@parameters == 1 &&  $parameters[0] =~ /:/)
@@ -168,7 +169,7 @@
           $newItem = $feed_item;
           $video             = toXML('external,"'.$executable.'",/device||'.$_->getfriendlyname()."||/uid||0||/path||".$_->getfriendlyname());
           $title             = $_->getfriendlyname();
-          $description       = $_->getfriendlyname();
+          $description       = $_->getfriendlyname()."  (EXE_TIME)";
           $thumbnail         = '';
           $type              = 'sagetv/subcategory';
           
@@ -183,16 +184,19 @@
           $newItem =~ s/%%ITEM_DUR_SEC%%//g; 
           push(@items,$newItem);            
       }
-            
+      
+      my $execTime = executionTime(@startTime);      
       print encode('UTF-8', $opening);
       foreach (@items)
       {
           if (!($_ eq ""))
           {
+              $_ =~ s/EXE_TIME/$execTime/g;
               print encode('UTF-8', $_);
           }
       }  
-      print encode('UTF-8', $feed_end);         
+      print encode('UTF-8', $feed_end);
+      echoPrint($execTime);         
       exit 0;
   }
 
@@ -277,7 +281,7 @@
           $newItem = $feed_item;
           $video             = toXML('external,'.$executable.',/device||'.$_->getfriendlyname()."||/uid||0");
           $title             = "UPnP Browser Error!";
-          $description       = "UPnP Browser Error!  Unable to find UPnP Device ($lookingFor)";
+          $description       = "UPnP Browser Error!  Unable to find UPnP Device ($lookingFor)"." (EXE_TIM  )";
           $thumbnail         = '';
           $type              = 'sagetv/textonly';
           
@@ -292,15 +296,18 @@
           $newItem =~ s/%%ITEM_DUR_SEC%%//g; 
           push(@items,$newItem);            
 
+          my $execTime = executionTime(@startTime);      
           print encode('UTF-8', $opening);
           foreach (@items)
           {
               if (!($_ eq ""))
               {
+                  $_ =~ s/EXE_TIME/$execTime/g;
                   print encode('UTF-8', $_);
               }
           }  
-          print encode('UTF-8', $feed_end);         
+          print encode('UTF-8', $feed_end);
+          echoPrint($execTime);           
           exit 0;
       }
       
@@ -372,6 +379,7 @@
               if ($found == 0)
               {
                   echoPrint("    ! Couldn't find : ".$lookingFor."\n");
+                  echoPrint(executionTime(@startTime));  
                   exit 0; 
               }
           }
@@ -394,43 +402,21 @@
           $opening =~ s/%%FEED_TITLE%%/UPnP Browser ($lookingFor)/g;
           $opening =~ s/%%FEED_DESCRIPTION%%/UPnP Browser ($lookingFor)/g;
 
+          my $execTime = executionTime(@startTime);      
           print encode('UTF-8', $opening);
           foreach (@items)
           {
               if (!($_ eq ""))
               {
+                  $_ =~ s/EXE_TIME/$execTime/g;
                   print encode('UTF-8', $_);
               }
           }  
           print encode('UTF-8', $feed_end);
+          echoPrint($execTime);  
           exit 0;               
       }     
   }
-  
-  my ( $finishSecond, $finishMinute, $finishHour ) = localtime();
-  
-  # handle negative times
-  if ( $finishSecond < $startSecond )
-  {
-      $finishSecond += 60;
-      $finishMinute--;
-  }
-  if ( $finishMinute < $startMinute )
-  {
-      $finishMinute += 60;
-      $finishHour--;
-  }
-  if ( $finishHour < $startHour )
-  {
-      $finishHour += 24;
-  }
-
-  $durHour = sprintf( "%02d", ( $finishHour - $startHour ) );
-  $durMin  = sprintf( "%02d", ( $finishMinute - $startMinute ) );
-  $durSec  = sprintf( "%02d", ( $finishSecond - $startSecond ) );
-  my $transcodeTime = $durHour . ":" . $durMin . ":" . $durSec;
-  echoPrint("  + Finished in ($transcodeTime)\n");
-
   
   ##### Overwrite echoPrint for compatability
     sub echoPrint
@@ -658,7 +644,7 @@ FEED_END
                     $newItem = $feed_item;
                     $video             = toXML('external,'.$executable.",/device||".$device."||/uid||".$_->getid()."||/path||".$path."\\".$_->gettitle());
                     $title             = $_->gettitle();
-                    $description       = $path."\\".$_->gettitle();
+                    $description       = $path."\\".$_->gettitle()."  (EXE_TIME)";
                     $thumbnail         = '';
                     $type              = 'sagetv/subcategory';
                     
@@ -950,6 +936,34 @@ FEED_END
         my $rv = getPath(getPath($fileName));
         return $rv;
     } 
+    
+    sub executionTime
+    {
+        my ($startSecond, $startMinute, $startHour) = @_;
+        my ($finishSecond, $finishMinute, $finishHour ) = localtime();
+  
+        # handle negative times
+        if ( $finishSecond < $startSecond )
+        {
+            $finishSecond += 60;
+            $finishMinute--;
+        }
+        if ( $finishMinute < $startMinute )
+        {
+            $finishMinute += 60;
+            $finishHour--;
+        }
+        if ( $finishHour < $startHour )
+        {
+            $finishHour += 24;
+        }
+
+        my $transcodeTime = sprintf( "%02d", ( $finishHour - $startHour ) ) .     ":" . 
+                            sprintf( "%02d", ( $finishMinute - $startMinute ) ) . ":" . 
+                            sprintf( "%02d", ( $finishSecond - $startSecond ) );
+        #echoPrint("  + executionTime ($transcodeTime)\n");
+        return "  + executionTime ($transcodeTime)";
+    }
 
       
       
