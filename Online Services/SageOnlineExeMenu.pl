@@ -27,14 +27,9 @@
 
   # Get the directory the script is being called from
   my $executable = $0;
-  $executable =~ m#(\\|\/)(([^\\/]*)\.([a-zA-Z0-9]{2,}))$#;
-  my $executablePath = $`;
-  my $executableEXE  = $3; 
-  my $useExt         = 'exe';
-  if ($executable =~ /\.out$/)
-  {
-      $useExt = 'out';    
-  }
+  my $executablePath = getPath($executable);
+  my $executableEXE  = getFile($executable); 
+  my $useExt         = getExt($executable); 
    
   open(LOGFILE,">$executablePath/$executableEXE.log");
   
@@ -71,8 +66,8 @@
   
   setOptions(decode('ISO-8859-1' , $parametersString),\@emptyArray,\%optionsHash,\@inputFiles,\%emptyHash,"  ");
   
-  my $exeDir = "$executablePath/SageOnlineServicesEXEs";  
-  my @onlineServicesEXEs = scanDir($exeDir,$useExt);
+  my $exeDir = "$executablePath/SageOnlineServicesEXEs";
+  my @onlineServicesEXEs = scanDir($exeDir,($useExt eq "" ? "^[^.]*" : $useExt));
   my @items = ();
   
   foreach $exe (@onlineServicesEXEs)
@@ -111,13 +106,13 @@
       
       $newItem   = $feed_item;
       
-      echoPrint("  + Adding Executable (".getFile($exe).".".$useExt.")\n");
+      echoPrint("  + Adding Executable (".getFile($exe)."$useExt)\n");
       echoPrint("    - Title          : $title\n");
       echoPrint("    - Description    : $description\n");
       echoPrint("    - Thumbnail      : $thumbnail\n");
       echoPrint("    - Parameters     : $parameters\n");      
       
-      $content     = toXML('external,"'.getFullFile($exe).'.'.$useExt.'",'.$parameters);
+      $content     = toXML('external,"'.getFullFile($exe).$useExt.'",'.$parameters);
       $thumbnail   = toXML($thumbnail);
       $type        = 'sagetv/subcategory';
       
@@ -362,7 +357,7 @@ FEED_END
           {
               #echoPrint("-> $file\n");
               next if ($file =~ m/^\./);
-              next if !($file =~ m/($fileFilter)$/ || -d "$inputFile\\$file");       
+              next if !($file =~ m/$fileFilter$/ || -d "$inputFile\\$file");       
               if (-d "$inputFile\\$file" && !($file =~ m/VIDEO_TS$/)) { push(@dirs,"$inputFile\\$file"); }
               else { push(@files,"$inputFile\\$file"); } 
           }
@@ -501,5 +496,80 @@ FEED_END
         $input =~ s#\/#\\#g;   
         return $input;
     }
+    
+##### Helper Functions
+    sub getExt
+    {   # G:\videos\filename(.avi)
+        my ( $fileName ) = @_;
+        my $rv = "";
+        if ($fileName =~ m#(([^\\/]*)\.([a-zA-Z0-9]{2,}))$#)
+        {
+            $rv = ".$3";
+        }
+        return $rv;
+    }
+
+    sub getDriveLetter
+    {   # (G:)\videos\filename.avi
+        my ( $fileName ) = @_;
+        my $rv = "";
+        if ($fileName =~ /([a-zA-Z]:|\\\\)/)
+        {
+            $rv = $&;
+        }
+        return $rv;
+    }
+    
+    sub getFullFile
+    {   # (G:\videos\filename).avi
+        my ( $fileName ) = @_;
+        my $rv = getPath($fileName)."/".getFile($fileName);
+        return $rv;
+    }
+    
+    sub getFile
+    {   # G:\videos\(filename).avi
+        my ( $fileName ) = @_;
+        my $rv = "";
+        
+        if ($fileName =~ m#(([^\\/]*)\.([a-zA-Z0-9]{2,}))$#)
+        {
+            $rv = $2;
+        }
+        elsif ($fileName =~ m#[^\\/]*$#)
+        {
+          $rv = $&;      
+        }
+    
+        return $rv;
+    }
+    
+    sub getFileWExt
+    {   # G:\videos\(filename.avi)
+        my ( $fileName ) = @_;
+        my $rv = getFile($fileName).getExt($fileName);    
+        return $rv;
+    }
+    
+    sub getPath
+    {   # (G:\videos\)filename.avi
+        my ( $fileName ) = @_;
+        my $rv = "";
+        if ($fileName =~ m#([^\\/]*)$#)
+        {
+            $rv = $`;
+        }
+      
+        $rv =~ s#(\\|/)$##;
+        return $rv;
+    }
+    
+    sub getParentDir
+    {   # (C:\some\path)\name\
+        my $fileName = shift;
+        my $rv = getPath(getPath($fileName));
+        return $rv;
+    }
+  
   
   
