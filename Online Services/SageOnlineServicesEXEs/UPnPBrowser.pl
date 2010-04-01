@@ -153,7 +153,21 @@
   if (@parameters == 0)
   {
       echoPrint("  + /mainMenu : Printing available UPnP Servers\n");
-      my @dev_list = $obj->search(st =>'upnp:rootdevice', mx => 1);
+      my @dev_list = $obj->search(st =>'upnp:rootdevice', mx => 180);
+  
+      foreach (@dev_list)
+      {
+          chomp;
+          echoPrint("    - Device: ".$_->getfriendlyname()."(".$_->getdevicetype().")\n");
+          echoPrint("      + Geneating Cache: ($executableEXE.".$_->getfriendlyname().".cache)\n");
+          $dev = $_;
+          if (open(UPNPCACHE,">$executablePath\\$executableEXE.".toWin32($_->getfriendlyname()).".cache"))
+          {
+              print UPNPCACHE $dev->getssdp()."=======================".$dev->getdescription();
+          }
+          close(UPNPCACHE);
+      }
+  
       my (@items, $opening, $newItem, $video, $title, $description, $type, $thumbnail);
   
       $opening = $feed_begin;
@@ -254,7 +268,7 @@
               if ($_->getfriendlyname() =~ /\Q$lookingFor\E/i)
               {
                   $dev = $_;
-                  if (open(UPNPCACHE,">$executablePath\\$executableEXE.$lookingFor.cache"))
+                  if (open(UPNPCACHE,">".toWin32("$executablePath\\$executableEXE.$lookingFor.cache")))
                   {
                       print UPNPCACHE $dev->getssdp()."=======================".$dev->getdescription();
                   }
@@ -691,7 +705,7 @@ FEED_END
                 my $userRating  = $content->getUserRating();
                 my $dur  = $content->getDur();
                 my $thumbnail  = toXML($content->getPicture());
-                my $description = $content->getDesc();
+                my $description = $content->getDesc()."  (EXE_TIME)";
                 my $type = 'video/mpeg2';
         
                 if ($title =~ /s([0-9]+)e([0-9]+): (.*)/)
@@ -935,6 +949,14 @@ FEED_END
         my $fileName = shift;
         my $rv = getPath(getPath($fileName));
         return $rv;
+    }
+    
+    sub toWin32
+    {
+        my $replaceString = shift;
+        my $illCharFileRegEx = "('|\"|\\\\|/|\\||<|>|:|\\*|\\?|\\&|\\;|`)";
+        $replaceString =~ s/$illCharFileRegEx//g;
+        return $replaceString;
     } 
     
     sub executionTime
