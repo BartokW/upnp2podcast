@@ -745,7 +745,7 @@ FEED_END
 
        
         my @content = split(/\n/,$content);
-        echoPrint("  + Downloaded FeedVersions.txt (".md5($content)."), checking for updates(".$feedVersionURL.")\n");
+        echoPrint("  + Downloaded FeedVersions.txt (".md5_hex($content)."), checking for updates(".$feedVersionURL.")\n");
         foreach (@content)
         {
             $updateFile      = 0;
@@ -799,7 +799,7 @@ FEED_END
                         my $content = $response->decoded_content;
                         $content =~ s/\r//g;
                         $content =~ s/\r//g; 
-                        $updatedMD5 = md5($content);
+                        $updatedMD5 = md5_hex($content);
                         echoPrint("        + MD5 URL : $updatedMD5 ($propFileMD5)($feedPath$propFileName)\n");
                         if ($updatedMD5 eq $propFileMD5)
                         {
