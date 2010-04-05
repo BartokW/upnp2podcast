@@ -23,15 +23,17 @@
   use Encode;
   use utf8;
   use Digest::MD5 qw(md5 md5_hex md5_base64);
-  use LWP::Simple qw($ua get head);
+  use LWP::UserAgent;
   use Net::UPnP::ControlPoint;
   use Net::UPnP::AV::MediaServer;
   
   my $obj = Net::UPnP::ControlPoint->new();
-  my $mediaServer = Net::UPnP::AV::MediaServer->new();    
+  my $mediaServer = Net::UPnP::AV::MediaServer->new();
   
-  $ua->timeout(30);
+  # Setup LWP user agent
+  my $ua = LWP::UserAgent->new;
   $ua->agent( 'Mozilla/4.0 (compatible; MSIE 5.12; Mac_PowerPC)' );
+  $ua->timeout(25);    
 
   # Get the directory the script is being called from
   $executable = $0;
@@ -110,7 +112,7 @@
   my $updateSuccess;
   if ((@parameters == 0 || int(rand(10)) > 5))  
   {
-      updateFeedFiles($sageDir);
+      updateFeedFiles($sageDir, $ua);
   }
   
   if (@parameters == 1 &&  $parameters[0] =~ /:/)
@@ -713,7 +715,7 @@ FEED_END
   
   sub updateFeedFiles
   {
-    my ($executablePath) = @_;
+    my ($executablePath,$ua) = @_;
     my $rv = 0;  
     # URL of file containing feed versions
     my $feedPath       = "$executablePath\\STVs\\SageTV3\\OnlineVideos\\";
@@ -726,10 +728,13 @@ FEED_END
 
     echoPrint("  + Checking for feed updates\n");
 
-    my $content = get $feedVersionURL;
-    $content =~ s/\r//g;
-    if (defined $content)
+    my $response  = $ua->get($feedVersionURL);
+    
+    if ($response)
     {
+        my $content = $response->decoded_content;
+        $content =~ s/\r//g;
+        
         my @plugIns = ();
         if (open(PLUGINS,"UPnP2Podcast.plugins"))
         {
@@ -787,11 +792,14 @@ FEED_END
                 if ($updateFile)
                 {
                     echoPrint("      - Updating File!\n");             
-                    $content = get $propFileURL;
-                    if (!($content eq ""))
+                    my $response  = $ua->get($propFileURL);
+                    
+                    if ($response)
                     {
+                        my $content = $response->decoded_content;
                         $content =~ s/\r//g;
-                        $updatedMD5 = md5(encode('UTF-8', $content));
+                        $content =~ s/\r//g; 
+                        $updatedMD5 = md5($content);
                         echoPrint("        + MD5 URL : $updatedMD5 ($propFileMD5)($feedPath$propFileName)\n");
                         if ($updatedMD5 eq $propFileMD5)
                         {
