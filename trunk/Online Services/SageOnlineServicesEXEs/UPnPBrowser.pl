@@ -791,7 +791,7 @@ FEED_END
                     if (!($content eq ""))
                     {
                         $content =~ s/\r//g;
-                        $updatedMD5 = md5(encode('UTF-8', $content);
+                        $updatedMD5 = md5(encode('UTF-8', $content));
                         echoPrint("        + MD5 URL : $updatedMD5 ($propFileMD5)($feedPath$propFileName)\n");
                         if ($updatedMD5 eq $propFileMD5)
                         {
