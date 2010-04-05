@@ -22,7 +22,7 @@
 ##### Import libraries
   use Encode;
   use utf8;
-  use MD5;
+  use Digest::MD5 qw(md5 md5_hex md5_base64);
   use LWP::Simple qw($ua get head);
   use Net::UPnP::ControlPoint;
   use Net::UPnP::AV::MediaServer;
@@ -150,10 +150,18 @@
       setOptions(decode('ISO-8859-1' , $parametersString),\@emptyArray,\%optionsHash,\@inputFiles,\%emptyHash,"  ");
   }
   
-  if (@parameters == 0)
+
+  
+  if (@parameters == 0 || exists $optionsHash{lc("mainMenu")})
   {
       echoPrint("  + /mainMenu : Printing available UPnP Servers\n");
-      my @dev_list = $obj->search(st =>'upnp:rootdevice', mx => 180);
+      my $serverWait = 1;
+      if (exists $optionsHash{lc("serverSearchTimeout")})
+      {
+          echoPrint("  + /serverSearchTimeout : (".$optionsHash{lc("serverSearchTimeout")}.")\n");
+          $serverWait = $optionsHash{lc("serverSearchTimeout")};
+      }
+      my @dev_list = $obj->search(st =>'upnp:rootdevice', mx => $serverWait);
   
       foreach (@dev_list)
       {
@@ -205,36 +213,13 @@
       {
           if (!($_ eq ""))
           {
-              $_ =~ s/EXE_TIME/$execTime/g;
+              $_ =~ s/EXE_TIME/($execTime)/g;
               print encode('UTF-8', $_);
           }
       }  
       print encode('UTF-8', $feed_end);
-      echoPrint($execTime);         
+      echoPrint("    + Execution time: $execTime\n");         
       exit 0;
-  }
-
-  my %serverCache = ();
-  if (open(UPNPTREECACHE, "$executablePath\\$executableEXE.cache"))
-  {
-      echoPrint("  + Building Cache UPnP Server Cache...\n");
-      while(<UPNPTREECACHE>)
-      {
-          chomp;
-          if (/===/)
-          {
-              $upnpFolder  = $`;
-              $upnpContent = $';
-              @upnpContent = split(/&&&/,$upnpContent);
-              echoPrint("    - $upnpFolder\n");
-              foreach (@upnpContent)
-              {
-                  #echoPrint("      + $_\n");
-                  push(@{$serverCache{lc($upnpFolder)}},$_)    
-              }
-          }
-      }
-      close(UPNPTREECACHE);    
   }
   
   if (exists $optionsHash{lc("device")})
@@ -336,48 +321,8 @@
               echoPrint("    - Looking for : ".$lookingFor."\n");
               
               # Checking Cache
-              my @content_list = ();
-              if (exists $serverCache{lc($optionsHash{lc("uid")})})
-              {
-                  my @tempArray = $serverCache{lc($optionsHash{lc("uid")})};
-                  
-                  echoPrint("  + Adding from Cache: (".$optionsHash{lc("uid")}.")(".@{$serverCache{lc($optionsHash{lc("uid")})}}.")\n");
-                  foreach (@{$serverCache{lc($optionsHash{lc("uid")})}})
-                  {
-                      #echoPrint("    - (".$serverCache{lc($optionsHash{lc("uid")})}[1].")\n");
-                      if($_ =~ /,,,/)
-                      {
-                          my $uid    = $`;
-                          my $title = $'; 
-                          #echoPrint("    - $title ($uid)\n");
-                          $container = Net::UPnP::AV::Container->new();
-                          $container->setid($uid);
-                          $container->settitle($title);
-                          push (@content_list,$container);
-  
-                      }
-                  }
-              }
-              else
-              {
-                  @content_list = $mediaServer->getcontentlist(ObjectID => $optionsHash{lc("uid")});
-                  my $cacheString = $optionsHash{lc("uid")}."===";
-                  my @content_list_cache = ();
-                  foreach (@content_list)
-                  {
-                      push(@content_list_cache,$_->getid().",".$_->gettitle());
-                      $cacheString .= $_->getid().",,,".$_->gettitle()."&&&";       
-                  }
-                  $cacheString .= "\n";
-                  $serverCache{lc($optionsHash{lc("uid")})} = @content_list_cache;               
-                  if (open(UPNPTREECACHE, ">>$executablePath\\$executableEXE.cache"))
-                  {
-                      print UPNPTREECACHE $cacheString; 
-                      close(UPNPTREECACHE);   
-                  }
-                                 
-              }
-
+              my @content_list = ();              
+              @content_list = $mediaServer->getcontentlist(ObjectID => $optionsHash{lc("uid")});
               my $found  = 0;
               foreach $content (@content_list)
               {
@@ -393,7 +338,7 @@
               if ($found == 0)
               {
                   echoPrint("    ! Couldn't find : ".$lookingFor."\n");
-                  echoPrint(executionTime(@startTime));  
+                  echoPrint("    + Execution time: ".executionTime(@startTime)."\n");  
                   exit 0; 
               }
           }
@@ -795,7 +740,7 @@ FEED_END
 
        
         my @content = split(/\n/,$content);
-        echoPrint("  + Downloaded FeedVersions.txt (".MD5->hexhash($content)."), checking for updates(".$feedVersionURL.")\n");
+        echoPrint("  + Downloaded FeedVersions.txt (".md5($content)."), checking for updates(".$feedVersionURL.")\n");
         foreach (@content)
         {
             $updateFile      = 0;
@@ -846,7 +791,7 @@ FEED_END
                     if (!($content eq ""))
                     {
                         $content =~ s/\r//g;
-                        $updatedMD5 = MD5->hexhash($content);
+                        $updatedMD5 = md5($content);
                         echoPrint("        + MD5 URL : $updatedMD5 ($propFileMD5)($feedPath$propFileName)\n");
                         if ($updatedMD5 eq $propFileMD5)
                         {
@@ -984,7 +929,7 @@ FEED_END
                             sprintf( "%02d", ( $finishMinute - $startMinute ) ) . ":" . 
                             sprintf( "%02d", ( $finishSecond - $startSecond ) );
         #echoPrint("  + executionTime ($transcodeTime)\n");
-        return "  + executionTime ($transcodeTime)";
+        return "$transcodeTime";
     }
 
       
