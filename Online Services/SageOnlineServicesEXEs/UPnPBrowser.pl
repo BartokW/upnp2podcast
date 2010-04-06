@@ -719,7 +719,7 @@ FEED_END
     my $rv = 0;  
     # URL of file containing feed versions
     my $feedPath       = "$executablePath\\STVs\\SageTV3\\OnlineVideos\\";
-    my $feedVersionURL = 'http://upnp2podcast.googlecode.com/svn/trunk/upnp2podcast/Feeds/FeedVersions.txt';
+    my $feedVersionURL = 'http://upnp2podcast.googlecode.com/svn/trunk/upnp2podcast/Feeds/$executableEXE.FeedVersions.txt';
     my ($updateFile, $propFileName, $propFileVersion, 
         $propFileMD5, $propFileURL, $topLine, $currentVersion,
         $updatedMD5, $propPlugIn);
@@ -730,10 +730,9 @@ FEED_END
 
     my $response  = $ua->get($feedVersionURL);
     
-    if ($response)
+    if ($response->is_success)
     {
-        my $content = $response->decoded_content;
-        my $content = $response->decoded_content;
+        my $content = $response->decoded_content((charset => "ISO-8859-1"));
         $content =~ s/\r//g;
         
         my @plugIns = ();
@@ -743,7 +742,6 @@ FEED_END
             chomp(@plugIns);
             close(PLUGINS);  
         }
-
        
         my @content = split(/\n/,$content);
         echoPrint("  + Downloaded FeedVersions.txt (".md5_hex($content)."), checking for updates(".$feedVersionURL.")\n");
@@ -794,9 +792,8 @@ FEED_END
                 {
                     echoPrint("      - Updating File!\n");                         
                     my $response  = $ua->get($propFileURL);
-
                     
-                    if ($response)
+                    if ($response->is_success)
                     {
                         my $content = $response->decoded_content((charset => "ISO-8859-1"));
                         $content =~ s/\r//g;
@@ -826,7 +823,7 @@ FEED_END
     }
     else
     {
-        echoPrint("  ! Failed to get FeedVersions.txt, skipping updates\n");
+        echoPrint("  ! Failed to get $executableEXE.FeedVersions.txt, skipping updates\n");
     } 
     return $rv;   
   }
