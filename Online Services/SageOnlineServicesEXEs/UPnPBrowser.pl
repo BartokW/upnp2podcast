@@ -733,6 +733,7 @@ FEED_END
     if ($response)
     {
         my $content = $response->decoded_content;
+        my $content = $response->decoded_content;
         $content =~ s/\r//g;
         
         my @plugIns = ();
@@ -791,14 +792,14 @@ FEED_END
                                 
                 if ($updateFile)
                 {
-                    echoPrint("      - Updating File!\n");             
+                    echoPrint("      - Updating File!\n");                         
                     my $response  = $ua->get($propFileURL);
+
                     
                     if ($response)
                     {
-                        my $content = $response->decoded_content;
+                        my $content = $response->decoded_content((charset => "ISO-8859-1"));
                         $content =~ s/\r//g;
-                        $content =~ s/\r//g; 
                         $updatedMD5 = md5_hex($content);
                         echoPrint("        + MD5 URL : $updatedMD5 ($propFileMD5)($feedPath$propFileName)\n");
                         if ($updatedMD5 eq $propFileMD5)
