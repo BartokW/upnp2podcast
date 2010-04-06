@@ -36,9 +36,10 @@
   if (!($arch =~ /^MS/i))
   {  # Linux
      $arch .= " ".`arch`;
+     chomp($arch);
      if ($arch =~ /64/)
      {
-        $useExt = "\.64bit\.out";   
+        $useExt = "\.64bitOut";   
      }
      else
      {
