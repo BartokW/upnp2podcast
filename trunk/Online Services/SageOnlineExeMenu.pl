@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -w
 # 
 ##    Copyright (C) 2009    Scott Zadigian  zadigian(at)gmail
 ##
@@ -29,7 +29,26 @@
   my $executable = $0;
   my $executablePath = getPath($executable);
   my $executableEXE  = getFile($executable); 
-  my $useExt         = getExt($executable); 
+  my $useExt         = getExt($executable);
+  
+  my $arch   = $^O;
+  my $filter = "";
+  if (!($arch =~ /^MS/i))
+  {  # Linux
+     $arch .= " ".`arch`;
+     if ($arch =~ /64/)
+     {
+        $useExt = "\.64bit\.out";   
+     }
+     else
+     {
+        $useExt = "\.out"; 
+     }
+  }
+  else
+  {
+      $useExt = "\.exe";
+  }
    
   open(LOGFILE,">$executablePath/$executableEXE.log");
   
@@ -47,6 +66,7 @@
 
   echoPrint("Welcome to $codeVersion!\n");
   echoPrint("  + Path: $executablePath\n");
+  echoPrint("  + Architecture : ($arch)($useExt)\n");
 
   # Move arguments into user array so we can modify it
   my @parameters = @ARGV;
@@ -149,17 +169,6 @@
         print stderr $utf8String;
         print LOGFILE $utf8String;
     }
-    
-  sub toXML
-  {
-      my ($string) = @_;
-      $string =~ s/\&/&amp;/g;
-      $string =~ s/"/&quot;/g; #"
-      $string =~ s/</&lt;/g;
-      $string =~ s/>/&gt;/g;
-      $string =~ s/'/&apos;/g;  #'
-      return $string;
-  }   
       
   ##### Populate an options Hash
     sub setOptions
@@ -187,16 +196,7 @@
         }
         while (@newOptions != 0)
         {
-            if ($newOptions[0] =~ m#^/ERROR$#)
-            {   # Message from profile that an unrecoverable error has occured
-                $reason = "Error reported from profile file: $newOptions[1]";
-                echoPrint("    ! $reason\n");
-                echoPrint("    ! Moving onto next file");
-                $optionsHash->{lc("wereDoneHere")} = $reason;
-                $errorLevel++;
-                return;
-            }
-            elsif ($newOptions[0] =~ m#^/(!?)([a-zA-Z0-9_]+)#i)
+            if ($newOptions[0] =~ m#^/(!?)([a-zA-Z0-9_]+)#i)
             {   # Generic add sub string
                 echoPrint("$logSpacing  - Adding to to options Hash\n");
                 $getVideoInfoCheck = $1;
@@ -298,7 +298,7 @@
     }
 
 
-  sub populateFeedStrings()
+  sub populateFeedStrings
   {
     my ($second, $minute, $hour, $dayOfMonth, $month, $yearOffset, $dayOfWeek, $dayOfYear, $daylightSavings) = localtime();
     my $year = 1900 + $yearOffset;
@@ -373,129 +373,7 @@ FEED_END
       #echoPrint("!!! @files\n");
       return @files;  
   }
-  
-  ##### Helper Functions
-    sub getExt
-    {   # G:\videos\filename(.avi)
-        my ( $fileName ) = @_;
-        my $rv = "";
-        if ($fileName =~ m#(([^\\/]*)\.([a-zA-Z0-9]{2,}))$#)
-        {
-            $rv = $3;
-        }
-        return $rv;
-    }
 
-    sub getDriveLetter
-    {   # (G:)\videos\filename.avi
-        my ( $fileName ) = @_;
-        my $rv = "";
-        if ($fileName =~ /([a-zA-Z]:|\\\\)/)
-        {
-            $rv = $&;
-        }
-        return $rv;
-    }
-    
-    sub getFullFile
-    {   # (G:\videos\filename).avi
-        my ( $fileName ) = @_;
-        my $rv = "";
-        if ($fileName =~ m#(([^\\/]*)\.([a-zA-Z0-9]{2,}))$#)
-        {
-            $rv = $` . $2;   
-        }
-        if (-d $fileName)
-        {
-            $rv = $fileName;
-        }
-        return $rv;
-    }
-    
-    sub getFile
-    {   # G:\videos\(filename).avi
-        my ( $fileName ) = @_;
-        my $rv = "";
-        if ($fileName =~ m#(([^\\/]*)\.([a-zA-Z0-9]{2,}))$#)
-        {
-            $rv = $2;
-        }
-    
-        if (-d $fileName && $fileName =~ m#([^\\/]*)$#)
-        {
-                $rv = $&;
-        }
-    
-        return $rv;
-    }
-    
-    sub getFileWExt
-    {   # G:\videos\(filename.avi)
-        my ( $fileName ) = @_;
-        my $rv = "";
-        if ($fileName =~ m#([^\\/]*)$#)
-        {
-            $rv = $&;
-        }
-    
-        return $rv;
-    }
-    
-    sub getPath
-    {   # (G:\videos\)filename.avi
-        my ( $fileName ) = @_;
-        my $rv = "";
-        if ($fileName =~ m#([^\\/]*)$#)
-        {
-            $rv = $`;
-        }
-      
-        $rv =~ s#(\\|/)$##;
-        return $rv;
-    }
-
-    sub trim
-    {
-       my $string = shift;
-       $string =~ s/^\s+|\s+$//g;
-       return $string;
-    }
-    
-    sub toXML
-    {
-        my $string = shift;
-        $string =~ s/\&/&amp;/g;
-        $string =~ s/"/&quot;/g; #"
-        $string =~ s/</&lt;/g;
-        $string =~ s/>/&gt;/g;
-        $string =~ s/'/&apos;/g;  #'
-        return $string;    
-    }
-    
-    sub fromXML
-    {
-        my $string = shift;
-        $string =~ s/\&amp;/&/g;
-        $string =~ s/\&quot;/"/g; #"
-        $string =~ s/\&lt;/</g;
-        $string =~ s/\&gt;/>/g;
-        $string =~ s/\&apos;/'/g;  #'
-        return $string;    
-    }
-  
-    sub reverseSlashes
-    {
-        my ($input) = @_;
-        $input =~ s#\\#/#g;   
-        return $input;
-    }
-    
-    sub forwardSlashes
-    {
-        my ($input) = @_;
-        $input =~ s#\/#\\#g;   
-        return $input;
-    }
     
 ##### Helper Functions
     sub getExt
@@ -569,6 +447,49 @@ FEED_END
         my $fileName = shift;
         my $rv = getPath(getPath($fileName));
         return $rv;
+    }
+
+    sub trim
+    {
+       my $string = shift;
+       $string =~ s/^\s+|\s+$//g;
+       return $string;
+    }
+    
+    sub toXML
+    {
+        my $string = shift;
+        $string =~ s/\&/&amp;/g;
+        $string =~ s/"/&quot;/g; #"
+        $string =~ s/</&lt;/g;
+        $string =~ s/>/&gt;/g;
+        $string =~ s/'/&apos;/g;  #'
+        return $string;    
+    }
+    
+    sub fromXML
+    {
+        my $string = shift;
+        $string =~ s/\&amp;/&/g;
+        $string =~ s/\&quot;/"/g; #"
+        $string =~ s/\&lt;/</g;
+        $string =~ s/\&gt;/>/g;
+        $string =~ s/\&apos;/'/g;  #'
+        return $string;    
+    }
+  
+    sub reverseSlashes
+    {
+        my ($input) = @_;
+        $input =~ s#\\#/#g;   
+        return $input;
+    }
+    
+    sub forwardSlashes
+    {
+        my ($input) = @_;
+        $input =~ s#\/#\\#g;   
+        return $input;
     }
   
   
