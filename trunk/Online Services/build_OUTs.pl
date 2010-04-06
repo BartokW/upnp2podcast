@@ -11,6 +11,12 @@ if (@ARGV == 0)
     exit 0;
 }
 
+my $ext = "out";
+if (`arch` =~ /64/)
+{
+   $ext = "64bitOut";
+}
+
 my $script = $ARGV[0];
 $script =~ m#(\\|\/)?(([^\\/]*)\.([a-zA-Z0-9]{2,}))$#;
 my $scriptPath = $`;
@@ -28,7 +34,7 @@ print "  + Copying Script : ($cpString)\n";
 $perlString = "perl -pi.bak -e \"s/SNIP:BUILT/Built on $date/g\" ./script.pl";
 print "  + editing temp Script : ($perlString)\n";
 `$perlString`;
-$ppString = "pp -N=Comments=\"$scriptEXE.out v1.0 by evilpenguin ($date)\" -c -M PerlIO.pm -o ./$scriptEXE.out ./script.pl";
+$ppString = "pp -N=Comments=\"$scriptEXE.$ext v1.0 by evilpenguin ($date)\" -c -M PerlIO.pm -o ./$scriptEXE.$ext ./script.pl";
 print "  + packing : ($ppString)\n";
 `$ppString`;
 $delString = "rm ./script.pl";
