@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 # 
 ##    Copyright (C) 2009    Scott Zadigian  zadigian(at)gmail
 ##
