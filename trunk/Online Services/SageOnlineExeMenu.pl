@@ -101,7 +101,7 @@
       {
           while(<INFO>)
           {
-              chomp;
+              chomp($_);
               if (/^Description=/i)
               {
                   $description = $';
