@@ -28,13 +28,13 @@ my $cwd  = `pwd`;
 my $date = `date`;
 chomp $date;
 
-$cpString = "cp ./$script ./script.pl";
+$cpString = "cp \"$script\" ./script.pl";
 print "  + Copying Script : ($cpString)\n";
 `$cpString`;
 $perlString = "perl -pi.bak -e \"s/SNIP:BUILT/Built on $date/g\" ./script.pl";
 print "  + editing temp Script : ($perlString)\n";
 `$perlString`;
-$ppString = "pp -N=Comments=\"$scriptEXE.$ext v1.0 by evilpenguin ($date)\" -c -M PerlIO.pm -o ./$scriptEXE.$ext ./script.pl";
+$ppString = "pp -N=Comments=\"$scriptEXE.$ext v1.0 by evilpenguin ($date)\" -c -M PerlIO.pm -o \"$scriptEXE.$ext\" ./script.pl";
 print "  + packing : ($ppString)\n";
 `$ppString`;
 $delString = "rm ./script.pl";
