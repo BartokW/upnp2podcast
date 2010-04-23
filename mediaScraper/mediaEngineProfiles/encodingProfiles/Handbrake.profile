@@ -8,6 +8,8 @@
     Encoder #1        =/insertFunction
     Encode CLI #1     =?>cutComm&&!isDVD<:>Cut Commercials<?
     Encoder #1        =/insertFunction
+    Encode CLI #4     =?>ORIGINAL:embeddedCCCount>10&&!handbrakeSubtitleTracks&&!noSubtitles<:>extractSubtitles<?
+    Encoder #4        =/insertFunction
     Encode CLI #1     =!#handbrake_1#-v -i "%%inputMain_REVSLASHES%%" -o "%%OUTPUT_MAIN_REVSLASHES%%.%%container%%" %%SNIP:Handbrake DVD%% %%SNIP:Handbrake Subtitles%% %%SNIP:Handbrake Video%% %%SNIP:Handbrake Audio%% %%SNIP:Handbrake Video Filters%%
     Encoder #1        =/exe HandBrakeCLI.exe
     Encode CLI #2     =?>inputMain:videoContainer=~matroska<:>mkvAttachExtras<?
