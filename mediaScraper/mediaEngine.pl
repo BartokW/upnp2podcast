@@ -156,6 +156,8 @@
     $optionsHash{lc("quote")}         = "\"";
     $optionsHash{lc("WORKDIR")}        = $executablePath;
     $optionsHash{lc("EXEPATH")}        = $executablePath;
+    $optionsHash{lc("TEMPPATH")}       = `echo %TEMP%`;
+    chomp($optionsHash{lc("TEMPPATH")});
          
     echoPrint("   - Found = ".$optionsHash{lc("profileFolder")}."\n",2);
     %profiles = ();
@@ -860,33 +862,7 @@
                     }
                      
                     echoPrint("$baseSpace    + $audioTrack) audioChannels  = ".$videoInfoHash->{lc("audioChannels_$audioTrack")}."\n",2);
-                }
-
-                if ($audioTrack  == 1)
-                {
-                    $handbrakeAudioTracks   = "$audioTrack"; 
-                    $handbrakeAudioBitrate  = "auto"; 
-                }
-
-                $handbrakeAllAudioTracks   .= "$audioTrack,";
-                $handbrakeAllAudioBitrate  .= "auto,"; 
-                if ($videoInfoHash->{lc("audioChannels_$audioTrack")} == 6 && $videoInfoHash->{lc("audioCodec_$audioTrack")} =~ /(dts|ac3)/i)
-                {
-                    if ($audioTrack  == 1)
-                    {
-                        $handbrakeAudioEncoders = "$&";
-                    }
-                    $handbrakeAllAudioEncoders .= "$&,";      
-                }
-                else
-                {
-                    if ($audioTrack  == 1)
-                    {
-                        $handbrakeAudioEncoders = "faac";
-                    }
-                    $handbrakeAllAudioEncoders .= "faac,";  
-                }
-                             
+                }                             
             }
             elsif ( $_ =~ /Duration: ([0-9][0-9]):([0-9][0-9]):([0-9][0-9])/ )
             {
@@ -914,17 +890,7 @@
                         $videoInfoHash->{lc("$baseProp")} = $videoInfoHash->{lc("$vidProperty")};
                         #echoPrint("$baseSpace      + Setting Property ($baseProp) -> (".$videoInfoHash->{lc("$vidProperty")}.")\n");    
                     }    
-                }
-                $handbrakeAudioTracks   = "$i"; 
-                $handbrakeAudioBitrate  = "auto"; 
-                if ($videoInfoHash->{lc("audioChannels_$i")} == 6 && $videoInfoHash->{lc("audioCodec_$i")} =~ /(dts|ac3)/i)
-                {
-                    $handbrakeAudioEncoders = "$&";     
-                }
-                else
-                {
-                    $handbrakeAudioEncoders = "faac"; 
-                }                
+                }               
             }
             elsif ($videoInfoHash->{lc("audioTrackScore_$1")} == $maxScore)
             {
@@ -942,22 +908,10 @@
                 
             my $nextAudio = 0;
             my $nextSubs  = 0;
-            
-            $handbrakeAudioTracks        =~ s/,$//;
-            $handbrakeAudioEncoders      =~ s/,$//;
-            $handbrakeAudioBitrate       =~ s/,$//;
-            $handbrakeAllAudioTracks     =~ s/,$//;
-            $handbrakeAllAudioEncoders   =~ s/,$//;
-            $handbrakeAllAudioBitrate    =~ s/,$//;
-            $handbrakeSubtitleTracks     =~ s/,$//;
-            
-            echoPrint("$baseSpace      - Setting Primary Audio Track to ".$videoInfoHash->{lc("primaryAudio")}."\n");
-            echoPrint("$baseSpace        + Handbrake Settings       : -a $handbrakeAudioTracks -E $handbrakeAudioEncoders -B $handbrakeAudioBitrate\n");
-            echoPrint("$baseSpace        + Handbrake Settings (ALL) : -a $handbrakeAllAudioTracks -E $handbrakeAllAudioEncoders -B $handbrakeAllAudioBitrate\n"); 
-                
+                           
             echoPrint("$baseSpace- Getting Handbrake info: $handBrakeString ($baseFileName.HandbrakeInfo)\n");
             echoPrint(padLines("$baseSpace    + ",30,@handBrakeOutput),100);
-                    
+            my $hbTrackNum = 0;      
             foreach (@handBrakeOutput)
             {
                 chomp;
@@ -973,10 +927,28 @@
                     $nextAudio = 1;
                     $nextSubs  = 0;  
                 }
-                
+
                 if ($nextAudio && /\+ ([0-9])/)
                 {
-                    echoPrint("$baseSpace      - Handbrake Audio #$1:        $_\n",2);
+                    $hbTrackNum++;
+                    $handbrakeAllAudioTracks .= "$hbTrackNum,";
+                    echoPrint("$baseSpace      - Handbrake Audio #$hbTrackNum:        $_\n",2);
+                    if (/DTS/)
+                    {
+                        $handbrakeAllAudioEncoders .= "dts,";
+                        $handbrakeAllAudioBitrate   = "auto,";   
+                    }
+                    elsif (/AC3/ && /5.1 ch/)
+                    {
+                        $handbrakeAllAudioEncoders .= "ac3,";
+                        $handbrakeAllAudioBitrate   = "auto,";     
+                    }
+                    else
+                    {
+                        $handbrakeAllAudioEncoders .= "faac,";
+                        $handbrakeAllAudioBitrate   = "160,";
+                    }
+                    
                 }
                 
                 if (/subtitle tracks:/)
@@ -992,11 +964,17 @@
                 }
             }
             
+            $handbrakeAllAudioTracks     =~ s/,$//;
+            $handbrakeAllAudioEncoders   =~ s/,$//;
+            $handbrakeAllAudioBitrate    =~ s/,$//;
+            $handbrakeSubtitleTracks     = "";#~ s/,$//;
+            
+            echoPrint("$baseSpace      - Setting Handbrake Audio Options if /allAudio\n");
+            echoPrint("$baseSpace        + Handbrake Settings (ALL) : -a $handbrakeAllAudioTracks -E $handbrakeAllAudioEncoders -B $handbrakeAllAudioBitrate\n"); 
+ 
+            
             if (!($handbrakeAudioTracks eq ""))
             {
-                $perRunOptionsHash->{lc("handbrakeAudioTracks")}   = $handbrakeAudioTracks;
-                $perRunOptionsHash->{lc("handbrakeAudioEncoders")} = $handbrakeAudioEncoders;
-                $perRunOptionsHash->{lc("handbrakeAudioBitrate")}  = $handbrakeAudioBitrate;
                 $perRunOptionsHash->{lc("handbrakeAllAudioTracks")}   = $handbrakeAllAudioTracks;
                 $perRunOptionsHash->{lc("handbrakeAllAudioEncoders")} = $handbrakeAllAudioEncoders;
                 $perRunOptionsHash->{lc("handbrakeAllAudioBitrate")}  = $handbrakeAllAudioBitrate;
@@ -3140,20 +3118,40 @@ sub dvdScanForTitles
     my @handBrakeOutput = split(/\n/,$handBrakeOutput); 
     echoPrint(padLines("      + ",30,@handBrakeOutput),100); 
     echoPrint("    - Scanning DVD for titles\n",2);
+    my @titlePrints = ();
+    my @titleTimes  = ();
+    my $titleString = "";
+    my $titleTime   = "";
+    
+    my $subLang = "eng";
+    if (exists $perRunOptionsHash->{lc("subLang")})
+    {
+        $subLang = $perRunOptionsHash->{lc("subLang")};
+        if ($subLang eq "all")
+        {
+            $subLang = "[a-zA-Z0-9]*";
+        }
+    }
+
     foreach $line (@handBrakeOutput)
     {
         chomp($line);
         if ($line =~ /\+ title (\d+):/) 
-        { 
+        {
+            if (!($titleString eq ""))
+            {
+                push(@titlePrints,$titleString);
+                $titleString = "";
+            } 
             $currentTitle = $1;
         }
         
-        if ( $line =~ /\+ duration: (\d{2}):(\d{2}):\d{2}/ && $currentTitle != $foundTitle)
+        if ( $line =~ /\+ duration: (\d{2}):(\d{2}):(\d{2})/ && $currentTitle != $foundTitle)
         {
             $totalDur = ($1*60) + $2;
             if ($totalDur > 5)
             {
-                echoPrint("      + Found Title $currentTitle ($totalDur)\n");
+                $titleString = "    + Title ($1:$2:$3)   : $currentTitle\n";
             }
             $titleHash{$currentTitle} = $totalDur;            
             $match = 0;
@@ -3180,7 +3178,7 @@ sub dvdScanForTitles
         {
             if ($line =~ /([0-9]), English \(AC3\).*,\s*[0-9]+Hz,\s*([0-9]+)bps/ && $currentTitle != 0)
             {
-                    #echoPrint("        - Adding English Audio Track ($currentTitle): ($line)\n");
+                    $titleString .= "      - Audio : $line\n";
                     if ($2 > 300000)
                     {
                         #echoPrint("          + Audio is 5.1\n");
@@ -3191,13 +3189,24 @@ sub dvdScanForTitles
                         push(@{$soundHash{$currentTitle}},$1);                    
                     }
             }
-            elsif ($line =~ /([0-9]),.*eng\) \((Bitmap|Text)\)/ && $currentTitle != 0)
+            elsif ($line =~ /([0-9]),.*$subLang\) \((Bitmap|Text)\)/ && $currentTitle != 0)
             {
+                #$titleString .= "      - Subs  : $line\n";
                 push(@{$srtHash{$currentTitle}},$1);
                 #echoPrint("          + SRT: $1 $line\n");
             }
+            elsif ($line =~ /size:/)
+            {
+                $titleString .= "      - Video : $line\n";
+            }
         }
     }
+    
+    @titlePrints = sort { lc($a) cmp lc($b) } @titlePrints;
+    foreach (@titlePrints)
+    {
+        echoPrint("\n$_",100);
+    }  
     
     echoPrint("    - Number of titles found = " . keys(%titleHash) . "\n");
     if (keys(%titleHash) == 0)
@@ -3224,7 +3233,15 @@ sub dvdScanForTitles
     
     my @forcedTitles;
     my %forcedTitles;
-    if (exists $perRunOptionsHash->{lc("forceTitle")})
+  
+    if (exists $perRunOptionsHash->{lc("manualTitles")})
+    {   # Manually Pick titles
+        echoPrint("> Manually Select Titles to Encode (seperate by commas) : ");
+        $perRunOptionsHash->{lc("forceTitle")} = <STDIN>;
+        chomp($perRunOptionsHash->{lc("forceTitle")});
+    }
+    
+    if (exists $perRunOptionsHash->{lc("forceTitle")} && !($perRunOptionsHash->{lc("forceTitle")} eq ""))
     {
         @forcedTitles = split(/,/,$perRunOptionsHash->{lc("forceTitle")});
         foreach (@forcedTitles)
@@ -3232,6 +3249,7 @@ sub dvdScanForTitles
             $forcedTitles{$_} = "";
         }
     }
+        
     
     foreach $checkingTitle (sort { $b <=> $a } keys %titleHash)
     {
