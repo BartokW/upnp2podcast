@@ -4,7 +4,7 @@
 #
 
     Profile           =Handbrake Audio
-    Encode CLI #1     =?>handBrakeAllAudioTracks&&(>ORIGINAL:allAudio||allAudio<)<:> -a %%handBrakeAllAudioTracks%% -E %%handBrakeAllAudioEncoders%% -B %%handbrakeAllAudioBitrate%%<=>handBrakeAudioTracks<:> -a %%handBrakeAudioTracks%% -E %%handBrakeAudioEncoders%% -B %%handbrakeAudioBitrate%%<=>-E ?>%%acodec%%=~passthrough<:>?>ORIGINAL:audioCodec=~ac3<:>ac3<=>ORIGINAL:audioCodec=~dts<:>dts<=>aac<?<=>%%aCodec%%<? -B %%aBitrate%%<?
+    Encode CLI #1     =?>handBrakeAllAudioTracks&&(>ORIGINAL:allAudio||allAudio<)<:> -a %%handBrakeAllAudioTracks%% -E %%handBrakeAllAudioEncoders%% -B %%handbrakeAllAudioBitrate%%<=>-a ?>atrack<:>%%atrack%%<=>1<? -E %%acodec%% -B %%abitrate%%<?
     Encoder #1        =
 
 # Snippit: HandBrake Video
@@ -49,5 +49,5 @@
 #
 
     Profile           =Handbrake Subtitles
-    Encode CLI #1     =?>handbrakeSubtitleTracks<:>--subtitle %%handbrakeSubtitleTracks%%<=>EXISTS:%%INPUTSUB%%&&extractedSubtitles<:>--srt-file "%%INPUTSUB%%" --srt-codeset UTF-8 --srt-offset 0 --srt-lang eng<?
+    Encode CLI #1     =?>handbrakeSubtitleTracks<:>--subtitle %%handbrakeSubtitleTracks%%<=>EXISTS:%%INPUTSUB%%<:>--srt-file "%%INPUTSUB%%" --srt-codeset UTF-8 --srt-offset 0 --srt-lang eng<?
     Encoder #1        =
