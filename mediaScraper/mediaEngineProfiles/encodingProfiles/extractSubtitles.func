@@ -10,6 +10,8 @@
     Profile           =extractSubtitles
     Encode CLI #1     =#extract_sub# -srt -sc "?>quickStreamFixFile<:>%%quickStreamFixFile%%<=>cutCommFile<:>%%cutCommFile%%<=>%%ORIGINAL%%<?" -o "%%TEMPPATH%%\temp.srt"
     Encoder #1        =/exe ccextractorwin.exe
+    Encode CLI #1     =/inputSub "%%TEMPPATH%%\temp.srt"
+    Encoder #1        =/setOptions
 
 # Function: extractSubtitlesDVD
 #
