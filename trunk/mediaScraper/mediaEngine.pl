@@ -36,7 +36,7 @@
     $executablePath = $`;
 
     # Code version
-    $codeVersion = "mediaEngine v3.0 (SNIP:BUILT)";
+    $codeVersion = "mediaEngine v3.0d (SNIP:BUILT)";
 
     $usage  = "$codeVersion\n\n";
     $usage .= "Usage: mediaEngine.exe should not be called directly.\n";
@@ -967,7 +967,7 @@
             $handbrakeAllAudioTracks     =~ s/,$//;
             $handbrakeAllAudioEncoders   =~ s/,$//;
             $handbrakeAllAudioBitrate    =~ s/,$//;
-            $handbrakeSubtitleTracks     = "";#~ s/,$//;
+            $handbrakeSubtitleTracks     =~ s/,$//;
             
             echoPrint("$baseSpace      - Setting Handbrake Audio Options if /allAudio\n");
             echoPrint("$baseSpace        + Handbrake Settings (ALL) : -a $handbrakeAllAudioTracks -E $handbrakeAllAudioEncoders -B $handbrakeAllAudioBitrate\n"); 
@@ -2963,7 +2963,7 @@ sub detectVideoProperties
                 
             if (($cropX/$xRes)   < .72  || # Make sure its not getting shrunk too much
                 ($cropY/$yRes)   < .72  ||
-                ($cropX/$cropY)  > 1.8  || # Make it doesn't result in a weird aspect ratio
+                ($cropX/$cropY)  > 1.85  || # Make it doesn't result in a weird aspect ratio
                 ($cropX/$cropY)  < 1.25 ||
                 abs($topCrop[$cropIndex] -  ($yRes - ($cropY+$topCrop[$cropIndex])))  > 30 || # Make sure left/right and top/bottom are about equal
                 abs($leftCrop[$cropIndex] - ($xRes - ($cropX+$leftCrop[$cropIndex]))) > 30)
@@ -2979,7 +2979,7 @@ sub detectVideoProperties
             
             echoPrint("        - cropX/xRes (".$cropX/$xRes.")   > .72\n");
             echoPrint("        - cropY/yRes(".$cropY/$yRes.")   > .72\n");
-            echoPrint("        - 1.25 < cropX/cropY (".$cropX/$cropY.")  < 1.8\n");
+            echoPrint("        - 1.25 < cropX/cropY (".$cropX/$cropY.")  < 1.85\n");
             echoPrint("        - abs(TopCrop - BottomCrop) (".$topCrop[$cropIndex]." -  ".($yRes - ($cropY+$topCrop[$cropIndex])).")  < 30\n");
             echoPrint("        - abs(RightCrop - LeftCrop) (".$leftCrop[$cropIndex]." - ".($xRes - ($cropX+$leftCrop[$cropIndex])).") < 30\n");    
 
@@ -3118,12 +3118,11 @@ sub dvdScanForTitles
     my @handBrakeOutput = split(/\n/,$handBrakeOutput); 
     echoPrint(padLines("      + ",30,@handBrakeOutput),100); 
     echoPrint("    - Scanning DVD for titles\n",2);
+
     my @titlePrints = ();
-    my @titleTimes  = ();
-    my $titleString = "";
-    my $titleTime   = "";
-    
+    my $titleString = "";    
     my $subLang = "eng";
+    
     if (exists $perRunOptionsHash->{lc("subLang")})
     {
         $subLang = $perRunOptionsHash->{lc("subLang")};
@@ -3191,7 +3190,7 @@ sub dvdScanForTitles
             }
             elsif ($line =~ /([0-9]),.*$subLang\) \((Bitmap|Text)\)/ && $currentTitle != 0)
             {
-                #$titleString .= "      - Subs  : $line\n";
+                $titleString .= "      - Subs  : $line\n";
                 push(@{$srtHash{$currentTitle}},$1);
                 #echoPrint("          + SRT: $1 $line\n");
             }
@@ -3201,6 +3200,12 @@ sub dvdScanForTitles
             }
         }
     }
+    
+    if (!($titleString eq ""))
+    {
+        push(@titlePrints,$titleString);
+        $titleString = "";
+    } 
     
     @titlePrints = sort { lc($a) cmp lc($b) } @titlePrints;
     foreach (@titlePrints)
