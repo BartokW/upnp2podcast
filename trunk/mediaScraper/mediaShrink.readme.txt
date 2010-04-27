@@ -9,8 +9,8 @@ CLI Syntax  : mediaShrink.exe [options] <File|Folder> <File|Folder>
     /saveLog                Save log file when complete (default)
     /saveAll                Save all temp files when complete
     /batch                  Run in batch mode, intended for Dirmon2/SJQ (default)
-    
-    /altLaunch              Use alternate launching meathod.  Should only be
+
+    /altLaunch             Use alternate launching meathod.  Should only be
                               used if you're having problems and I ask you to 
                               try it.
 
@@ -83,10 +83,21 @@ CLI Syntax  : mediaShrink.exe [options] <File|Folder> <File|Folder>
                               - dts    : DTS passthough
 
     /abitrate <kbs>        Set audio bitrate in kbs (Default 160)
+
+    /atrack <Track #>        Set audio bitrate in kbs (Default 160)
+
+    Note: atrack, abitrate, acodec can take comma separated values to force multiple tracks
     
     /allAudio              Force mediaSrhink to encode all audio tracks      
 
 ### DVD Options ------------------------------------------------------------
+
+    /subLang <lang Code|all>  Lets user specify the language code of the 
+                              subtitles they want to extract (default: eng)
+
+                              http://www.loc.gov/standards/iso639-2/php/code_list.php
+
+    /manualTitles           Prompts user to manually specify the DVD titles to encode
 
     /forceTitle <#,#,...>   By default mediaShrink will automatically attempt to 
                             detect which titles to encode, however, sometimes it
