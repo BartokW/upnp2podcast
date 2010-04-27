@@ -121,11 +121,11 @@
     
     my %passwords = ();
     
-    if (!exists $optionsHash{lc("silent")})
+    if (!exists $optionsHash{lc("verbose")})
     {
-        $verboseLevel = 0;
+        $verboseLevel = $optionsHash{lc("verbose")};
         print STDOUT $ourStorySoFar;   
-    }
+    }   
     
     if (exists $optionsHash{lc("batch")})
     {
@@ -703,6 +703,12 @@
                 echoPrint("$baseSpace  ! Error in ffmpeg log: ($&)\n");
                 return;
             }
+            
+            if ( $_ =~ /concealing [0-9]+ DC, [0-9]+ AC, [0-9]+ MV errors/)
+            {
+                echoPrint("$baseSpace  ! Warning Potential Corruption:          $_\n",2);
+                $videoInfoHash->{lc("videoCorruption")} = $_;
+            }
     
             if ( $_ =~ /Input #0, ([a-zA-Z0-9_\-]+)/ )
             {
@@ -1097,12 +1103,20 @@
             echoPrint("            - Previously Resolved Condition: $check\n",2);  
             $condTrue = $condTrue = checkProfileCond($check, $negate, $text);;
         }
+        elsif ($check =~ /EXTEMPTY:([a-zA-Z0-9]+)/i)
+        {
+            $extToCheck = $1;
+            echoPrint("            - Does file exist next to inputFile with a (.$extToCheck) extention (empty ok)? (".getFullFile("$perRunOptionsHash->{lc(inputFile)}").".".$extToCheck.")\n",2);
+            $condTrue = checkProfileCond((((-e getFullFile("$perRunOptionsHash->{lc(inputFile)}").".".$extToCheck ||
+                                            -e "$perRunOptionsHash->{lc(inputFile)}.".".$extToCheck"))?1:0), $negate, $text); 
+            $perRunOptionsHash->{lc("check")} = $extToCheck;
+        }
         elsif ($check =~ /EXT:([a-zA-Z0-9]+)/i)
         {
             $extToCheck = $1;
             echoPrint("            - Does file exist next to inputFile with a (.$extToCheck) extention? (".getFullFile("$perRunOptionsHash->{lc(inputFile)}").".".$extToCheck.")\n",2);
-            $condTrue = checkProfileCond((((-e getFullFile("$perRunOptionsHash->{lc(inputFile)}").".".$extToCheck ||
-                                            -e "$perRunOptionsHash->{lc(inputFile)}.".".$extToCheck"))?1:0), $negate, $text); 
+            $condTrue = checkProfileCond((((-s getFullFile("$perRunOptionsHash->{lc(inputFile)}").".".$extToCheck ||
+                                            -s "$perRunOptionsHash->{lc(inputFile)}.".".$extToCheck"))?1:0), $negate, $text); 
             $perRunOptionsHash->{lc("check")} = $extToCheck;
         }
         elsif ($check =~ /EXISTS:(.*)/i)
