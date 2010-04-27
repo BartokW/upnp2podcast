@@ -4,7 +4,7 @@
 #
 
     Profile           =HandBrake
-    Encode CLI #1     =?>inputMain:videoContainer=~mpegts&&(>!cutComm||(>cutComm&&onlyWhenVprj&&!EXT:vprj<)<)<:>QuickStream Fix<?
+    Encode CLI #1     =?>quickStreamFix||inputMain:videoContainer=~mpegts||inputMain:videoCorruption&&(>!cutComm||(>cutComm&&onlyWhenVprj&&!EXT:vprj<)<)<:>QuickStream Fix<?
     Encoder #1        =/insertFunction
     Encode CLI #1     =?>cutComm&&!isDVD<:>Cut Commercials<?
     Encoder #1        =/insertFunction
