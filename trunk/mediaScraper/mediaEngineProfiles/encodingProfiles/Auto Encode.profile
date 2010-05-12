@@ -19,7 +19,7 @@
     Encode CLI #3     =/vbitrate ?>%%SNIP:HDTVCheck%%<:>2000<=>isDVD<:>1800<=>1500<?
     Encoder #3        =/setOptions /noOverwrite
 
-    Encode CLI #4     =?>ORIGINAL:audioCodec=~(ac3|dts)&&ORIGINAL:audioChannels=~6&&!ORIGINAL:43in169<:>passthrough<=>/acodec faac /abitrate 160<? 
+    Encode CLI #4     =?>ORIGINAL:audioCodec=~(ac3|dts)&&ORIGINAL:audioChannels=~6&&!ORIGINAL:43in169<:><=>/acodec faac /abitrate 160<? 
     Encoder #4        =/setOptions /noOverwrite
 
     Encode CLI #4     =/acodec ?>ORIGINAL:audioCodec=~ac3<:>ac3<=>ORIGINAL:audioCodec=~dts<:>dts<=>faac /abitrate 160<? 
