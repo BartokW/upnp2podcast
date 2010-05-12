@@ -24,6 +24,8 @@
     Encoder #1        =/use "%%inputFile_PATH_PATH%%\folder.override.txt" /readFile
     Encode CLI #1     =?>ExISTS:%%inputFile_PATH%%\%%inputFile_NAME%%.override.txt&&!showTitle<:>($$showTitle$$.*)<?
     Encoder #1        =/use "%%inputFile_PATH%%\%%inputFile_NAME%%.override.txt" /readFile
+    Encode CLI #1     =Override
+    Encoder #1        =/insertFunction
     Encode CLI #1     =TV_Series_Season_Episode
     Encoder #1        =/insertFunction
     Encode CLI #1     =TV_Series_SeasonXEpisode
