@@ -12,6 +12,8 @@
     Encoder #1        =/use "%%showTitle_STRIPSPACES_DOTTOSPACE%%"
     Encode CLI #1     =/isTV
     Encoder #1        =/setOptions
+    Encode CLI #1     =Overrides
+    Encoder #1        =/insertFunction
     Encode CLI #1     =?>showTitle<:>theTVDBAPISearch<?
     Encoder #1        =/insertFunction
     Encode CLI #1     =?>!tvdbID<:>theTVDBSearch<?
@@ -40,9 +42,11 @@
     Encoder #1        =/insertFunction
     Encode CLI #1     =?>tvdbID&&genMyFile<:>createMyFile<?
     Encoder #1        =/insertFunction
+    Encode CLI #1     =?>tvdbID&&genSymLink<:>createSymLink<?
+    Encoder #1        =/insertFunction
     Encode CLI #1     =?>tvdbID&&(>genXMLFile||addToSageDB<)<:>createTVXMLFile<?
     Encoder #1        =/insertFunction
-    Encode CLI #1     =?>tvdbID&&(>genPropertyFile||(>!genInfoFile&&!genMyFile&&!genPropertyFile<)<)<:>createPropertiesFile<?
+    Encode CLI #1     =?>tvdbID&&(>genPropertyFile||(>!genInfoFile&&!genMyFile&&!genPropertyFile&&!genSymLink<)<)<:>createPropertiesFile<?
     Encoder #1        =/insertFunction
 
 
