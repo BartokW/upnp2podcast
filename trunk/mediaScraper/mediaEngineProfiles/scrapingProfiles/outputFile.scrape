@@ -52,6 +52,18 @@
     Encode CLI #2     =?>!DIRECTORY:%%inputFile%%&&!airingID<:>"%%inputFile%%"<?
     Encoder #2        =/exe touch.exe
 
+# 
+# Profile: createSymLink
+#
+
+    Profile           =createSymLink
+    Encode CLI #2     =($$symLinkFile$$.*)
+    Encoder #2        =/use "%%inputFile_DRIVE%%\%%symlinkdir%%\%%showTitle_WIN32%% %%SEoutputFormat_WIN32%% - %%episodeTitle_WIN32%%\%%showTitle_WIN32%% %%SEoutputFormat_WIN32%% - %%episodeTitle_WIN32%%.%%inputFile_EXT%%"
+    Encode CLI #2     ="%%symLinkFile_PATH%%"
+    Encoder #2        =/exe mkdir
+    Encode CLI #2     =?>!exists:%%symLinkFile%%<:>/H "%%symLinkFile%%" "%%inputFile%%"<? 
+    Encoder #2        =/exe mklink
+
 
 #
 # Profile: createMyFile
