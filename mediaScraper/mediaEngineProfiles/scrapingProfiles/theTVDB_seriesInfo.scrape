@@ -87,7 +87,7 @@
 #
 
     Profile           =theTVDBAPIGetShowInfo
-    Encode CLI #1     =http://www.thetvdb.com/api/%%theTVDBapiKey%%/series/%%tvdbID%%
+    Encode CLI #1     =http://www.thetvdb.com/api/%%theTVDBapiKey%%/series/%%tvdbID%%/en.xml
     Encoder #1        =/get $$tvDBShowInfoHTML$$
     Encode CLI #2     =<Overview>($$showDescription$$[^<]*)</Overview>
     Encoder #2        =/use tvDBShowInfoHTML /flatten
