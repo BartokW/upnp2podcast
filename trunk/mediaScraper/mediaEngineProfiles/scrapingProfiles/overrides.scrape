@@ -1,0 +1,17 @@
+# Scraper: Overrides for problem shows
+#
+#  INPUT : %%showTitle%%    - Title of show to search
+#  OUTPUT: %%tvdbID%%       - theTVDB show ID
+#
+
+    Profile           =Overrides
+    Encode CLI #1     =?>firstAired<:>($$airedYear$$[0-9]{4})-($$airedMonth$$[0-9]{2})-($$airedDay$$[0-9]{2})<?
+    Encoder #1        =/use "%%firstAired%%"
+    Encode CLI #1     =?>showTitle=eq=V&&!airedYear<2009<:>($$showTitle$$.*)<?
+    Encoder #1        =/use "V (2009)"
+    Encode CLI #1     =?>showTitle=~The.Office&&!airedYear<2005<:>($$showTitle$$.*)<?
+    Encoder #1        =/use "The Office (US)"
+    Encode CLI #1     =?>showTitle=~Castle&&!airedYear<2009<:>($$showTitle$$.*)<?
+    Encoder #1        =/use "Castle (2009)"
+    Encode CLI #1     =?>showTitle=~American Dad<:>($$showTitle$$.*)<?
+    Encoder #1        =/use "American Dad!"
