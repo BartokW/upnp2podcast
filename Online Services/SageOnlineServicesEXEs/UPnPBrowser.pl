@@ -42,12 +42,13 @@
    
   open(LOGFILE,">$executablePath/$executableEXE.log");
 
+
   # Get Start Time
   my ( $startSecond, $startMinute, $startHour) = localtime();
   my @startTime = ( $startSecond, $startMinute, $startHour);
 
   # Code version
-  my $codeVersion = "$executableEXE v1.0 (SNIP:BUILT)";
+  my $codeVersion = "$executableEXE v1.1 (SNIP:BUILT)";
   
   my $invalidMsg .= "\n$codeVersion\n";
   $invalidMsg .= "\tUSAGE:";
@@ -57,6 +58,14 @@
 
   echoPrint("Welcome to $codeVersion! (".localtime()."\n");
   echoPrint("  + Path: $executablePath\n");
+  
+  if (!(-d "$executablePath\\$executableEXE"))
+  {
+      echoPrint("  + Making .cache Directory: ($executablePath\\$executableEXE)\n");
+      {
+          mkdir("$executablePath\\$executableEXE");
+      }
+  }
   
   # Find SageTV Directory and check version
   my @checkPaths = ($executablePath,
@@ -110,9 +119,68 @@
   my %emptyHash  = ();
   
   my $updateSuccess;
-  if ((@parameters == 0 || int(rand(10)) > 5))  
+  my $serverPresetVersion = 0;
+  my $serverPresets = "";
+  my $presetVersion = -1;
+  
+  if ((@parameters == 0 || int(rand(10)) > 5) || !(-s "$executablePath\\$executableEXE\\$executableEXE.presets"))  
   {
-      updateFeedFiles($sageDir, $ua);
+      my $presetsURL    = 'http://upnp2podcast.googlecode.com/svn/trunk/Online%20Services/SageOnlineServicesEXEs/UPnPBrowser.presets';  
+      
+      echoPrint("  + Checking for preset updates\n");
+      my $response  = $ua->get($presetsURL);  
+      if ($response->is_success)
+      {
+          $serverPresets = $response->decoded_content((charset => "ISO-8859-1"));
+          $serverPresets =~ s/\r//g;
+          $serverPresets =~ /Version=([0-9]+)/;
+          $serverPresetVersion = $1;
+          echoPrint("    - Downloaded $executableEXE.presets (Version: $serverPresetVersion)\n");
+      }
+      else
+      {
+          echoPrint("  ! Failed to download updates file ($presetsURL)\n");
+      }
+      
+      if (open(PRESETS,"$executablePath\\$executableEXE\\$executableEXE.presets"))
+      {   
+          $presetVersion = <PRESETS>;
+          $presetVersion =~ /Version=([0-9]+)/i;
+          $presetVersion = $1;
+          echoPrint("    - Existing Presets Version ($presetVersion)\n");
+      }
+      close(PRESETS);
+      
+      # Check to see if file is most recent
+      if ($serverPresetVersion > $presetVersion && !($serverPresets eq ""))
+      {
+          echoPrint("      ! Updating Presets File ($serverPresetVersion > $presetVersion)\n");
+          open(PRESETS,">$executablePath\\$executableEXE\\$executableEXE.presets");
+          print PRESETS $serverPresets;
+          close(PRESETS);         
+      }      
+  }
+  
+  my %presets = ();
+  if (-s "$executablePath\\$executableEXE\\$executableEXE.presets")
+  {   # Read in Presets      
+      if (open(PRESETS,"$executablePath\\$executableEXE\\$executableEXE.presets"))
+      {   
+          my $presetVersion = <PRESETS>;
+          $presetVersion =~ /Version=([0-9]+)/i;
+          $presetVersion = $1;
+          echoPrint("  + Reading Presets ($presetVersion)\n");
+          
+          while(<PRESETS>)
+          {
+              chomp;
+              if (/^(.*):::(.*)/)
+              {
+                  echoPrint("    - $1 :  ($2)\n");    
+                  $presets{lc($1)} = $2;
+              }
+          }
+      }
   }
   
   if (@parameters == 1 &&  $parameters[0] =~ /:/)
@@ -136,9 +204,12 @@
       $optionsHash{lc("path")} = $v1path;
       echoPrint("    - /path  : (".$optionsHash{lc("path")}.")\n");
 
-      #disabling subcats
-      $optionsHash{lc("disableSubcats")} = 1;
-      echoPrint("    - /disableSubcats\n");          
+      if (!($sageVersion =~ /SageTV V7/i))
+      {
+          #disabling subcats
+          $optionsHash{lc("disableSubcats")} = 1;
+          echoPrint("    - /disableSubcats\n");        
+      }        
   }
   else
   {
@@ -150,20 +221,95 @@
       }
       
       setOptions(decode('ISO-8859-1' , $parametersString),\@emptyArray,\%optionsHash,\@inputFiles,\%emptyHash,"  ");
+      
+      if (exists $optionsHash{lc("preset")})
+      {   # Add in presets
+          if (exists $presets{lc($optionsHash{lc("preset")})})
+          {
+              echoPrint("  + Using Preset ".$optionsHash{lc("preset")}." (".$presets{lc($optionsHash{lc("preset")})}.")\n"); 
+              setOptions(decode('ISO-8859-1' , $presets{lc($optionsHash{lc("preset")})}),\@emptyArray,\%optionsHash,\@inputFiles,\%emptyHash,"    ");              
+          }
+          else
+          {
+              echoPrint("  ! Couldn't find Preset ".$optionsHash{lc("preset")}." (".$presets{lc($optionsHash{lc("preset")})}.")\n");               
+          }
+      }
   }
   
+  if (exists $optionsHash{lc("search")})
+  {
+      echoPrint("  + Breaking up /search into options\n");
+      my @v1sting = split(/:/, $optionsHash{lc("search")});
+      
+      $optionsHash{lc("device")} = shift @v1sting;
+      echoPrint("    - /device : (".$optionsHash{lc("device")}.")\n");
+      
+      my $v1Depth = pop @v1sting;
+      $v1Depth =~ /\+([0-9])/;
+      $optionsHash{lc("depth")} = $1-1;
+      echoPrint("    - /depth : (".$optionsHash{lc("depth")}.")\n");
+      
+      my $v1path = $optionsHash{lc("device")}."/"; 
+      foreach (@v1sting)
+      {
+          $v1path .= $_."/";   
+      }
+      $optionsHash{lc("path")} = $v1path;
+      echoPrint("    - /path  : (".$optionsHash{lc("path")}.")\n");
+  }
+  
+  my $serverWait = 1;
+  if (exists $optionsHash{lc("serverSearchTimeout")})
+  {
+      echoPrint("  + /serverSearchTimeout : (".$optionsHash{lc("serverSearchTimeout")}.")\n");
+      $serverWait = $optionsHash{lc("serverSearchTimeout")};
+  }
 
   
   if (@parameters == 0 || exists $optionsHash{lc("mainMenu")})
   {
       echoPrint("  + /mainMenu : Printing available UPnP Servers\n");
-      my $serverWait = 1;
-      if (exists $optionsHash{lc("serverSearchTimeout")})
-      {
-          echoPrint("  + /serverSearchTimeout : (".$optionsHash{lc("serverSearchTimeout")}.")\n");
-          $serverWait = $optionsHash{lc("serverSearchTimeout")};
-      }
       my @dev_list = $obj->search(st =>'upnp:rootdevice', mx => $serverWait);
+
+      if (opendir(SCANDIR,"$executablePath/$executableEXE"))
+      {
+          my @filesInDir = readdir(SCANDIR);
+          echoPrint("  + Checking for .cache files not found in search\n");
+          foreach $fileName (@filesInDir)
+          {
+              if ($fileName =~ /$executableEXE\.(.*)\.cache/)
+              {
+                  $nameToCheck = $1;
+                  $found = 0;
+                  foreach $server (@dev_list)
+                  {
+                      if (toWin32($server->getfriendlyname()) eq $nameToCheck)
+                      {
+                          $found = 1;
+                          last;    
+                      }        
+                  }
+                  
+                  if ($found == 0)
+                  {   # Add to Dev List
+                      echoPrint("    - Found ($fileName), adding to list\n");
+                      if (open(UPNPCACHE,"$executablePath/$executableEXE/$fileName"))
+                      {                      
+                          @cacheFull = <UPNPCACHE>;
+                          $cacheText  = "@cacheFull";
+                          $cacheText  =~ /=======================/;
+                          $post_con = $';
+                          $dev = Net::UPnP::Device->new();              
+               		        $dev->setssdp($cacheText);
+              		        $dev->setdescription($post_con);
+              		        @dev_list = (@dev_list, $dev);
+          		        }
+          		        close(UPNPCACHE);
+                  }
+              }
+          }
+      }
+      
   
       foreach (@dev_list)
       {
@@ -171,7 +317,7 @@
           echoPrint("    - Device: ".$_->getfriendlyname()."(".$_->getdevicetype().")\n");
           echoPrint("      + Geneating Cache: ($executableEXE.".$_->getfriendlyname().".cache)\n");
           $dev = $_;
-          if (open(UPNPCACHE,">$executablePath\\$executableEXE.".toWin32($_->getfriendlyname()).".cache"))
+          if (open(UPNPCACHE,">$executablePath/$executableEXE/$executableEXE.".toWin32($_->getfriendlyname()).".cache"))
           {
               print UPNPCACHE $dev->getssdp()."=======================".$dev->getdescription();
           }
@@ -186,7 +332,7 @@
       
       foreach (@dev_list)
       {
-          if ($_->getfriendlyname() eq "")
+          if ($_->getfriendlyname() eq "" || (exists $optionsHash{lc("filter")} && $_->getfriendlyname() =~ /$optionsHash{lc("filter")}/))
           {
               next;
           }
@@ -209,6 +355,25 @@
           push(@items,$newItem);            
       }
       
+      # Add in Long Search
+      $newItem = $feed_item;
+      $video             = toXML('external,"'.$executable.'",/serverSearchTimeout||30||/mainMenu');
+      $title             = "Find More Servers...";
+      $description       = "Re-run the UPnP server search with an extra long timeout to find more servers (~10 minutes).";
+      $thumbnail         = '';
+      $type              = 'sagetv/subcategory';
+      
+      $newItem =~ s/%%ITEM_TITLE%%/$title/g;
+      $newItem =~ s/%%ITEM_DATE%%//g;
+      $newItem =~ s/%%ITEM_DESCRIPTION%%/$description/g;
+      $newItem =~ s/%%ITEM_URL%%/$video/g;
+      $newItem =~ s/%%ITEM_DUR%%//g;
+      $newItem =~ s/%%ITEM_SIZE%%//g;
+      $newItem =~ s/%%ITEM_TYPE%%/$type/g;
+      $newItem =~ s/%%ITEM_PICTURE%%/$thumbnail/g;
+      $newItem =~ s/%%ITEM_DUR_SEC%%//g; 
+      push(@items,$newItem);
+      
       my $execTime = executionTime(@startTime);      
       print encode('UTF-8', $opening);
       foreach (@items)
@@ -224,30 +389,44 @@
       exit 0;
   }
   
+  my $foundDevice = 0;
   if (exists $optionsHash{lc("device")})
   {
       my $lookingFor = $optionsHash{lc("device")};
       echoPrint("  + Looking for UPnP Server: ".$lookingFor."\n");
-      if (-s "$executablePath\\$executableEXE.$lookingFor.cache")
+      if (opendir(SCANDIR,"$executablePath/$executableEXE"))
       {
-          echoPrint("    - Found Cache ($executablePath\\$lookingFor.cache)\n");
-          if (open(UPNPCACHE,"$executablePath\\$executableEXE.$lookingFor.cache"))
+          my @filesInDir = readdir(SCANDIR);
+          foreach $cacheFile (@filesInDir)
           {
-              $foundDevice = 1;
-              @cacheFull = <UPNPCACHE>;
-              $cacheText  = "@cacheFull";
-              $cacheText  =~ /=======================/;
-              $post_con = $';
-              $dev = Net::UPnP::Device->new();              
-   		        $dev->setssdp($cacheText);
-  		        $dev->setdescription($post_con);
-  		        $mediaServer->setdevice($dev);
+              if ($cacheFile =~ /$executableEXE\.(.+)\.cache/)
+              {
+                  $cacheServer = $1;
+                  if ($cacheServer =~ /$lookingFor/i)
+                  {
+                      echoPrint("    - Found Cache ($cacheFile)\n");
+                      if (open(UPNPCACHE,"$executablePath/$executableEXE/$cacheFile"))
+                      {
+                          $foundDevice = 1;
+                          @cacheFull = <UPNPCACHE>;
+                          $cacheText  = "@cacheFull";
+                          $cacheText  =~ /=======================/;
+                          $post_con = $';
+                          $dev = Net::UPnP::Device->new();              
+               		        $dev->setssdp($cacheText);
+              		        $dev->setdescription($post_con);
+              		        $mediaServer->setdevice($dev);
+              		        last;
+                      }
+                      close(UPNPCACHE);
+                  }
+              }
           }
-          close(UPNPCACHE);
       }
-      else
+          
+      if ($foundDevice == 0)
       {
-          my @dev_list = $obj->search(st =>'upnp:rootdevice', mx => 1);
+          my @dev_list = $obj->search(st =>'upnp:rootdevice', mx => $serverWait);
           foreach (@dev_list)
           {
               chomp;
@@ -255,7 +434,7 @@
               if ($_->getfriendlyname() =~ /\Q$lookingFor\E/i)
               {
                   $dev = $_;
-                  if (open(UPNPCACHE,">".toWin32("$executablePath\\$executableEXE.$lookingFor.cache")))
+                  if (open(UPNPCACHE,">$executablePath/$executableEXE/$executableEXE.".toWin32($_->getfriendlyname()).".cache"))
                   {
                       print UPNPCACHE $dev->getssdp()."=======================".$dev->getdescription();
                   }
@@ -355,7 +534,8 @@
           @items    = (@items, addItems($mediaServer, 
                                         $optionsHash{lc("uid")}, 
                                         $optionsHash{lc("path")}, 
-                                        $optionsHash{lc("device")}, 
+                                        $optionsHash{lc("device")},
+                                        $optionsHash{lc("filter")}, 
                                         !(exists $optionsHash{lc("disableSubcats")}), 
                                         (exists $optionsHash{lc("depth")} ? $optionsHash{lc("depth")} : 0) ));
           
@@ -577,6 +757,7 @@ FEED_END
       my $uid            = shift;
       my $path           = shift;
       my $device         = shift;
+      my $filter         = shift;
       my $disableSubcats = shift;
       my $depth          = shift;
 
@@ -595,17 +776,23 @@ FEED_END
         {
             if ($_->iscontainer())
             {
-                echoPrint("      / ".$_->gettitle()."\n");
                 if ($depth != 0)
                 {
-                    @items = (@items, addItems($mediaServer, $_->getid(), $path."\\".$_->gettitle(), $device, $disableSubcats, ($depth - 1)));        
+                    echoPrint("      / ".$_->gettitle()."\n");
+                    @items = (@items, addItems($mediaServer, $_->getid(), $path."/".$_->gettitle(), $device, $filter, $disableSubcats, ($depth - 1)));        
                 }
                 elsif ($disableSubcats == 1)
-                {                        
+                {     
+                    if (!($filter eq "") && !($_->gettitle() =~ /$filter/))
+                    {   # Check Filter
+                        echoPrint("      / ".$_->gettitle()." (FILTERED)\n");
+                        next;
+                    }
+                    echoPrint("      / ".$_->gettitle()."\n");                   
                     $newItem = $feed_item;
-                    $video             = toXML('external,'.$executable.",/device||".$device."||/uid||".$_->getid()."||/path||".$path."\\".$_->gettitle());
+                    $video             = toXML('external,'.$executable.",/device||".$device."||/uid||".$_->getid()."||/path||".$path."/".$_->gettitle());
                     $title             = $_->gettitle();
-                    $description       = $path."\\".$_->gettitle()."  (EXE_TIME)";
+                    $description       = $path.$_->gettitle();
                     $thumbnail         = '';
                     $type              = 'sagetv/subcategory';
                     
@@ -640,6 +827,11 @@ FEED_END
             }
             elsif ($_->isitem())
             {
+                if (!($filter eq "") && !($_->gettitle() =~ /$filter/))
+                {   # Check Filter
+                    echoPrint("      + ".$_->gettitle()." (FILTERED)\n"); 
+                    next;
+                }  
                 echoPrint("      + ".$_->gettitle()."\n"); 
                 my $newItem = $feed_item;
                 my $content = $_;
@@ -652,7 +844,7 @@ FEED_END
                 my $userRating  = $content->getUserRating();
                 my $dur  = $content->getDur();
                 my $thumbnail  = toXML($content->getPicture());
-                my $description = $content->getDesc()."  (EXE_TIME)";
+                my $description = $content->getDesc();
                 my $type = 'video/mpeg2';
         
                 if ($title =~ /s([0-9]+)e([0-9]+): (.*)/)
@@ -715,11 +907,11 @@ FEED_END
   
   sub updateFeedFiles
   {
-    my ($executablePath,$ua) = @_;
+    my ($ua) = @_;
     my $rv = 0;  
     # URL of file containing feed versions
-    my $feedPath       = "$executablePath\\STVs\\SageTV3\\OnlineVideos\\";
-    my $feedVersionURL = 'http://upnp2podcast.googlecode.com/svn/trunk/upnp2podcast/Feeds/$executableEXE.FeedVersions.txt';
+    my $feedPath = "$executablePath/STVs/SageTV7/OnlineVideos/";
+    my $feedVersionURL = 'http://upnp2podcast.googlecode.com/svn/trunk/upnp2podcast/Feeds/$executableEXE.presets';
     my ($updateFile, $propFileName, $propFileVersion, 
         $propFileMD5, $propFileURL, $topLine, $currentVersion,
         $updatedMD5, $propPlugIn);
