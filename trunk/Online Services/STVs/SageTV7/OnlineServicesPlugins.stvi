@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Module xmlns="urn:tv.sage/stv" Name="default" PersistentPrimaryRefs="true">
+ <Hook Name="STVImported" Sym="XDNVX-55570">
+  <Action Name="&quot;REM Deletion of Widgets&quot;" Sym="XDNVX-55571"/>
+  <Action Name="&quot;REM Renaming of Widgets&quot;" Sym="XDNVX-55572"/>
+  <Action Name="&quot;REM Resetting of Widget properties&quot;" Sym="XDNVX-55573"/>
+  <Action Name="&quot;REM Removal of Widget children relationships&quot;" Sym="XDNVX-55574"/>
+  <Action Name="&quot;REM Adding of Widget children relationships&quot;" Sym="XDNVX-55575">
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;OPUS4A-125824&quot;)" Sym="XDNVX-55577">
+    <Branch Name="else" Sym="XDNVX-55578">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-55560&quot;)" Sym="XDNVX-55581">
+      <Branch Name="else" Sym="XDNVX-55582">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-55585"/>
+      </Branch>
+      <Branch Name="null" Sym="XDNVX-55583">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-55560 \&quot;Secondary Menu Items Area\&quot; could not add as child; parent symbol=OPUS4A-125824 \&quot;OnlineServicesPlugins\&quot;&quot;)" Sym="XDNVX-55584"/>
+      </Branch>
+     </Conditional>
+    </Branch>
+    <Branch Name="null" Sym="XDNVX-55579">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=OPUS4A-125824 \&quot;Secondary Menu Items Area\&quot; missing parent; could not add child with symbol=XDNVX-55560 \&quot;OnlineServicesPlugins\&quot;&quot;)" Sym="XDNVX-55580"/>
+    </Branch>
+   </Conditional>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-55560&quot;)" Sym="XDNVX-55586">
+    <Branch Name="else" Sym="XDNVX-55587">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-55561&quot;)" Sym="XDNVX-55590">
+      <Branch Name="else" Sym="XDNVX-55591">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-55594"/>
+      </Branch>
+      <Branch Name="null" Sym="XDNVX-55592">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-55561 \&quot;OnlineServicesPlugins\&quot; could not add as child; parent symbol=XDNVX-55560 \&quot;ButtonText\&quot;&quot;)" Sym="XDNVX-55593"/>
+      </Branch>
+     </Conditional>
+    </Branch>
+    <Branch Name="null" Sym="XDNVX-55588">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-55560 \&quot;OnlineServicesPlugins\&quot; missing parent; could not add child with symbol=XDNVX-55561 \&quot;ButtonText\&quot;&quot;)" Sym="XDNVX-55589"/>
+    </Branch>
+   </Conditional>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-55560&quot;)" Sym="XDNVX-55595">
+    <Branch Name="else" Sym="XDNVX-55596">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-55562&quot;)" Sym="XDNVX-55599">
+      <Branch Name="else" Sym="XDNVX-55600">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-55603"/>
+      </Branch>
+      <Branch Name="null" Sym="XDNVX-55601">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-55562 \&quot;OnlineServicesPlugins\&quot; could not add as child; parent symbol=XDNVX-55560 \&quot;ThisItem\&quot;&quot;)" Sym="XDNVX-55602"/>
+      </Branch>
+     </Conditional>
+    </Branch>
+    <Branch Name="null" Sym="XDNVX-55597">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-55560 \&quot;OnlineServicesPlugins\&quot; missing parent; could not add child with symbol=XDNVX-55562 \&quot;ThisItem\&quot;&quot;)" Sym="XDNVX-55598"/>
+    </Branch>
+   </Conditional>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-55560&quot;)" Sym="XDNVX-55604">
+    <Branch Name="else" Sym="XDNVX-55605">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-55563&quot;)" Sym="XDNVX-55608">
+      <Branch Name="else" Sym="XDNVX-55609">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-55612"/>
+      </Branch>
+      <Branch Name="null" Sym="XDNVX-55610">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-55563 \&quot;OnlineServicesPlugins\&quot; could not add as child; parent symbol=XDNVX-55560 \&quot;OnlineMenuTitle = \&quot;Online Services Plugins\&quot;\&quot;&quot;)" Sym="XDNVX-55611"/>
+      </Branch>
+     </Conditional>
+    </Branch>
+    <Branch Name="null" Sym="XDNVX-55606">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-55560 \&quot;OnlineServicesPlugins\&quot; missing parent; could not add child with symbol=XDNVX-55563 \&quot;OnlineMenuTitle = \&quot;Online Services Plugins\&quot;\&quot;&quot;)" Sym="XDNVX-55607"/>
+    </Branch>
+   </Conditional>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-55563&quot;)" Sym="XDNVX-55613">
+    <Branch Name="else" Sym="XDNVX-55614">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-55564&quot;)" Sym="XDNVX-55617">
+      <Branch Name="else" Sym="XDNVX-55618">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-55621"/>
+      </Branch>
+      <Branch Name="null" Sym="XDNVX-55619">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-55564 \&quot;OnlineMenuTitle = \&quot;Online Services Plugins\&quot;\&quot; could not add as child; parent symbol=XDNVX-55563 \&quot;UPnPBrowserString = \&quot;\&quot;\&quot;&quot;)" Sym="XDNVX-55620"/>
+      </Branch>
+     </Conditional>
+    </Branch>
+    <Branch Name="null" Sym="XDNVX-55615">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-55563 \&quot;OnlineMenuTitle = \&quot;Online Services Plugins\&quot;\&quot; missing parent; could not add child with symbol=XDNVX-55564 \&quot;UPnPBrowserString = \&quot;\&quot;\&quot;&quot;)" Sym="XDNVX-55616"/>
+    </Branch>
+   </Conditional>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-55564&quot;)" Sym="XDNVX-55622">
+    <Branch Name="else" Sym="XDNVX-55623">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-55565&quot;)" Sym="XDNVX-55626">
+      <Branch Name="else" Sym="XDNVX-55627">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-55630"/>
+      </Branch>
+      <Branch Name="null" Sym="XDNVX-55628">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-55565 \&quot;UPnPBrowserString = \&quot;\&quot;\&quot; could not add as child; parent symbol=XDNVX-55564 \&quot;SearchURL = \&quot;external,\&quot; + GetWorkingDirectory() + \&quot;\\\\SageOnlineExeMenu\&quot; + If(IsLinuxOS(),\&quot;.out\&quot;,\&quot;.exe\&quot;) + \&quot;,\&quot; + UPnPBrowserString\&quot;&quot;)" Sym="XDNVX-55629"/>
+      </Branch>
+     </Conditional>
+    </Branch>
+    <Branch Name="null" Sym="XDNVX-55624">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-55564 \&quot;UPnPBrowserString = \&quot;\&quot;\&quot; missing parent; could not add child with symbol=XDNVX-55565 \&quot;SearchURL = \&quot;external,\&quot; + GetWorkingDirectory() + \&quot;\\\\SageOnlineExeMenu\&quot; + If(IsLinuxOS(),\&quot;.out\&quot;,\&quot;.exe\&quot;) + \&quot;,\&quot; + UPnPBrowserString\&quot;&quot;)" Sym="XDNVX-55625"/>
+    </Branch>
+   </Conditional>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-55565&quot;)" Sym="XDNVX-55631">
+    <Branch Name="else" Sym="XDNVX-55632">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-55566&quot;)" Sym="XDNVX-55635">
+      <Branch Name="else" Sym="XDNVX-55636">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-55639"/>
+      </Branch>
+      <Branch Name="null" Sym="XDNVX-55637">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-55566 \&quot;SearchURL = \&quot;external,\&quot; + GetWorkingDirectory() + \&quot;\\\\SageOnlineExeMenu\&quot; + If(IsLinuxOS(),\&quot;.out\&quot;,\&quot;.exe\&quot;) + \&quot;,\&quot; + UPnPBrowserString\&quot; could not add as child; parent symbol=XDNVX-55565 \&quot;AddStaticContext(\&quot;SearchURL\&quot;,SearchURL)\&quot;&quot;)" Sym="XDNVX-55638"/>
+      </Branch>
+     </Conditional>
+    </Branch>
+    <Branch Name="null" Sym="XDNVX-55633">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-55565 \&quot;SearchURL = \&quot;external,\&quot; + GetWorkingDirectory() + \&quot;\\\\SageOnlineExeMenu\&quot; + If(IsLinuxOS(),\&quot;.out\&quot;,\&quot;.exe\&quot;) + \&quot;,\&quot; + UPnPBrowserString\&quot; missing parent; could not add child with symbol=XDNVX-55566 \&quot;AddStaticContext(\&quot;SearchURL\&quot;,SearchURL)\&quot;&quot;)" Sym="XDNVX-55634"/>
+    </Branch>
+   </Conditional>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-55566&quot;)" Sym="XDNVX-55640">
+    <Branch Name="else" Sym="XDNVX-55641">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-55567&quot;)" Sym="XDNVX-55644">
+      <Branch Name="else" Sym="XDNVX-55645">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-55648"/>
+      </Branch>
+      <Branch Name="null" Sym="XDNVX-55646">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-55567 \&quot;AddStaticContext(\&quot;SearchURL\&quot;,SearchURL)\&quot; could not add as child; parent symbol=XDNVX-55566 \&quot;AddStaticContext(\&quot;OnlineVideoType\&quot;,\&quot;xPodcast\&quot;)\&quot;&quot;)" Sym="XDNVX-55647"/>
+      </Branch>
+     </Conditional>
+    </Branch>
+    <Branch Name="null" Sym="XDNVX-55642">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-55566 \&quot;AddStaticContext(\&quot;SearchURL\&quot;,SearchURL)\&quot; missing parent; could not add child with symbol=XDNVX-55567 \&quot;AddStaticContext(\&quot;OnlineVideoType\&quot;,\&quot;xPodcast\&quot;)\&quot;&quot;)" Sym="XDNVX-55643"/>
+    </Branch>
+   </Conditional>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-55567&quot;)" Sym="XDNVX-55649">
+    <Branch Name="else" Sym="XDNVX-55650">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-55568&quot;)" Sym="XDNVX-55653">
+      <Branch Name="else" Sym="XDNVX-55654">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-55657"/>
+      </Branch>
+      <Branch Name="null" Sym="XDNVX-55655">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-55568 \&quot;AddStaticContext(\&quot;OnlineVideoType\&quot;,\&quot;xPodcast\&quot;)\&quot; could not add as child; parent symbol=XDNVX-55567 \&quot;AddStaticContext(\&quot;CustomName\&quot;, OnlineMenuTitle)\&quot;&quot;)" Sym="XDNVX-55656"/>
+      </Branch>
+     </Conditional>
+    </Branch>
+    <Branch Name="null" Sym="XDNVX-55651">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-55567 \&quot;AddStaticContext(\&quot;OnlineVideoType\&quot;,\&quot;xPodcast\&quot;)\&quot; missing parent; could not add child with symbol=XDNVX-55568 \&quot;AddStaticContext(\&quot;CustomName\&quot;, OnlineMenuTitle)\&quot;&quot;)" Sym="XDNVX-55652"/>
+    </Branch>
+   </Conditional>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-55568&quot;)" Sym="XDNVX-55658">
+    <Branch Name="else" Sym="XDNVX-55659">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-55569&quot;)" Sym="XDNVX-55662">
+      <Branch Name="else" Sym="XDNVX-55663">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-55666"/>
+      </Branch>
+      <Branch Name="null" Sym="XDNVX-55664">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-55569 \&quot;AddStaticContext(\&quot;CustomName\&quot;, OnlineMenuTitle)\&quot; could not add as child; parent symbol=XDNVX-55568 \&quot;AddStaticContext(\&quot;IsCustomName\&quot;, true)\&quot;&quot;)" Sym="XDNVX-55665"/>
+      </Branch>
+     </Conditional>
+    </Branch>
+    <Branch Name="null" Sym="XDNVX-55660">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-55568 \&quot;AddStaticContext(\&quot;CustomName\&quot;, OnlineMenuTitle)\&quot; missing parent; could not add child with symbol=XDNVX-55569 \&quot;AddStaticContext(\&quot;IsCustomName\&quot;, true)\&quot;&quot;)" Sym="XDNVX-55661"/>
+    </Branch>
+   </Conditional>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-55569&quot;)" Sym="XDNVX-55667">
+    <Branch Name="else" Sym="XDNVX-55668">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;OPUS4A-168105&quot;)" Sym="XDNVX-55671">
+      <Branch Name="else" Sym="XDNVX-55672">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-55675"/>
+      </Branch>
+      <Branch Name="null" Sym="XDNVX-55673">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=OPUS4A-168105 \&quot;AddStaticContext(\&quot;IsCustomName\&quot;, true)\&quot; could not add as child; parent symbol=XDNVX-55569 \&quot;\&quot;REM Download the RSS feed for the SearchURL.\&quot;\&quot;&quot;)" Sym="XDNVX-55674"/>
+      </Branch>
+     </Conditional>
+    </Branch>
+    <Branch Name="null" Sym="XDNVX-55669">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-55569 \&quot;AddStaticContext(\&quot;IsCustomName\&quot;, true)\&quot; missing parent; could not add child with symbol=OPUS4A-168105 \&quot;\&quot;REM Download the RSS feed for the SearchURL.\&quot;\&quot;&quot;)" Sym="XDNVX-55670"/>
+    </Branch>
+   </Conditional>
+  </Action>
+  <Action Name="&quot;REM Repositioning of child Widgets&quot;" Sym="XDNVX-55576"/>
+  <Action Name="ReturnValue = &quot;AutoCleanupSTVImportedHook&quot;" Sym="XDNVX-55676"/>
+ </Hook>
+ <Action Name="OnlineMenuTitle = &quot;Online Services Plugins&quot;" Sym="XDNVX-55563"/>
+ <Action Name="UPnPBrowserString = &quot;&quot;" Sym="XDNVX-55564"/>
+ <Action Name="SearchURL = &quot;external,&quot; + GetWorkingDirectory() + &quot;\\SageOnlineExeMenu&quot; + If(IsLinuxOS(),&quot;.out&quot;,&quot;.exe&quot;) + &quot;,&quot; + UPnPBrowserString" Sym="XDNVX-55565"/>
+ <Action Name="AddStaticContext(&quot;SearchURL&quot;,SearchURL)" Sym="XDNVX-55566"/>
+ <Action Name="AddStaticContext(&quot;OnlineVideoType&quot;,&quot;xPodcast&quot;)" Sym="XDNVX-55567"/>
+ <Action Name="AddStaticContext(&quot;CustomName&quot;, OnlineMenuTitle)" Sym="XDNVX-55568"/>
+ <Action Name="AddStaticContext(&quot;IsCustomName&quot;, true)" Sym="XDNVX-55569"/>
+ <Item Name="OnlineServicesPlugins" Sym="XDNVX-55560"/>
+ <Attribute Name="ButtonText" Sym="XDNVX-55561">
+  <Value>"Online Services Plugins"</Value>
+ </Attribute>
+ <Attribute Name="ThisItem" Sym="XDNVX-55562">
+  <Value>"xItemOnlineServicesPlugins"</Value>
+ </Attribute>
+</Module>
