@@ -1,4 +1,4 @@
-## Version=20100605
+## Version=20100608
 PlayON:::"/search" "PlayON:+1"
 Hulu:::"/search" "PlayON:Hulu:+1"
 Hulu_User_Queue:::"/search" "PlayON:Hulu:User Queue:Sort By Date:+1"
@@ -10,7 +10,7 @@ Netflix_Genres:::"/search" "PlayON:Netflix:Browse Genres:+1"
 Netflix_New_Releases:::"/search" "PlayON:Netflix:New Arrivals:+1"
 FOX:::"/search" "PlayON:Hulu:TV Networks:^FOX$:Popular Titles:+1"
 CBS:::"/search" "PlayON:CBS:Primetime:+1"
-ABC:::"/search" "PlayON:Hulu:TV Networks:^FOX$:Popular Titles:+1"
+ABC:::"/search" "PlayON:Hulu:TV Networks:^ABC$:Popular Titles:+1"
 NBC:::"/search" "PlayON:Hulu:TV Networks:^NBC$:Popular Titles:+1"
 USA:::"/search" "PlayON:Hulu:TV Networks:^USA$:Popular Titles:+1"
 FX:::"/search" "PlayON:Hulu:TV Networks:^FX$:Popular Titles:+1"
