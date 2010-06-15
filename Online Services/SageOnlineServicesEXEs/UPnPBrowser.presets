@@ -1,10 +1,11 @@
-## Version=20100608
+## Version=20100615
 PlayON:::"/search" "PlayON:+1"
 Hulu:::"/search" "PlayON:Hulu:+1"
 Hulu_User_Queue:::"/search" "PlayON:Hulu:User Queue:Sort By Date:+1"
 Hulu_Popular_TV:::"/search" "PlayON:Hulu:Popular:Popular Shows:+1"
 Hulu_Popular_Movies:::"/search" "PlayON:Hulu:Popular:Popular Feature Films:+1"
 Hulu_Genres:::"/search" "PlayON:Hulu:TV Genres:+1"
+Netflix:::"/search" "PlayON:Netflix:+1"
 Netflix_User_Queue:::"/search" "PlayON:Netflix:Instant Queue:Queue Top 50:+1"
 Netflix_Genres:::"/search" "PlayON:Netflix:Browse Genres:+1"
 Netflix_New_Releases:::"/search" "PlayON:Netflix:New Arrivals:+1"
