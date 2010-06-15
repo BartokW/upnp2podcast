@@ -31,7 +31,7 @@
   my $mediaServer = Net::UPnP::AV::MediaServer->new();
   
   # Setup LWP user agent
-  my $ua = LWP::UserAgent->new;
+  $ua = LWP::UserAgent->new;
   $ua->agent( 'Mozilla/4.0 (compatible; MSIE 5.12; Mac_PowerPC)' );
   $ua->timeout(25);    
 
@@ -71,9 +71,11 @@
   my @checkPaths = ($executablePath,
                     getParentDir($executablePath),
                     'C:/Program Files/SageTV/SageTV',
+                    'C:/Program Files (x86)/SageTV/SageTV',
+                    'C:/Program Files (x64)/SageTV/SageTV',
                     '/opt/sagetv/server/');
   
-  my $sageDir = $executablePath;                
+  $sageDir = $executablePath;                
   foreach (@checkPaths)
   {
       echoPrint("  + Checking: ($_)\n");
@@ -118,47 +120,11 @@
   my @emptyArray = ();
   my %emptyHash  = ();
   
-  my $updateSuccess;
-  my $serverPresetVersion = 0;
-  my $serverPresets = "";
-  my $presetVersion = -1;
+  my @content_list = ();
   
   if ((@parameters == 0 || int(rand(10)) > 5) || !(-s "$executablePath\\$executableEXE\\$executableEXE.presets"))  
   {
-      my $presetsURL    = 'http://upnp2podcast.googlecode.com/svn/trunk/Online%20Services/SageOnlineServicesEXEs/UPnPBrowser.presets';  
-      
-      echoPrint("  + Checking for preset updates\n");
-      my $response  = $ua->get($presetsURL);  
-      if ($response->is_success)
-      {
-          $serverPresets = $response->decoded_content((charset => "ISO-8859-1"));
-          $serverPresets =~ s/\r//g;
-          $serverPresets =~ /Version=([0-9]+)/;
-          $serverPresetVersion = $1;
-          echoPrint("    - Downloaded $executableEXE.presets (Version: $serverPresetVersion)\n");
-      }
-      else
-      {
-          echoPrint("  ! Failed to download updates file ($presetsURL)\n");
-      }
-      
-      if (open(PRESETS,"$executablePath\\$executableEXE\\$executableEXE.presets"))
-      {   
-          $presetVersion = <PRESETS>;
-          $presetVersion =~ /Version=([0-9]+)/i;
-          $presetVersion = $1;
-          echoPrint("    - Existing Presets Version ($presetVersion)\n");
-      }
-      close(PRESETS);
-      
-      # Check to see if file is most recent
-      if ($serverPresetVersion > $presetVersion && !($serverPresets eq ""))
-      {
-          echoPrint("      ! Updating Presets File ($serverPresetVersion > $presetVersion)\n");
-          open(PRESETS,">$executablePath\\$executableEXE\\$executableEXE.presets");
-          print PRESETS $serverPresets;
-          close(PRESETS);         
-      }      
+      updatePresets();
   }
   
   my %presets = ();
@@ -166,9 +132,8 @@
   {   # Read in Presets      
       if (open(PRESETS,"$executablePath\\$executableEXE\\$executableEXE.presets"))
       {   
-          my $presetVersion = <PRESETS>;
-          $presetVersion =~ /Version=([0-9]+)/i;
-          $presetVersion = $1;
+          <PRESETS> =~ /Version=([0-9]+)/i;
+          my $presetVersion = $1;
           echoPrint("  + Reading Presets ($presetVersion)\n");
           
           while(<PRESETS>)
@@ -185,56 +150,33 @@
   
   if (@parameters == 1 &&  $parameters[0] =~ /:/)
   {
-      echoPrint("  + Detected v1 parameter string, converting to v2 ($parameters[0])\n");
-      my @v1sting = split(/:/, $parameters[0]);
-      
-      $optionsHash{lc("device")} = shift @v1sting;
-      echoPrint("    - /device : (".$optionsHash{lc("device")}.")\n");
-      
-      my $v1Depth = pop @v1sting;
-      $v1Depth =~ /\+([0-9])/;
-      $optionsHash{lc("depth")} = $1-1;
-      echoPrint("    - /depth : (".$optionsHash{lc("depth")}.")\n");
-      
-      my $v1path = $optionsHash{lc("device")}."/"; 
-      foreach (@v1sting)
-      {
-          $v1path .= $_."/";   
-      }
-      $optionsHash{lc("path")} = $v1path;
-      echoPrint("    - /path  : (".$optionsHash{lc("path")}.")\n");
+      echoPrint("  + Detected v1 parameter string, converting to v2 (/serach $parameters[0])\n");
+      $parameters[1] = $parameters[0];
+      $parameters[0] = "/search";       
+  }
 
-      if (!($sageVersion =~ /SageTV V7/i))
-      {
-          #disabling subcats
-          $optionsHash{lc("disableSubcats")} = 1;
-          echoPrint("    - /disableSubcats\n");        
-      }        
-  }
-  else
+  # Setting cli options
+  $parametersString = "";
+  foreach (@parameters)
   {
-      # Setting cli options
-      $parametersString = "";
-      foreach (@parameters)
+      $parametersString .= "\"$_\" ";
+  }
+  
+  setOptions(decode('ISO-8859-1' , $parametersString),\@emptyArray,\%optionsHash,\@inputFiles,\%emptyHash,"  ");
+  
+  if (exists $optionsHash{lc("preset")})
+  {   # Add in presets
+      if (exists $presets{lc($optionsHash{lc("preset")})})
       {
-          $parametersString .= "\"$_\" ";
+          echoPrint("  + Using Preset ".$optionsHash{lc("preset")}." (".$presets{lc($optionsHash{lc("preset")})}.")\n"); 
+          setOptions(decode('ISO-8859-1' , $presets{lc($optionsHash{lc("preset")})}),\@emptyArray,\%optionsHash,\@inputFiles,\%emptyHash,"    ");              
       }
-      
-      setOptions(decode('ISO-8859-1' , $parametersString),\@emptyArray,\%optionsHash,\@inputFiles,\%emptyHash,"  ");
-      
-      if (exists $optionsHash{lc("preset")})
-      {   # Add in presets
-          if (exists $presets{lc($optionsHash{lc("preset")})})
-          {
-              echoPrint("  + Using Preset ".$optionsHash{lc("preset")}." (".$presets{lc($optionsHash{lc("preset")})}.")\n"); 
-              setOptions(decode('ISO-8859-1' , $presets{lc($optionsHash{lc("preset")})}),\@emptyArray,\%optionsHash,\@inputFiles,\%emptyHash,"    ");              
-          }
-          else
-          {
-              echoPrint("  ! Couldn't find Preset ".$optionsHash{lc("preset")}." (".$presets{lc($optionsHash{lc("preset")})}.")\n");               
-          }
+      else
+      {
+          echoPrint("  ! Couldn't find Preset ".$optionsHash{lc("preset")}." (".$presets{lc($optionsHash{lc("preset")})}.")\n");               
       }
   }
+
   
   if (exists $optionsHash{lc("search")})
   {
@@ -258,14 +200,16 @@
       echoPrint("    - /path  : (".$optionsHash{lc("path")}.")\n");
   }
   
-  my $serverWait = 1;
-  if (exists $optionsHash{lc("serverSearchTimeout")})
+  if ($sageVersion =~ /SageTV V6/i)
   {
-      echoPrint("  + /serverSearchTimeout : (".$optionsHash{lc("serverSearchTimeout")}.")\n");
-      $serverWait = $optionsHash{lc("serverSearchTimeout")};
-  }
-
+      #disabling subcats
+      $optionsHash{lc("disableSubcats")} = 1;
+      echoPrint("    - /disableSubcats\n");        
+  }    
   
+  my $serverWait = (exists $optionsHash{lc("serverSearchTimeout")} ? $optionsHash{lc("serverSearchTimeout")} : 1);
+  echoPrint("  + /serverSearchTimeout : (".$serverWait.")\n");
+
   if (@parameters == 0 || exists $optionsHash{lc("mainMenu")})
   {
       echoPrint("  + /mainMenu : Printing available UPnP Servers\n");
@@ -359,7 +303,7 @@
       $newItem = $feed_item;
       $video             = toXML('external,"'.$executable.'",/serverSearchTimeout||30||/mainMenu');
       $title             = "Find More Servers...";
-      $description       = "Re-run the UPnP server search with an extra long timeout to find more servers (~10 minutes).";
+      $description       = "Re-run the UPnP server search with an extra long timeout to find more servers (~5 minutes).";
       $thumbnail         = '';
       $type              = 'sagetv/subcategory';
       
@@ -416,9 +360,21 @@
                		        $dev->setssdp($cacheText);
               		        $dev->setdescription($post_con);
               		        $mediaServer->setdevice($dev);
-              		        last;
+                          close(UPNPCACHE);
+                          
+                          # Try getting the top level to verify that .cache is real
+                          echoPrint("       - Checking if cache is valid...\n");
+                          @content_list = $mediaServer->getcontentlist(ObjectID => 0);
+                          if ($content_list[0] =~ /^!!/)
+                          {  # Cache is bad, delete it and run full serach
+                              $foundDevice = 0;
+                              `del "$executablePath\\$executableEXE\\$cacheFile"`;
+                              echoPrint("       ! Cache is stale, deleting and doing full search ($cacheFile)\n");
+                          }
+                  		    last;
                       }
                       close(UPNPCACHE);
+
                   }
               }
           }
@@ -459,9 +415,9 @@
           $opening =~ s/%%FEED_DESCRIPTION%%/UPnP Browser (Error!)/g;
           
           $newItem = $feed_item;
-          $video             = toXML('external,'.$executable.',/device||'.$_->getfriendlyname()."||/uid||0");
+          $video             = toXML('external,'.$executable.',/serverSearchTimeOut||30||/search||'.$optionsHash{lc("search")});
           $title             = "UPnP Browser Error!";
-          $description       = "UPnP Browser Error!  Unable to find UPnP Device ($lookingFor)"." (EXE_TIM  )";
+          $description       = "UPnP Browser Error!  Unable to find UPnP Device ($lookingFor), select this to try a longer server serach. (~5 minutes)"." (EXE_TIME)";
           $thumbnail         = '';
           $type              = 'sagetv/textonly';
           
@@ -474,7 +430,7 @@
           $newItem =~ s/%%ITEM_TYPE%%/$type/g;
           $newItem =~ s/%%ITEM_PICTURE%%/$thumbnail/g;
           $newItem =~ s/%%ITEM_DUR_SEC%%//g; 
-          push(@items,$newItem);            
+          push(@items,$newItem);        
 
           my $execTime = executionTime(@startTime);      
           print encode('UTF-8', $opening);
@@ -491,18 +447,16 @@
           exit 0;
       }
       
-      if (exists $optionsHash{lc("path")} && $foundDevice == 1 &&!exists $optionsHash{lc("uid")})
+      if (exists $optionsHash{lc("path")} && $foundDevice == 1 && !exists $optionsHash{lc("uid")})
       {  # if all we get is a path, serach the tree for the uid
           $optionsHash{lc("uid")} = 0;
           my @splitString = split(/\//,$optionsHash{lc("path")});
+          $optionsHash{lc("path")}   = $optionsHash{lc("device")};
           echoPrint("  + GetContent from: ".(shift @splitString)."\n");
           
           foreach $lookingFor (@splitString)
           {         
-              echoPrint("    - Looking for : ".$lookingFor."\n");
-              
-              # Checking Cache
-              my @content_list = ();              
+              echoPrint("    - Looking for : ".$lookingFor."\n");          
               @content_list = $mediaServer->getcontentlist(ObjectID => $optionsHash{lc("uid")});
               my $found  = 0;
               foreach $content (@content_list)
@@ -511,7 +465,8 @@
                   if ($content->gettitle() =~ /$lookingFor/i)
                   {
                       echoPrint("        - Found! : $`(".$&.")$'\n");
-                      $optionsHash{lc("uid")} = $content->getid();
+                      $optionsHash{lc("uid")}   = $content->getid();
+                      $optionsHash{lc("path")} .= "\\".$content->gettitle();
                       $found = 1;
                       #last;    
                   }    
@@ -523,9 +478,7 @@
                   exit 0; 
               }
           }
-
       }
-      #die;  
       
       if (exists $optionsHash{lc("uid")} && $foundDevice == 1)
       {
@@ -792,7 +745,7 @@ FEED_END
                     $newItem = $feed_item;
                     $video             = toXML('external,'.$executable.",/device||".$device."||/uid||".$_->getid()."||/path||".$path."/".$_->gettitle());
                     $title             = $_->gettitle();
-                    $description       = $path.$_->gettitle();
+                    $description       = "$path\\".$_->gettitle();
                     $thumbnail         = '';
                     $type              = 'sagetv/subcategory';
                     
@@ -905,121 +858,6 @@ FEED_END
     return @items;
   }
   
-  sub updateFeedFiles
-  {
-    my ($ua) = @_;
-    my $rv = 0;  
-    # URL of file containing feed versions
-    my $feedPath = "$executablePath/STVs/SageTV7/OnlineVideos/";
-    my $feedVersionURL = 'http://upnp2podcast.googlecode.com/svn/trunk/upnp2podcast/Feeds/$executableEXE.presets';
-    my ($updateFile, $propFileName, $propFileVersion, 
-        $propFileMD5, $propFileURL, $topLine, $currentVersion,
-        $updatedMD5, $propPlugIn);
-    $feedVersionURL    =~ /http:\/\/[^\/]/;
-    my $feedBaseURL    = $&;
-
-    echoPrint("  + Checking for feed updates\n");
-
-    my $response  = $ua->get($feedVersionURL);
-    
-    if ($response->is_success)
-    {
-        my $content = $response->decoded_content((charset => "ISO-8859-1"));
-        $content =~ s/\r//g;
-        
-        my @plugIns = ();
-        if (open(PLUGINS,"UPnP2Podcast.plugins"))
-        {
-            @plugIns = <PLUGINS>;
-            chomp(@plugIns);
-            close(PLUGINS);  
-        }
-       
-        my @content = split(/\n/,$content);
-        echoPrint("  + Downloaded FeedVersions.txt (".md5_hex($content)."), checking for updates(".$feedVersionURL.")\n");
-        foreach (@content)
-        {
-            $updateFile      = 0;
-            if (/(.*),(.*),(.*),(.*),(.*)/)
-            {
-                ($propFileName, $propFileVersion, $propFileMD5, $propFileURL, $propPlugIn) = ($1,$2,$3,$4,$5);
-                echoPrint("    - File      : $propFileName\n");
-                echoPrint("      - Version : $propFileVersion\n");
-                echoPrint("      - URL     : $propFileURL\n");
-                echoPrint("      - MD5     : $propFileMD5\n");
-                echoPrint("      - Plugin  : $propPlugIn\n");
-                if (grep(/\Q$propPlugIn\E/,@plugIns) || $propPlugIn eq "")
-                {
-                    if ($propFileURL =~ /\Q^$feedBaseURL\E/ || 1)
-                    {   # Make sure it comes from my google code account
-                        if (-e "$feedPath$propFileName")
-                        {
-                            open(FEED,"$feedPath$propFileName");
-                            $topLine = <FEED>;
-                            chomp($topLine);
-                            close(FEED);
-                            $currentVersion = "";
-                            if ($topLine =~ /Version=([0-9]+)/i)
-                            {
-                                $currentVersion = $1;
-                            }
-                            echoPrint("      - Local Version : $currentVersion\n");
-                            if ($propFileVersion > $currentVersion)
-                            {
-                                $updateFile = 1;    
-                            }
-                        }
-                        else
-                        {
-                            $updateFile = 1;
-                        }
-                    }
-                }
-                else
-                {
-                    echoPrint("        + PlayOn Plug-in ($propPlugIn) not installed, skipping (@plugIns)\n");    
-                }
-                                
-                if ($updateFile)
-                {
-                    echoPrint("      - Updating File!\n");                         
-                    my $response  = $ua->get($propFileURL);
-                    
-                    if ($response->is_success)
-                    {
-                        my $content = $response->decoded_content((charset => "ISO-8859-1"));
-                        $content =~ s/\r//g;
-                        $updatedMD5 = md5_hex($content);
-                        echoPrint("        + MD5 URL : $updatedMD5 ($propFileMD5)($feedPath$propFileName)\n");
-                        if ($updatedMD5 eq $propFileMD5)
-                        {
-                            if (open(FEED,">$feedPath$propFileName"))
-                            {
-                                print FEED $content;
-                                close(FEED);
-                            }
-                            else
-                            {
-                                echoPrint("        ! Couldn't open file for write ($feedPath$propFileName)\n");
-                            }    
-                            $rv++;
-                        }
-                        else
-                        {
-                            echoPrint("        - MD5 check failed, skipping!\n");    
-                        }
-                    }
-                } 
-            }
-        }  
-    }
-    else
-    {
-        echoPrint("  ! Failed to get $executableEXE.FeedVersions.txt, skipping updates\n");
-    } 
-    return $rv;   
-  }
-  
 ##### Helper Functions
     sub getExt
     {   # G:\videos\filename(.avi)
@@ -1128,6 +966,50 @@ FEED_END
                             sprintf( "%02d", ( $finishSecond - $startSecond ) );
         #echoPrint("  + executionTime ($transcodeTime)\n");
         return "$transcodeTime";
+    }
+    
+    sub updatePresets
+    {
+        my $serverPresetVersion = 0;
+        my $serverPresets = "";
+        my $presetVersion = -1;
+        my $presetsURL    = 'http://upnp2podcast.googlecode.com/svn/trunk/Online%20Services/SageOnlineServicesEXEs/UPnPBrowser.presets';  
+        
+        echoPrint("  + Checking for preset updates\n");
+        my $response  = $ua->get($presetsURL);  
+        if ($response->is_success)
+        {
+            $serverPresets = $response->decoded_content((charset => "ISO-8859-1"));
+            $serverPresets =~ s/\r//g;
+            $serverPresets =~ /Version=([0-9]+)/;
+            $serverPresetVersion = $1;
+            echoPrint("    - Downloaded $executableEXE.presets (Version: $serverPresetVersion)\n");
+        }
+        else
+        {
+            echoPrint("  ! Failed to download updates file ($presetsURL)\n");
+        }
+        
+        if (open(PRESETS,"$executablePath\\$executableEXE\\$executableEXE.presets"))
+        {   
+            <PRESETS> =~ /Version=([0-9]+)/i;
+            $presetVersion = $1;
+            echoPrint("    - Existing Presets Version ($presetVersion)\n");
+        }
+        else
+        {
+            echoPrint("  ! Couldn't open presets file ($executablePath\\$executableEXE\\$executableEXE.presets)\n");
+        }
+        close(PRESETS);
+        
+        # Check to see if file is most recent
+        if ($serverPresetVersion > $presetVersion && !($serverPresets eq ""))
+        {
+            echoPrint("      ! Updating Presets File ($serverPresetVersion > $presetVersion)\n");
+            open(PRESETS,">$executablePath\\$executableEXE\\$executableEXE.presets");
+            print PRESETS $serverPresets;
+            close(PRESETS);         
+        }      
     }
 
       
