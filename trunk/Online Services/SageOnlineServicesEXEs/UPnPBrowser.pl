@@ -450,7 +450,7 @@
       if (exists $optionsHash{lc("path")} && $foundDevice == 1 && !exists $optionsHash{lc("uid")})
       {  # if all we get is a path, serach the tree for the uid
           $optionsHash{lc("uid")} = 0;
-          $optionsHash{lc("isContainer"} = false;
+          $optionsHash{lc("isContainer")} = 0;
           my @splitString = split(/\//,$optionsHash{lc("path")});
           $optionsHash{lc("path")}   = $optionsHash{lc("device")};
           echoPrint("  + GetContent from: ".(shift @splitString)."\n");
@@ -468,7 +468,7 @@
                       echoPrint("        - Found! : $`(".$&.")$'\n");
                       $optionsHash{lc("uid")}   = $content->getid();
                       $optionsHash{lc("path")} .= "\\".$content->gettitle();
-                      $optionsHash{lc("isContainer"} = $content->iscontainer(); 
+                      $optionsHash{lc("isContainer")} = $content->iscontainer(); 
                       $found = 1;
                       #last;    
                   }    
