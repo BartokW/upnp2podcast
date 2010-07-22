@@ -69,7 +69,7 @@
   
   # Find SageTV Directory and check version
   my @checkPaths = ($executablePath,
-                    getParentDir($executablePath),
+                    getPath($executablePath),
                     'C:/Program Files/SageTV/SageTV',
                     'C:/Program Files (x86)/SageTV/SageTV',
                     'C:/Program Files (x64)/SageTV/SageTV',
@@ -450,6 +450,7 @@
       if (exists $optionsHash{lc("path")} && $foundDevice == 1 && !exists $optionsHash{lc("uid")})
       {  # if all we get is a path, serach the tree for the uid
           $optionsHash{lc("uid")} = 0;
+          $optionsHash{lc("isContainer"} = false;
           my @splitString = split(/\//,$optionsHash{lc("path")});
           $optionsHash{lc("path")}   = $optionsHash{lc("device")};
           echoPrint("  + GetContent from: ".(shift @splitString)."\n");
@@ -467,6 +468,7 @@
                       echoPrint("        - Found! : $`(".$&.")$'\n");
                       $optionsHash{lc("uid")}   = $content->getid();
                       $optionsHash{lc("path")} .= "\\".$content->gettitle();
+                      $optionsHash{lc("isContainer"} = $content->iscontainer(); 
                       $found = 1;
                       #last;    
                   }    
@@ -732,7 +734,7 @@ FEED_END
                 if ($depth != 0)
                 {
                     echoPrint("      / ".$_->gettitle()."\n");
-                    @items = (@items, addItems($mediaServer, $_->getid(), $path."/".$_->gettitle(), $device, $filter, $disableSubcats, ($depth - 1)));        
+                    @items = (@items, addItems($mediaServer, $_->getid(), $path."\\".$_->gettitle(), $device, $filter, $disableSubcats, ($depth - 1)));        
                 }
                 elsif ($disableSubcats == 1)
                 {     
@@ -743,7 +745,7 @@ FEED_END
                     }
                     echoPrint("      / ".$_->gettitle()."\n");                   
                     $newItem = $feed_item;
-                    $video             = toXML('external,'.$executable.",/device||".$device."||/uid||".$_->getid()."||/path||".$path."/".$_->gettitle());
+                    $video             = toXML('external,'.$executable.",/device||".$device."||/uid||".$_->getid()."||/path||".$path."\\".$_->gettitle());
                     $title             = $_->gettitle();
                     $description       = "$path\\".$_->gettitle();
                     $thumbnail         = '';
@@ -813,14 +815,13 @@ FEED_END
                 my $durTotalSec = $1*60*60 + $2*60 + $3;
                 my $durTotalMin = $durTotalSec/60;
                 
-                if ($video =~ /(hulu|cbs)/i)
-                {   # Roughly Account for commercials
-                    while($durTotalMin > 0)
-                    {
-                        $durTotalMin -= 7;
-                        $durTotalSec += 30;    
-                    }  
-                }
+                # Roughly Account for commercials
+                while($durTotalMin > 0)
+                {
+                    $durTotalMin -= 7;
+                    $durTotalSec += 60;    
+                }  
+
                 
                 my $durDisSec  = $durTotalSec;
                 my $durDisMin  = 0;
