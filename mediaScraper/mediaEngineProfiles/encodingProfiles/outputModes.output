@@ -44,7 +44,7 @@
 #
 
     Profile           =outputDirectory
-    Encode CLI #1     =/finalOutputName "?>outputDirectory<:>%%outputDirectory%%<=>%%ORIGINAL_PATH%%<??>isDVD<:>_compress<??>hardwareDevice<:>\%%hardwareDevice%%<?\?>outputNameWExt<:>%%outputNameWExt%%<=>?>outputName<:>%%outputName%%<=>%%SNIP:defaultOutputName%%<??>isDVD<:>.title_%%dvdTitle%%<?.?>appendFileName<:>%%appendFileName%%.<?%%inputMain_EXT%%<?"
+    Encode CLI #1     =/finalOutputName "?>outputDirectory<:>%%outputDirectory%%<=>%%ORIGINAL_PATH%%<??>isDVD<:>_compress<??>hardwareDevice<:>\%%hardwareDevice%%<=>outputSubFolder<:>\%%outputSubFolder%%<?\?>outputNameWExt<:>%%outputNameWExt%%<=>?>outputName<:>%%outputName%%<=>%%SNIP:defaultOutputName%%<??>isDVD<:>.title_%%dvdTitle%%<?.?>appendFileName<:>%%appendFileName%%.<?%%inputMain_EXT%%<?"
     Encoder #1        =/setOptions
     Encode CLI #1     =?>!DIRECTORY:%%finalOutputName_PATH_FORWARDSLASHES%%<:>#makeOutputDir#"%%finalOutputName_PATH_FORWARDSLASHES%%"<?
     Encoder #1        =/exe mkdir
