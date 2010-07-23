@@ -687,9 +687,6 @@
         echoPrint(padLines("$baseSpace    + ",30,@ffmpegOutput),100);
 
         my $audioTrack = 0;
-        my $handbrakeAudioTracks    = "";
-        my $handbrakeAudioEncoders  = "";
-        my $handbrakeAudioBitrate   = "";
         my $handbrakeAllAudioTracks    = "";
         my $handbrakeAllAudioEncoders  = "";
         my $handbrakeAllAudioBitrate   = "";
@@ -885,6 +882,7 @@
             echoPrint("$baseSpace    - Checking Audio Track #$i (".$videoInfoHash->{lc("audioTrackScore_$i")}." vs $maxScore)\n"); 
             if ($videoInfoHash->{lc("audioTrackScore_$i")} > $maxScore)
             {
+                echoPrint("$baseSpace      + Setting as new Primary Track!\n");
                 $maxScore = $videoInfoHash->{lc("audioTrackScore_$1")};
                 $videoInfoHash->{lc("primaryAudio")} = $i;               
                 foreach $vidProperty (keys %{$videoInfoHash})
@@ -917,7 +915,8 @@
                            
             echoPrint("$baseSpace- Getting Handbrake info: $handBrakeString ($baseFileName.HandbrakeInfo)\n");
             echoPrint(padLines("$baseSpace    + ",30,@handBrakeOutput),100);
-            my $hbTrackNum = 0;      
+            my $hbTrackNum = 0; 
+            my $firstAudio = 0;     
             foreach (@handBrakeOutput)
             {
                 chomp;
@@ -942,17 +941,17 @@
                     if (/DTS/)
                     {
                         $handbrakeAllAudioEncoders .= "dts,";
-                        $handbrakeAllAudioBitrate   = "auto,";   
+                        $handbrakeAllAudioBitrate  .= "auto,";   
                     }
                     elsif (/AC3/ && /5.1 ch/)
                     {
                         $handbrakeAllAudioEncoders .= "ac3,";
-                        $handbrakeAllAudioBitrate   = "auto,";     
+                        $handbrakeAllAudioBitrate  .= "auto,";     
                     }
                     else
                     {
                         $handbrakeAllAudioEncoders .= "faac,";
-                        $handbrakeAllAudioBitrate   = "160,";
+                        $handbrakeAllAudioBitrate  .= "160,";
                     }
                     
                 }
