@@ -4,9 +4,37 @@
 #
 
     Profile           =Handbrake Audio
-    Encode CLI #1     =?>handBrakeAllAudioTracks&&(>ORIGINAL:allAudio||allAudio<)<:> -a %%handBrakeAllAudioTracks%% -E %%handBrakeAllAudioEncoders%% -B %%handbrakeAllAudioBitrate%%<=>-a ?>atrack<:>%%atrack%%<=>1<? -E %%acodec%% ?>abitrate<:>-B %%abitrate%%<?<?
+    Encode CLI #1     =%%SNIP:Handbrake Audio Tracks%% %%SNIP:Handbrake Audio Encoders%% %%SNIP:Handbrake Audio Bitrate%%
     Encoder #1        =
 
+# Snippit: All Audio Check
+#  
+
+    Profile           =All Audio Check
+    Encode CLI #1     =handBrakeAllAudioTracks&&(>ORIGINAL:allAudio||allAudio<)
+    Encoder #1        =
+	
+# Snippit: Handbrake Audio Tracks
+# 
+
+    Profile           =Handbrake Audio Tracks
+    Encode CLI #1     =	?>%%SNIP:All Audio Check%%<:>-a %%handBrakeAllAudioTracks%%<=>isDVD&&handBrakeAudioTracks&&!acodec<:>-a %%handBrakeAudioTracks%%<?
+    Encoder #1        =
+	
+# Snippit: Handbrake Audio Encoders
+#
+
+    Profile           =Handbrake Audio Encoders
+    Encode CLI #1     =-E ?>%%SNIP:All Audio Check%%<:>%%handBrakeAllAudioEncoders%%<=>isDVD&&handBrakeAudioEncoders&&!acodec<:>%%handBrakeAudioEncoders%%<=>acodec<:>%%acodec%%<=>faac<? 
+    Encoder #1        =
+	
+# Snippit: Handbrake Audio Bitrate
+#
+
+    Profile           =Handbrake Audio Bitrate
+    Encode CLI #1     =?>%%SNIP:All Audio Check%%<:>-B %%handbrakeAllAudioBitrate%%<=>isDVD&&handbrakeAudioBitrate&&!acodec<:>-B %%handbrakeAudioBitrate%%<=>abitrate<:>-B %%abitrate%%<?
+    Encoder #1        =
+	
 # Snippit: HandBrake Video
 #
 # HandBrake's Video settings    
