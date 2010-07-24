@@ -37,8 +37,7 @@
     Encode CLI #2     ="%%inputMain_FORWARDSLASHES%%" "%%finalOutputName_FORWARDSLASHES%%"
     Encoder #2        =/exe copy
 
-# Output: outputDirectory - Copies encoded video with the original name so it will be
-#                           picked up as a Sage Recording
+# Output: outputDirectory - Output to a directory
 #
 # Input = %%inputMain%%
 #
