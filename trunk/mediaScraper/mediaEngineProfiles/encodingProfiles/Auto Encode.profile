@@ -31,7 +31,7 @@
     Encode CLI #7     =?>ORIGINAL:videoCodec=~mpeg2video&&!%%SNIP:HDTVCheck%%<:>/decomb<?
     Encoder #7        =/setOptions /noOverwrite
 
-    Encode CLI #8     =?>!isDVD&&!noAutoCrop&&!xRes&&!yRes<:>/yres ?>ORIGINAL:43in169<:>540<=>ORIGINAL:cropY>720<:>720<=>%%ORIGINAL:cropY%%<?<?
+    Encode CLI #8     =?>!isDVD&&!noAutoCrop&&!xRes&&!yRes<:>?>ORIGINAL:43in169<:>/yres 540<=>ORIGINAL:cropY>720<:>/yres 720<=>ORIGINAL:cropY<:>/yRes %%ORIGINAL:cropY%%<?<?
     Encoder #8        =/setOptions /noOverwrite
 
     Encode CLI #9     =?>%%SNIP:SubtitleSuccess%%&&%%container%%=~(mkv|mp4)<:>/addSubtitleTrack<?
