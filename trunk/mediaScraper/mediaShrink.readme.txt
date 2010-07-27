@@ -22,9 +22,14 @@ CLI Syntax  : mediaShrink.exe [options] <File|Folder> <File|Folder>
     /outputDirectory <path> Directory to place encoded video.  Default is same
                             path as original.
                             
+    /outputSubFolder <name> Create a folder next to the original file
+                            and put the finished encode in there. 
+                            
     /centralWorkFolder <path> Directory to do all temp work, useful if your 
                               videos are stored on a NAS or recording drive
                               that you don't want affected by encoding work.
+                              Also needed if you want to process files straight
+                              off of a DVD drive.
                               
     /container <container>  A/V container to use
                               - mkv : Uses mkv container (default)
@@ -44,6 +49,10 @@ CLI Syntax  : mediaShrink.exe [options] <File|Folder> <File|Folder>
                              - LQ       : Fast enough for slow machines
                              - portable : For playback on portable devices
                              - custom   : Uses custom parameters from /x264opts
+                             
+    /handbrakeProfile <profile>  Use one of handbrakes preset profiles.
+                           Note that you still need to specify /container mp4
+                           for portable device profiles.
 
    /x264opts <options>     Sets custom x264 options
                              - ex: ref=2:bframes=2:subme=6:mixed-refs=0
