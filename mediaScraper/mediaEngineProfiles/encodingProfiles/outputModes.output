@@ -8,7 +8,7 @@
     Profile           =outputModes
     Encode CLI #1     =?>(>!inputMain:videoContainer&&!%%hardwareDevice%%=~videoOnly<)||(>!inputMain:videoInfo&&!%%hardwareDevice%%=~audioOnly<)<:>/ERROR "No Audio or Video"<?
     Encoder #1        =/setOptions
-    Encode CLI #1     =Match Timestamps
+    Encode CLI #1     =?>!DIRECTORY:%ORIGINAL%%<:>Match Timestamps<?
     Encoder #1        =/insertFunction
     Encode CLI #1     =?>%%outputMode%%=eq=inPlace<:>/inPlace<?
     Encoder #1        =/setOptions
@@ -30,9 +30,9 @@
 # TODO: FIX
 
     Profile           =outputIsDVD
-    Encode CLI #1     =/finalOutputName "%%ORIGINAL_PATH%%_compress\%%ORIGINAL_PATH_FILE%%.title_%%dvdTitle%%.%%inputMain_EXT%%"
+    Encode CLI #1     =/finalOutputName "%%ORIGINAL%%_compress\%%ORIGINAL_PATH_FILE%%.title_%%dvdTitle%%.%%inputMain_EXT%%"
     Encoder #1        =/setOptions
-    Encode CLI #1     =?>!DIRECTORY:?>outputDirectory<:>%%outputDirectory%%<=>%%ORIGINAL_PATH%%_compress<??>hardwareDevice<:>\%%hardwareDevice%%<?<:>"%%check%%"<?
+    Encode CLI #1     =?>!DIRECTORY:?>outputDirectory<:>%%outputDirectory%%<=>%%ORIGINAL%%_compress<??>hardwareDevice<:>\%%hardwareDevice%%<?<:>"%%check%%"<?
     Encoder #1        =/exe mkdir
     Encode CLI #2     ="%%inputMain_FORWARDSLASHES%%" "%%finalOutputName_FORWARDSLASHES%%"
     Encoder #2        =/exe copy
@@ -43,7 +43,7 @@
 #
 
     Profile           =outputDirectory
-    Encode CLI #1     =/finalOutputName "?>outputDirectory<:>%%outputDirectory%%<=>%%ORIGINAL_PATH%%<??>isDVD<:>_compress<??>hardwareDevice<:>\%%hardwareDevice%%<=>outputSubFolder<:>\%%outputSubFolder%%<?\?>outputNameWExt<:>%%outputNameWExt%%<=>?>outputName<:>%%outputName%%<=>%%SNIP:defaultOutputName%%<??>isDVD<:>.title_%%dvdTitle%%<?.?>appendFileName<:>%%appendFileName%%.<?%%inputMain_EXT%%<?"
+    Encode CLI #1     =/finalOutputName "?>outputDirectory<:>%%outputDirectory%%<=>isDVD<:>%%ORIGINAL%%_compress<=>%%ORIGINAL_PATH%%<??>hardwareDevice<:>\%%hardwareDevice%%<=>outputSubFolder<:>\%%outputSubFolder%%<?\?>outputNameWExt<:>%%outputNameWExt%%<=>?>outputName<:>%%outputName%%<=>%%SNIP:defaultOutputName%%<??>isDVD<:>.title_%%dvdTitle%%<?.?>appendFileName<:>%%appendFileName%%.<?%%inputMain_EXT%%<?"
     Encoder #1        =/setOptions
     Encode CLI #1     =?>!DIRECTORY:%%finalOutputName_PATH_FORWARDSLASHES%%<:>#makeOutputDir#"%%finalOutputName_PATH_FORWARDSLASHES%%"<?
     Encoder #1        =/exe mkdir
