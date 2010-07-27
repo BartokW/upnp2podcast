@@ -9,7 +9,7 @@
     Profile           =Cut Commercials
     Encode CLI #1     =?>EXISTS:C:\Program Files\VideoReDoPlus\VideoReDo.exe<:>/VideoRedoPath "C:\Program Files\VideoReDoPlus\"<=>EXISTS:C:\Program Files\VideoReDoTVSuite\VideoReDo3.exe<:>/VideoRedoPath "C:\Program Files\VideoReDoTVSuite\"<?
     Encoder #1        =/setOptions
-    Encode CLI #1     =?>inputMain:videoCodec=~mpeg2video&&VideoRedoPath&&!forceMencoderCutComm<:>?>(>EXT:VPrj&&onlyWhenVprj<)||!onlyWhenVprj<:>VRD_CutCommercials<?<=>mencoder_CutCommercials<?
+    Encode CLI #1     =?>inputMain:videoCodec=~mpeg2video&&VideoRedoPath&&!forceMencoderCutComm<:>?>(>EXT:VPrj&&onlyWhenVprj<)||!onlyWhenVprj<:>VRD_CutCommercials<?<=>EXT:EDL&&!onlyWhenVprj<:>mencoder_CutCommercials<?
     Encoder #1        =/insertFunction
     Encode CLI #3     =?>profile=eq=Cut Commercials||profile=eq=CutCommercials<:>outputModes<?
     Encoder #3        =/insertFunction
@@ -23,7 +23,7 @@
 #
 
     Profile           =mencoder_CutCommercials
-    Encode CLI #1     =?>!EXT:EDL||inputMain:videoContainer=~mpegts<<:>Generate_ComCutFile_Comskip<?
+    Encode CLI #1     =?>!EXT:EDL||inputMain:videoContainer=~mpegts<:>Generate_ComCutFile_Comskip<?
     Encoder #1        =/insertFunction
     Encode CLI #1     =?>EXT:edl<:>#Cutting_Commercials#"%%inputMain%%" -o "%%OUTPUT_MAIN%%.?>inputMain:videoContainer=~mpeg<:>mpg<=>avi<?" -oac copy -ovc copy -edl "%%ORIGINAL_FULLFILE%%.edl" ?>inputMain:videoContainer=~mpeg<:>-of mpeg -mpegopts format=dvd:tsaf<?<?
     Encoder #1        =/exe mencoder.exe
