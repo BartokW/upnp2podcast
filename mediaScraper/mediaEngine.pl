@@ -32,26 +32,39 @@
 
     # Get the directory the script is being called from
     $executable = $0;
-    $executable =~ m#(\\|\/)(([^\\/]*)\.([a-zA-Z0-9]{2,}))$#;;
+    $executable =~ m#(\\|\/)(([^\\/]*)\.([a-zA-Z0-9]{2,}))$#;
     $executablePath = $`;
+    $executableEXE  = $3; 
 
     # Code version
-    $codeVersion = "mediaEngine v3.0d (SNIP:BUILT)";
+    $codeVersion = "mediaEngine v3.0.2 (SNIP:BUILT)";
 
     $usage  = "$codeVersion\n\n";
     $usage .= "Usage: mediaEngine.exe should not be called directly.\n";
     $usage .= "       Unless you know what you are doing please use\n";
     $usage .= "       mediaShrink.exe instead.\n";
 
-    $delString = "del \"$executablePath\\$executablePath.exit\"";
-    `$delString`;
+    $exitFile = "$executablePath\\$executableEXE.exit";
+    if (-e $exitFile)
+    {
+        $delString = "del \"$exitFile\"";
+        `$delString`;
+    }
+    
+    #Init main log file
+    %fileHandles = ();
+    my $mainLogFileName = "$executablePath\\$executableEXE.log";
+    open($mainLogFile,">$mainLogFileName");
+    print $mainLogFile $ourStorySoFar;
+    select($mainLogFile);
+    $fileHandles{$mainLogFileName} = $mainLogFile;    
     
     # Move arguments into user array so we can modify it
     my @parameters = @ARGV;
     if (@parameters == 0)
     {
-        print "ERROR: No Parameters\n\n";
-        print $usage;
+        echoPrint("ERROR: No Parameters\n\n");
+        echoPrint($usage);
         exitWithFile(1);
     }
 
@@ -63,27 +76,17 @@
         $parameters[0] eq "/usage"  ||
         $parameters[0] eq "/?")
     {
-        print $usage;
+        echoPrint($usage);
         exitWithFile(1);
     }
-    
-##### Let's get this show on the road
-    echoPrint(" Welcome to $codeVersion\n");
-    echoPrint(" Staring Proccesing at $startTime $startDate\n\n");
-    echoPrint("  + Executable   : $executable\n");
-    echoPrint("  + EXE path     : $executablePath\n");
+
+##### Initilizing Variables 
     
     # Start at -1, elevate to 0 if nessisary
-    $verboseLevel = -1; 
-    
-    $errorLevel = 0;
-
-    # Create log file
-    %fileHandles = ();
-    
+    $verboseLevel = -1;     
+    $errorLevel = 0;   
     my $zip = Archive::Zip->new();
-
-##### Initilizing Variables  
+     
     @emptyArray = ();
     %emptyHash  = ();
 
@@ -109,6 +112,15 @@
     my %optionsHash;
     my @inputFiles;
     
+##### Let's get this show on the road
+    echoPrint(" Welcome to $codeVersion\n");
+    echoPrint(" Staring Proccesing at $startTime $startDate\n\n");
+    echoPrint("  + Executable   : $executable\n");
+    echoPrint("  + EXE path     : $executablePath\n");
+
+
+
+    
     # Setting cli options
     foreach (@parameters)
     {
@@ -124,7 +136,6 @@
     if (!exists $optionsHash{lc("verbose")})
     {
         $verboseLevel = $optionsHash{lc("verbose")};
-        print STDOUT $ourStorySoFar;   
     }   
     
     if (exists $optionsHash{lc("batch")})
@@ -132,13 +143,7 @@
         $batchMode = 1;
     }
 
-   #### extra log file
-   if (exists $optionsHash{lc("altLogFile")})
-   {
-        open($hPerVideoLog,">".$optionsHash{lc("altLogFile")});
-        print $hPerVideoLog $ourStorySoFar;
-        $fileHandles{$optionsHash{lc("altLogFile")}} = $hPerVideoLog;
-    }
+
 
 ##### Initilize Profiles
     echoPrint("\n------------------Profiles--------------------\n",2);
@@ -247,33 +252,20 @@
             $mainProcessingTarget = "showTitle = ".$perRunOptionsHash{lc("showTitle")};
         }
         echoPrint("  + Processing: $mainProcessingTarget\n");
-        
-        if ($mainLogFile eq "" && exists $perRunOptionsHash{lc("inputFile")})
+           
+        if ($logNextToFile eq "" && exists $perRunOptionsHash{lc("inputFile")})
         {
-            $mainLogFile  = ($perRunOptionsHash{lc("inputFile")} =~ /VIDEO_TS/i ? getPath($perRunOptionsHash{lc("inputFile")}) : getFullFile($perRunOptionsHash{lc("inputFile")}));
-            $mainLogFile .= ".".$perRunOptionsHash{lc("profile")}.".(".(scalar @perRunOptions).").log";
-            if (!open($mainLog, ">".encode('ISO-8859-1',$mainLogFile) ))
+            $logNextToFile  = ($perRunOptionsHash{lc("inputFile")} =~ /VIDEO_TS/i ? getPath($perRunOptionsHash{lc("inputFile")}) : getFullFile($perRunOptionsHash{lc("inputFile")}));
+            $logNextToFile .= ".".$perRunOptionsHash{lc("profile")}.".(".(scalar @perRunOptions).").log";
+            if (!open($fileLog, ">".encode('ISO-8859-1',$logNextToFile)))
             {
                 echoPrint("  ! Can't open create log file");
-                exitWithFile(1);
             }
-            print $mainLog $ourStorySoFar;
-            select($mainLog);
-            $fileHandles{$mainLogFile} = $mainLog;
-        }
-        elsif ($mainLogFile eq "")
-        {
-            $mainLogFile = "$executablePath\\mediaEngine.log";
-            echoPrint("  ! No input file found\n");
-            echoPrint("    - Making Log File: $mainLogFile\n");
-            if (!open($mainLog, ">".encode('ISO-8859-1',$mainLogFile) ))
+            else
             {
-                echoPrint("  ! Can't open create log file");
-                exitWithFile(1);
+                print $fileLog $ourStorySoFar;
+                $fileHandles{$logNextToFile} = $fileLog;            
             }
-            print $mainLog $ourStorySoFar;
-            select($mainLog);
-            $fileHandles{$mainLogFile} = $mainLog;         
         }
         
      ##### Checking for profile       
@@ -310,11 +302,19 @@
         
         if (exists $perRunOptionsHash{lc("inputFile")})
         {
-            $scratchName = $perRunOptionsHash{lc("inputFile")};
+            if ($perRunOptionsHash{lc("inputFile")} =~ /VIDEO_TS$/i)
+            {
+                $scratchName = getPath($perRunOptionsHash{lc("inputFile")});   
+            }
+            else
+            {
+                $scratchName = $perRunOptionsHash{lc("inputFile")};
+            }
+            
         }
         else
         {
-            $scratchName = $mainLogFile;
+            $scratchName = "$executablePath\\$executableEXE";
         }
         
         $perRunOptionsHash{lc("scratchPath")}     = getFullFile($scratchName).".workFolder";
@@ -655,7 +655,7 @@
     {
         my $string_member = $zip->addString( $ourStorySoFar, 'mediaEngine.log' );
         $string_member->desiredCompressionLevel(9);
-        $zip->writeToFileNamed(getFullFile($mainLogFile).".mediaEngineLog.zip");
+        $zip->writeToFileNamed("$executablePath\\mediaEngineLog_$startTime.zip");
     }
     
     if (!(exists $optionsHash{lc("saveLog")} || exists $optionsHash{lc("saveAll")}))
@@ -3318,6 +3318,14 @@ sub dvdScanForTitles
     }
     return @newPerRunOptions;
 }
+
+sub toWin32
+{
+    my $replaceString = shift;
+    my $illCharFileRegEx = "('|\"|\\\\|/|\\||<|>|:|\\*|\\?|\\&|\\;|`)";
+    $replaceString =~ s/$illCharFileRegEx//g;
+    return $replaceString;
+} 
 
 
 
