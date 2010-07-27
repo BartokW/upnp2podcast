@@ -6,7 +6,7 @@
     Profile           =HandBrake
     Encode CLI #1     =?>quickStreamFix||inputMain:videoContainer=~mpegts||inputMain:videoCorruption&&(>!cutComm||(>cutComm&&onlyWhenVprj&&!EXT:vprj<)<)<:>QuickStream Fix<?
     Encoder #1        =/insertFunction
-    Encode CLI #1     =?>cutComm&&!isDVD<:>Cut Commercials<?
+    Encode CLI #1     =?>cutComm&&!isDVD&&inputMain:videoCodec=~mpeg2video<:>Cut Commercials<?
     Encoder #1        =/insertFunction
     Encode CLI #4     =?>ORIGINAL:embeddedCCCount>10&&!handbrakeSubtitleTracks&&!noSubtitles<:>extractSubtitles<?
     Encoder #4        =/insertFunction
