@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PluginRepository version="1.0.203">
+<SageTVPlugin>
+   <Name>UPnP Browser</Name>
+   <Identifier>UPnPBrowser</Identifier>
+   <Description><![CDATA[A tool for browsing UPnP/DLNA servers such as PlayON]]></Description>
+   <Screenshot><![CDATA[http://docs.google.com/uc?id=0B_sMJcYiGvN4Njk1ZGEzZTQtOWFlNS00MWM0LTgzM2ItMWM2NGNhZjIwZjQ1&export=download&hl=en]]></Screenshot>
+   <Author>evilpenguin</Author>
+   <CreationDate>2009.09.15</CreationDate>
+   <ModificationDate>2010.08.11</ModificationDate>
+   <Version>1.3.2</Version>
+   <Desktop>false</Desktop>
+   <OS>Windows</OS>
+   <OS>Linux</OS>
+   <Webpage><![CDATA[http://forums.sagetv.com/forums/showthread.php?t=44446]]></Webpage>
+   <PluginType>Library</PluginType>
+   <Package>
+     <PackageType>System</PackageType>
+     <Location><![CDATA[http://upnp2podcast.googlecode.com/files/UPnPBrowser_EXEs_v1_3_2.zip]]></Location>
+     <MD5>cc435fe321f57aae54748fd5b3d0052a</MD5>
+   </Package>
+ </SageTVPlugin>
+<SageTVPlugin>
+   <Name>PlayON STVI</Name>
+   <Identifier>PlayOnSTVI</Identifier>
+   <Description><![CDATA[This STVi allows easy access to PlayOn content through the main menu]]></Description>
+   <Screenshot><![CDATA[http://docs.google.com/uc?id=0B_sMJcYiGvN4MTNkYTFkMmQtNGI3ZC00ZTEzLWJhZTYtMGE2MmIyYmI5NWM4&export=download&hl=en]]></Screenshot>
+   <Author>evilpenguin</Author>
+   <CreationDate>2010.06.01</CreationDate>
+   <ModificationDate>2010.08.11</ModificationDate>
+   <Version>1.3.2</Version>
+   <Desktop>false</Desktop>
+   <DemoVideo>http://www.youtube.com/watch?v=ccQj2mjKkZM</DemoVideo>
+ <ReleaseNotes>v1.3.2
+ * STVi: Added support for .playon files
+ * UPnPBrowser: Added /scrapeMode which will crete dummy videos for content in Hulu/Netflix Queue
+ * UPnPBrowser: Added /outputDir to specify where to put the dummy videos
+ *   
+ v1.3
+ * STVi: Fixed unique names in main menu buttons
+ * STVi: Fixed linux file sepeators for launching UPnPBrowser.exe
+ * STVi: Added .property files for people with SageMC
+ * STVi: Added menu button for generic UPnP Browsing
+ * UPnPBrowser: Made commerical allowance longer
+ * UPnPBrowser: Fixed issue where finding parent folder of a folder was broken
+ 
+ v1.2
+ * Fixed issue with 64-bit windows users
+ * Added option to do an extra long server scan when the device isn't found
+ * Invalidating .cache files if server changes
+ * Added depedency on v7 STV
+ * Fixed some spelling errors</ReleaseNotes>
+   <PluginType>STVI</PluginType>
+    <Dependency>
+     <Plugin>UPnPBrowser</Plugin>
+     <MinVersion>1.3.2</MinVersion>
+    </Dependency>
+   <Dependency>
+     <STV>SageTV7</STV>
+     <MinVersion>7.0</MinVersion>
+   </Dependency>
+   <Package>
+     <PackageType>STVI</PackageType>
+     <Location><![CDATA[http://upnp2podcast.googlecode.com/files/PlayON_STVI_v1_3_2.zip]]></Location>
+     <MD5>b0be0d529cfaa4bf10b9e84d6897fba7</MD5>
+   </Package>
+   <STVImport>PlayON_v1_3_2.stvi</STVImport>
+ </SageTVPlugin>
+</PluginRepository>
