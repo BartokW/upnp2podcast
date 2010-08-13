@@ -1,0 +1,1 @@
+This folder is for storing the dummy videos used by the PlayOn Plugin.  Its automatically added as an import directory and can be changed to a different import directory though the Plugin configuration.
