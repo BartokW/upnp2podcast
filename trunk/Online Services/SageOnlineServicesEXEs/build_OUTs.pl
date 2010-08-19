@@ -28,7 +28,7 @@ my $cwd  = `pwd`;
 my $date = `date`;
 chomp $date;
 
-$cpString = "cp ./$script ./script.pl";
+$cpString = "cp $script script.pl";
 print "  + Copying Script : ($cpString)\n";
 `$cpString`;
 $perlString = "perl -pi.bak -e \"s/SNIP:BUILT/Built on $date/g\" ./script.pl";
