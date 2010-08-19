@@ -706,7 +706,7 @@
             $originalLine = $`."quote$quoteNum".$';  
             $quoteNum++;
         }
-        @splitWithQuotes = split(/"[^"]"/,$originalLine); #"
+        #@splitWithQuotes = split(/"[^"]"/,$originalLine); #"
         @splitWithQuotes = split(/$split/,$originalLine);
         for($i=0;$i<@splitWithQuotes;$i++)
         {
