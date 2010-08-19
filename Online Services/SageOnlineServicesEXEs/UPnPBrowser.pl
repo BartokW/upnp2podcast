@@ -35,13 +35,22 @@
   $ua->agent( 'Mozilla/4.0 (compatible; MSIE 5.12; Mac_PowerPC)' );
   $ua->timeout(25);    
 
+  $FS = "\\";
+  if ($^O =~ /linux/i)
+  {
+      $linux = 1;
+      $FS = "/";
+  }
+
   # Get the directory the script is being called from
   $executable = $0;
   $executablePath = getPath($executable);
-  $executableEXE  = getFile($executable); 
+  $executableEXE  = getFile($executable);
+  $workPath       = "$executablePath".$FS."$executableEXE";
+  
+  $outputPathName = "";
    
   open(LOGFILE,">$executablePath/$executableEXE.log");
-
 
   # Get Start Time
   my ( $startSecond, $startMinute, $startHour) = localtime();
@@ -59,11 +68,11 @@
   echoPrint("Welcome to $codeVersion! (".localtime()."\n");
   echoPrint("  + Path: $executablePath\n");
   
-  if (!(-d "$executablePath\\$executableEXE"))
+  if (!(-d "$executablePath".$FS."$executableEXE"))
   {
-      echoPrint("  + Making .cache Directory: ($executablePath\\$executableEXE)\n");
+      echoPrint("  + Making .cache Directory: ($executablePath".$FS."$executableEXE)\n");
       {
-          mkdir("$executablePath\\$executableEXE");
+          mkdir("$executablePath".$FS."$executableEXE");
       }
   }
   
@@ -100,7 +109,7 @@
           if (/^version=/)
           {
               $sageVersion = $';
-          }          
+          }         
       }
       close(PROPERTIES);
       echoPrint("    - SageTV Version: ($sageVersion)\n");
@@ -122,15 +131,15 @@
   
   my @content_list = ();
   
-  if ((@parameters == 0 || int(rand(10)) > 5) || !(-s "$executablePath\\$executableEXE\\$executableEXE.presets"))  
+  if ((@parameters == 0 || int(rand(10)) > 5) || !(-s "$executablePath".$FS."$executableEXE".$FS."$executableEXE.presets"))  
   {
       updatePresets();
   }
   
   my %presets = ();
-  if (-s "$executablePath\\$executableEXE\\$executableEXE.presets")
+  if (-s "$executablePath".$FS."$executableEXE".$FS."$executableEXE.presets")
   {   # Read in Presets      
-      if (open(PRESETS,"$executablePath\\$executableEXE\\$executableEXE.presets"))
+      if (open(PRESETS,"$executablePath".$FS."$executableEXE".$FS."$executableEXE.presets"))
       {   
           <PRESETS> =~ /Version=([0-9]+)/i;
           my $presetVersion = $1;
@@ -147,6 +156,21 @@
           }
       }
   }
+  
+  my @toScrape = ();
+  if (-s "$executablePath".$FS."$executableEXE".$FS."$executableEXE.toScrape")
+  {
+      if (open(TOSCRAPE,"$executablePath".$FS."$executableEXE".$FS."$executableEXE.toScrape"))
+      {   
+          while(<TOSCRAPE>)
+          {
+              chomp;
+              @toScrape = (@toScrape,$_);
+          }
+          close(TOSCRAPE);
+      }  
+  }
+
   
   if (@parameters == 1 &&  $parameters[0] =~ /:/)
   {
@@ -176,7 +200,48 @@
           echoPrint("  ! Couldn't find Preset ".$optionsHash{lc("preset")}." (".$presets{lc($optionsHash{lc("preset")})}.")\n");               
       }
   }
-
+  
+  $myMovies = 0;
+  if (exists $optionsHash{lc("myMovies")})
+  {
+      $myMovies = 1;    
+  }
+  
+  if (exists $optionsHash{lc("scrapeMode")})
+  {
+      $optionsHash{lc("device")} = "PlayOn";
+  
+      if (exists $optionsHash{lc("outputDir")}   && 
+          !($optionsHash{lc("outputDir")} eq "") &&
+          -d $optionsHash{lc("outputDir")})
+      {   # Add in presets
+          $workPath = $optionsHash{lc("outputDir")};
+      }
+      else
+      {
+          echoPrint("  ! /scrapeMode but /outputDir (".$optionsHash{lc("outputDir")}.") isn't valid, exiting!\n");
+          exit 1;
+      }
+      $workPath .= "".$FS."PlayOn";
+      if (-d "$workPath")
+      {
+          $delString = "rmdir /Q /S \"$workPath\"";
+          `$delString`;
+      }
+    
+       $mkdirString = "mkdir \"$workPath\"";
+      `$mkdirString`;
+  }
+  
+  if ($sageVersion =~ /SageTV V6/i)
+  {
+      #disabling subcats
+      $optionsHash{lc("disableSubcats")} = 1;
+      echoPrint("    - /disableSubcats\n");        
+  }    
+  
+  my $serverWait = (exists $optionsHash{lc("serverSearchTimeout")} ? $optionsHash{lc("serverSearchTimeout")} : 1);
+  echoPrint("  + /serverSearchTimeout : (".$serverWait.")\n");
   
   if (exists $optionsHash{lc("search")})
   {
@@ -199,16 +264,6 @@
       $optionsHash{lc("path")} = $v1path;
       echoPrint("    - /path  : (".$optionsHash{lc("path")}.")\n");
   }
-  
-  if ($sageVersion =~ /SageTV V6/i)
-  {
-      #disabling subcats
-      $optionsHash{lc("disableSubcats")} = 1;
-      echoPrint("    - /disableSubcats\n");        
-  }    
-  
-  my $serverWait = (exists $optionsHash{lc("serverSearchTimeout")} ? $optionsHash{lc("serverSearchTimeout")} : 1);
-  echoPrint("  + /serverSearchTimeout : (".$serverWait.")\n");
 
   if (@parameters == 0 || exists $optionsHash{lc("mainMenu")})
   {
@@ -368,7 +423,7 @@
                           if ($content_list[0] =~ /^!!/)
                           {  # Cache is bad, delete it and run full serach
                               $foundDevice = 0;
-                              `del "$executablePath\\$executableEXE\\$cacheFile"`;
+                              `del "$executablePath".$FS."$executableEXE".$FS."$cacheFile"`;
                               echoPrint("       ! Cache is stale, deleting and doing full search ($cacheFile)\n");
                           }
                   		    last;
@@ -447,57 +502,84 @@
           exit 0;
       }
       
-      if (exists $optionsHash{lc("path")} && $foundDevice == 1 && !exists $optionsHash{lc("uid")})
-      {  # if all we get is a path, serach the tree for the uid
-          $optionsHash{lc("uid")} = 0;
-          $optionsHash{lc("isContainer")} = 0;
-          my @splitString = split(/\//,$optionsHash{lc("path")});
-          $optionsHash{lc("path")}   = $optionsHash{lc("device")};
-          echoPrint("  + GetContent from: ".(shift @splitString)."\n");
-          
-          foreach $lookingFor (@splitString)
-          {         
-              echoPrint("    - Looking for : ".$lookingFor."\n");          
-              @content_list = $mediaServer->getcontentlist(ObjectID => $optionsHash{lc("uid")});
-              my $found  = 0;
-              foreach $content (@content_list)
-              {
-                  echoPrint("      + ".($content->iscontainer() ? "/" : "")."".$content->gettitle()." (".$content->getid().")\n");
-                  if ($content->gettitle() =~ /$lookingFor/i)
+      # Try Looping here
+      my @items = ();
+      if (exists $optionsHash{lc("scrapeMode")})
+      {
+          @PlayONPaths = (@toScrape);
+          $optionsHash{lc("depth")} = 2;
+      }
+      else
+      {
+          @PlayONPaths = ($optionsHash{lc("path")});
+      }     
+      
+      foreach $playONPath (@PlayONPaths)
+      {
+          echoPrint("LOOPING: $playONPath\n");
+
+          if (!($playONPath eq "") && $foundDevice == 1 && !(exists $optionsHash{lc("uid")}))
+          {  # if all we get is a path, serach the tree for the uid
+              $optionsHash{lc("uid")} = 0;
+              $optionsHash{lc("isContainer")} = 0;
+              my @splitString = split(/\//,$playONPath);
+              $optionsHash{lc("path")}   = $optionsHash{lc("device")};
+              echoPrint("  + GetContent from: ".(shift @splitString)." (@splitString)\n");
+              
+              foreach $lookingFor (@splitString)
+              {         
+                  echoPrint("    - Looking for : ".$lookingFor."\n");          
+                  @content_list = $mediaServer->getcontentlist(ObjectID => $optionsHash{lc("uid")});
+                  my $found  = 0;
+                  foreach $content (@content_list)
                   {
-                      echoPrint("        - Found! : $`(".$&.")$'\n");
-                      $optionsHash{lc("uid")}   = $content->getid();
-                      $optionsHash{lc("path")} .= "\\".$content->gettitle();
-                      $optionsHash{lc("isContainer")} = $content->iscontainer(); 
-                      $found = 1;
-                      #last;    
-                  }    
-              }              
-              if ($found == 0)
-              {
-                  echoPrint("    ! Couldn't find : ".$lookingFor."\n");
-                  echoPrint("    + Execution time: ".executionTime(@startTime)."\n");  
-                  exit 0; 
+                      echoPrint("      + ".($content->iscontainer() ? "/" : "")."".$content->gettitle()." (".$content->getid().")\n");
+                      if ($content->gettitle() =~ /$lookingFor/i)
+                      {
+                          echoPrint("        - Found! : $`(".$&.")$'\n");
+                          $optionsHash{lc("uid")}   = $content->getid();
+                          $optionsHash{lc("path")} .= "".$FS."".$content->gettitle();
+                          $optionsHash{lc("isContainer")} = $content->iscontainer(); 
+                          $found = 1;
+                          #last;    
+                      }    
+                  }              
+                  if ($found == 0)
+                  {
+                      echoPrint("    ! Couldn't find : ".$lookingFor."\n");
+                      echoPrint("    + Execution time: ".executionTime(@startTime)."\n");  
+                      exit 0; 
+                  }
               }
           }
-      }
-      
-      if (exists $optionsHash{lc("uid")} && $foundDevice == 1)
-      {
-                             
-          my @items = ();
-          @items    = (@items, addItems($mediaServer, 
-                                        $optionsHash{lc("uid")}, 
-                                        $optionsHash{lc("path")}, 
-                                        $optionsHash{lc("device")},
-                                        $optionsHash{lc("filter")}, 
-                                        !(exists $optionsHash{lc("disableSubcats")}), 
-                                        (exists $optionsHash{lc("depth")} ? $optionsHash{lc("depth")} : 0) ));
           
-          my $opening = $feed_begin;;
-          $opening =~ s/%%FEED_TITLE%%/UPnP Browser ($lookingFor)/g;
-          $opening =~ s/%%FEED_DESCRIPTION%%/UPnP Browser ($lookingFor)/g;
-
+          if (exists $optionsHash{lc("uid")} && $foundDevice == 1)
+          {
+                                 
+              
+              @items    = (@items, addItems($mediaServer, 
+                                            $optionsHash{lc("uid")}, 
+                                            $optionsHash{lc("path")}, 
+                                            $optionsHash{lc("device")},
+                                            $optionsHash{lc("filter")}, 
+                                            !(exists $optionsHash{lc("disableSubcats")}),
+                                            exists $optionsHash{lc("scrapeMode")}, 
+                                            (exists $optionsHash{lc("depth")} ? $optionsHash{lc("depth")} : 0) ));             
+          }
+          
+          # Clear UID for looping
+          delete $optionsHash{lc("uid")};
+      }  
+               
+      my $opening = $feed_begin;
+      $opening =~ s/%%FEED_TITLE%%/UPnP Browser ($lookingFor)/g;
+      $opening =~ s/%%FEED_DESCRIPTION%%/UPnP Browser ($lookingFor)/g;
+      if (exists $optionsHash{lc("outputPath")})
+      {
+          print encode('UTF-8', $outputPathName);
+      }
+      elsif (!(exists $optionsHash{lc("scrapeMode")}))
+      {
           my $execTime = executionTime(@startTime);      
           print encode('UTF-8', $opening);
           foreach (@items)
@@ -509,9 +591,9 @@
               }
           }  
           print encode('UTF-8', $feed_end);
-          echoPrint($execTime);  
-          exit 0;               
-      }     
+      }
+      echoPrint($execTime);  
+      exit 0;
   }
   
   ##### Overwrite echoPrint for compatability
@@ -714,6 +796,7 @@ FEED_END
       my $device         = shift;
       my $filter         = shift;
       my $disableSubcats = shift;
+      my $scrapeMode     = shift;
       my $depth          = shift;
 
       my ($newItem, $video, $title, $description ,$type, $thumbnail);       
@@ -734,7 +817,7 @@ FEED_END
                 if ($depth != 0)
                 {
                     echoPrint("      / ".$_->gettitle()."\n");
-                    @items = (@items, addItems($mediaServer, $_->getid(), $path."\\".$_->gettitle(), $device, $filter, $disableSubcats, ($depth - 1)));        
+                    @items = (@items, addItems($mediaServer, $_->getid(), $path."".$FS."".$_->gettitle(), $device, $filter, $disableSubcats, $scrapeMode, ($depth - 1)));        
                 }
                 elsif ($disableSubcats == 1)
                 {     
@@ -745,9 +828,9 @@ FEED_END
                     }
                     echoPrint("      / ".$_->gettitle()."\n");                   
                     $newItem = $feed_item;
-                    $video             = toXML('external,'.$executable.",/device||".$device."||/uid||".$_->getid()."||/path||".$path."\\".$_->gettitle());
+                    $video             = toXML('external,'.$executable.",/device||".$device."||/uid||".$_->getid()."||/path||".$path."".$FS."".$_->gettitle());
                     $title             = $_->gettitle();
-                    $description       = "$path\\".$_->gettitle();
+                    $description       = "$path".$FS."".$_->gettitle();
                     $thumbnail         = '';
                     $type              = 'sagetv/subcategory';
                     
@@ -777,6 +860,7 @@ FEED_END
                     $newItem =~ s/%%ITEM_TYPE%%/$type/g;
                     $newItem =~ s/%%ITEM_PICTURE%%/$thumbnail/g;
                     $newItem =~ s/%%ITEM_DUR_SEC%%//g; 
+    
                     push(@items,$newItem);
                 }                   
             }
@@ -801,58 +885,76 @@ FEED_END
                 my $thumbnail  = toXML($content->getPicture());
                 my $description = $content->getDesc();
                 my $type = 'video/mpeg2';
-        
-                if ($title =~ /s([0-9]+)e([0-9]+): (.*)/)
+                
+                if ($scrapeMode)
                 {
-                    my $season  = $1;
-                    my $episode = $2;
-                    my $episodeTitle = $3;
-                    $description        = "Season $season Episode $episode - $description"; 
-                    $title = $episodeTitle;
+                    scrapePlayON($path,$content->getDesc(),$content->gettitle(),$content->getdate());
+                    next;
                 }
-                
-                $dur    =~ /([0-9]+):([0-9]+):([0-9]+).([0-9]+)/;
-                my $durTotalSec = $1*60*60 + $2*60 + $3;
-                my $durTotalMin = $durTotalSec/60;
-                
-                # Roughly Account for commercials
-                while($durTotalMin > 0)
+                else
                 {
-                    $durTotalMin -= 7;
-                    $durTotalSec += 60;    
-                }  
-
-                
-                my $durDisSec  = $durTotalSec;
-                my $durDisMin  = 0;
-                my $durDisHour = 0;
-                
-                while ($durDisSec > 60)
-                {
-                    $durDisSec -= 60;
-                    $durDisMin   += 1;
-                    if ($durDisMin == 60)
-                    {
-                        $durDisHour += 1;
-                        $durDisMin   = 0;
+                    if ($title =~ /^s([0-9]+)e([0-9]+): (.*)/i)
+                    {   # Hulu Show
+                        my $season  = $1;
+                        my $episode = $2;
+                        my $episodeTitle = $3;
+                        $description        = "Season $season Episode $episode - $description"; 
+                        $title = $episodeTitle;
                     }
-                }
-        
-                my $durDisplay = sprintf("%02d:%02d:%02d", $durDisHour, $durDisMin, $durDisSec);       
-                
-                $date  =~ /^(.*)T/;
-                $date  = $1;                    
-                
-                $newItem =~ s/%%ITEM_TITLE%%/$title/g;
-                $newItem =~ s/%%ITEM_DATE%%/$date/g;
-                $newItem =~ s/%%ITEM_DESCRIPTION%%/$description/g;
-                $newItem =~ s/%%ITEM_URL%%/$video/g;
-                $newItem =~ s/%%ITEM_DUR%%/$durDisplay/g;
-                $newItem =~ s/%%ITEM_SIZE%%/$size/g;
-                $newItem =~ s/%%ITEM_TYPE%%/$type/g;
-                $newItem =~ s/%%ITEM_PICTURE%%/$thumbnail/g;
-                $newItem =~ s/%%ITEM_DUR_SEC%%/$durTotalSec/g;
-                push(@items,$newItem);                
+                    elsif ($title =~ /(.*) - s([0-9]+)e([0-9]+): (.*)/)
+                    {   # Hulu Queue
+                        my $show    = $1;
+                        my $season  = $2;
+                        my $episode = $3;
+                        my $episodeTitle = $4;
+                        $description        = "Season $season Episode $episode - $episodeTitle"; 
+                        $title = $show;                                        
+                    }
+                    
+                    $dur    =~ /([0-9]+):([0-9]+):([0-9]+).([0-9]+)/;
+                    my $durTotalSec = $1*60*60 + $2*60 + $3;
+                    my $durTotalMin = $durTotalSec/60;
+                                        
+                    do
+                    {   # Roughly Account for commercials
+                        $durTotalMin -= 7;
+                        $durTotalSec += 60;    
+                    }while($durTotalMin > 0);  
+    
+                    
+                    my $durDisSec  = $durTotalSec;
+                    my $durDisMin  = 0;
+                    my $durDisHour = 0;
+                    
+                    while ($durDisSec > 60)
+                    {
+                        $durDisSec -= 60;
+                        $durDisMin   += 1;
+                        if ($durDisMin == 60)
+                        {
+                            $durDisHour += 1;
+                            $durDisMin   = 0;
+                        }
+                    }
+                    
+                    $outputPathName = $content->geturl()."||$durTotalSec";
+            
+                    my $durDisplay = sprintf("%02d:%02d:%02d", $durDisHour, $durDisMin, $durDisSec);       
+                    
+                    $date  =~ /^(.*)T/;
+                    $date  = $1;                    
+                    
+                    $newItem =~ s/%%ITEM_TITLE%%/$title/g;
+                    $newItem =~ s/%%ITEM_DATE%%/$date/g;
+                    $newItem =~ s/%%ITEM_DESCRIPTION%%/$description/g;
+                    $newItem =~ s/%%ITEM_URL%%/$video/g;
+                    $newItem =~ s/%%ITEM_DUR%%/$durDisplay/g;
+                    $newItem =~ s/%%ITEM_SIZE%%/$size/g;
+                    $newItem =~ s/%%ITEM_TYPE%%/$type/g;
+                    $newItem =~ s/%%ITEM_PICTURE%%/$thumbnail/g;
+                    $newItem =~ s/%%ITEM_DUR_SEC%%/$durTotalSec/g;
+                    push(@items,$newItem);
+                }                
             } 
        }
     }          
@@ -916,6 +1018,7 @@ FEED_END
     sub getPath
     {   # (G:\videos\)filename.avi
         my ( $fileName ) = @_;
+        $fileName .= ".txt";  # Always append an extention
         my $rv = "";
         if ($fileName =~ m#([^\\/]*)$#)
         {
@@ -991,7 +1094,7 @@ FEED_END
             echoPrint("  ! Failed to download updates file ($presetsURL)\n");
         }
         
-        if (open(PRESETS,"$executablePath\\$executableEXE\\$executableEXE.presets"))
+        if (open(PRESETS,"$executablePath".$FS."$executableEXE".$FS."$executableEXE.presets"))
         {   
             <PRESETS> =~ /Version=([0-9]+)/i;
             $presetVersion = $1;
@@ -999,7 +1102,7 @@ FEED_END
         }
         else
         {
-            echoPrint("  ! Couldn't open presets file ($executablePath\\$executableEXE\\$executableEXE.presets)\n");
+            echoPrint("  ! Couldn't open presets file ($executablePath".$FS."$executableEXE".$FS."$executableEXE.presets)\n");
         }
         close(PRESETS);
         
@@ -1007,10 +1110,158 @@ FEED_END
         if ($serverPresetVersion > $presetVersion && !($serverPresets eq ""))
         {
             echoPrint("      ! Updating Presets File ($serverPresetVersion > $presetVersion)\n");
-            open(PRESETS,">$executablePath\\$executableEXE\\$executableEXE.presets");
+            open(PRESETS,">$executablePath".$FS."$executableEXE".$FS."$executableEXE.presets");
             print PRESETS $serverPresets;
             close(PRESETS);         
         }      
+    }
+    
+    sub scrapePlayON
+    {
+        my ($playONPath,$playONDescription,$playONTitle,$playONAirdate) = @_;
+        my $season;
+        my $episode;
+        my $description;
+        my $mediaType;
+        my $showTitle;
+        my $mediaType;
+        my $airdate;
+        my $airYear;
+        
+        # Get Airdate
+        if ($playONAirdate =~ /([0-9]{4})-[0-9]{2}-[0-9]{2}/)
+        {
+            $airdate    = $&;
+            $airYear    = $1;
+        }
+  
+        if ($playONPath =~ /PlayON\\Hulu/i)
+        {  # Hulu
+           if ($playONTitle =~ /^s([0-9]+)e([0-9]+): (.*)/i)
+           {
+              $season       = $1;
+              $episode      = $2;
+              $episodeTitle = $3;
+              $description  = $playONDescription;
+              
+              # Grab show Title from path
+              $playONPath   =~ /\\([^\\]*)\\Full Episodes/i;
+              $showTitle    = $1;
+              
+              $mediaType = "TV";
+           }
+           elsif ($playONTitle =~ /(.*) - s([0-9]+)e([0-9]+): (.*)/)
+           {
+              $season       = $2;
+              $episode      = $3;
+              $episodeTitle = $4;
+              $description  = $playONDescription;
+              $showTitle    = $1;
+              
+              $mediaType = "TV";
+           }
+           else
+           {  # Treat like movie
+              $mediaType   = "Movie";
+              $showTitle   = $playONTitle;
+              $description = $playONDescription;          
+           }
+        }
+        elsif ($playONPath =~ /PlayON\\Netflix/i)
+        {
+            if ($playONTitle =~ /^([0-9]+): (.*)/i)
+            {   # TV show
+                $mediaType   = "TV";
+                $episode      = $1;
+                $episodeTitle = $2;
+                $description  = $playONDescription;
+                if ($playONPath   =~ /\\([^\\]+): (Series|Season) ([0-9]+)/i)
+                {   # Full fledged TV show               
+                    $season       = $3;
+                    $showTitle    = $1;                        
+                }
+                elsif($playONPath   =~ /\\([^\\]+): (Collection) ([0-9]+)/i)
+                {   # Collections don't usually have seasons associated with them
+                    $showTitle    = $1;
+                }
+                elsif($playONPath   =~ /\\([^\\]+)$/i)
+                {   # Miniseries or something
+                    $showTitle    = $1;
+                }
+            }
+            else
+            {
+                $mediaType   = "Movie";
+                $showTitle   = $playONTitle;
+                $description = $playONDescription;   
+            }        
+        }
+        my $path           = "/outputPath||/search||\"$playONPath\\$playONTitle\\+1\"";
+        $path              =~ s/:/./gi;
+        $path              =~ s/\\/:/gi;
+
+        my $fileName       = $showTitle; 
+        my $propertiesFile = "MediaType=$mediaType\n";
+        $propertiesFile   .= "MediaTitle=$showTitle\n";
+        $propertiesFile   .= "ReleaseDate=$airdate\n";
+        $propertiesFile   .= "Description=$description\n";
+        if ($mediaType eq "TV")
+        {
+            $folder = "TV".$FS."".toWin32($showTitle);
+            if (!($season eq ""))
+            {
+                $folder           .= "".$FS."Season $season"; 
+                $fileName         .= " S".$season."E".sprintf("%02d",$episode) ." - ";
+            }
+            else
+            {
+                $fileName         .= " -- ";
+            }
+            $fileName         .= $episodeTitle;
+            $propertiesFile   .= "EpisodeTitle=$episodeTitle\n";
+            $propertiesFile   .= "SeasonNumber=$season\n";
+            $propertiesFile   .= "EpisodeNumber=$episode\n";
+            $fold
+        }
+        else
+        {
+            $folder = "Movies".($myMovies == 1 ? $FS.toWin32($showTitle) : "");
+            if (!($airYear eq ""))
+            {
+                $fileName   .= " ($airYear)";    
+            }
+            
+            
+        }
+        $propertiesFile   .= "PlayOnPath=$path\n";
+         
+        $fileName =~ s/\&amp;/&/g;
+        $fileName =~ s/\&quot;/"/g; #"
+        $fileName =~ s/\&lt;/</g;
+        $fileName =~ s/\&gt;/>/g;
+        $fileName =~ s/\&apos;/'/g;  #'
+        $fileName =~ s/ & / and /g;
+        
+        $fileName = toWin32($fileName);
+        echoPrint("  + Generating : ($workPath".$FS."$folder".$FS."$fileName.mkv)\n");
+        #echoPrint($propertiesFile);
+        
+        if (!(-d "$workPath".$FS."$folder"))
+        {           
+            $mkdirString = "mkdir \"$workPath".$FS."$folder\"";
+            echoPrint("    - mkdir : ($mkdirString)\n");
+            `$mkdirString`; 
+        } 
+              
+        if (open(PROPERTIES,">$workPath".$FS."$folder".$FS."$fileName.mkv.playon"))
+        {
+            print PROPERTIES $path;
+            close PROPERTIES;
+            
+            $copyString = ($linux == 1 ? "cp" : "copy")." \"$executablePath".$FS."$executableEXE".$FS."base.mkv\" \"$workPath".$FS."$folder".$FS."$fileName.mkv\"";
+            echoPrint("    - copying : ($copyString)\n");
+            `$copyString`; 
+        }       
     }
 
       
