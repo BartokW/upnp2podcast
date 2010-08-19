@@ -700,14 +700,17 @@
         my @splitWithQuotes = ();
         my %quoteHash = ();
         my $quoteNum = 0;
+        echoPrint("        - Original ($originalLine)\n",2);
         while($originalLine =~ /"([^"]*)"/)#"
         {
             $quoteHash{$quoteNum} = $1;
             $originalLine = $`."quote$quoteNum".$';  
             $quoteNum++;
         }
+        echoPrint("        - Quoted ($originalLine)\n",2);
         #@splitWithQuotes = split(/"[^"]"/,$originalLine); #"
-        @splitWithQuotes = split(/$split/,$originalLine);
+        @splitWithQuotes = split(/\Q$split\E/,$originalLine);
+        echoPrint("        - Split (@splitWithQuotes)\n",2);
         for($i=0;$i<@splitWithQuotes;$i++)
         {
             if ($splitWithQuotes[$i] =~ /quote([0-9]+)$/)
