@@ -129,6 +129,9 @@
   my @emptyArray = ();
   my %emptyHash  = ();
   
+  %playOnFileHash = ();
+  %existingFilesHash = ();
+  
   my @content_list = ();
   
   if ((@parameters == 0 || int(rand(10)) > 5) || !(-s "$executablePath".$FS."$executableEXE".$FS."$executableEXE.presets"))  
@@ -210,7 +213,6 @@
   if (exists $optionsHash{lc("scrapeMode")})
   {
       $optionsHash{lc("device")} = "PlayOn";
-  
       if (exists $optionsHash{lc("outputDir")}   && 
           !($optionsHash{lc("outputDir")} eq "") &&
           -d $optionsHash{lc("outputDir")})
@@ -222,15 +224,8 @@
           echoPrint("  ! /scrapeMode but /outputDir (".$optionsHash{lc("outputDir")}.") isn't valid, exiting!\n");
           exit 1;
       }
-      $workPath .= "".$FS."PlayOn";
-      if (-d "$workPath")
-      {
-          $delString = "rmdir /Q /S \"$workPath\"";
-          `$delString`;
-      }
-    
-       $mkdirString = "mkdir \"$workPath\"";
-      `$mkdirString`;
+
+      %existingFilesHash = scanDir($workPath,"playon");
   }
   
   if ($sageVersion =~ /SageTV V6/i)
@@ -571,16 +566,55 @@
           delete $optionsHash{lc("uid")};
       }  
                
-      my $opening = $feed_begin;
-      $opening =~ s/%%FEED_TITLE%%/UPnP Browser ($lookingFor)/g;
-      $opening =~ s/%%FEED_DESCRIPTION%%/UPnP Browser ($lookingFor)/g;
       if (exists $optionsHash{lc("outputPath")})
       {
           print encode('UTF-8', $outputPathName);
       }
-      elsif (!(exists $optionsHash{lc("scrapeMode")}))
+      elsif (exists $optionsHash{lc("scrapeMode")})
       {
-          my $execTime = executionTime(@startTime);      
+          # Find existing PlayON Files
+          @existingFiles = scanDir($workPath,"playon");
+          %playOnFileHashCopy = %playOnFileHash;
+          foreach $exitingFile (sort(keys %existingFilesHash))
+          {
+              echoPrint("  + Missing : (".getFile($exitingFile)." (".(-s getFullFile($exitingFile)).")\n"); 
+              if (-e "$exitingFile" && $exitingFile =~ /\.playon$/ && (-s getFullFile($exitingFile)) < 60000)
+              {   # never delete anything over 60 mb                 
+                  $rmString = "del \"$exitingFile\"";
+                  #echoPrint("    - rm : ($rmString)\n");
+                  `$rmString`;
+                  $rmString = "del \"".getFullFile($exitingFile)."\"";
+                  #echoPrint("    - rm : ($rmString)\n");
+                  `$rmString`;
+              }        
+          }
+          foreach $newFile (sort(keys %playOnFileHashCopy))
+          {
+              echoPrint("  + Added : (".getFile($newFile)."\n");
+              
+              if (!(-d getPath($newFile)))
+              {           
+                  $mkdirString = "mkdir \"".getPath($newFile)."\"";
+                  #echoPrint("    - mkdir : ($mkdirString)\n");
+                  `$mkdirString`; 
+              }
+              
+              if (open(PROPERTIES,">$newFile"))
+              { # Write .playon file
+                print PROPERTIES $playOnFileHashCopy{$newFile};
+                close PROPERTIES;
+            
+                $copyString = ($linux == 1 ? "cp" : "copy")." \"$executablePath".$FS."$executableEXE".$FS."base.mkv\" \"".getFullFile($newFile)."\"";
+                #echoPrint("    - copying : ($copyString)\n");
+                `$copyString`; 
+              }    
+          }                  
+      }
+      else
+      {
+          my $opening = $feed_begin;
+          $opening =~ s/%%FEED_TITLE%%/UPnP Browser ($lookingFor)/g;
+          $opening =~ s/%%FEED_DESCRIPTION%%/UPnP Browser ($lookingFor)/g;   
           print encode('UTF-8', $opening);
           foreach (@items)
           {
@@ -592,6 +626,7 @@
           }  
           print encode('UTF-8', $feed_end);
       }
+      my $execTime = executionTime(@startTime);   
       echoPrint($execTime);  
       exit 0;
   }
@@ -989,7 +1024,7 @@ FEED_END
     sub getFullFile
     {   # (G:\videos\filename).avi
         my ( $fileName ) = @_;
-        my $rv = getPath($fileName)."/".getFile($fileName);
+        my $rv = getPath($fileName).$FS.getFile($fileName);
         return $rv;
     }
     
@@ -1182,7 +1217,7 @@ FEED_END
                     $season       = $3;
                     $showTitle    = $1;                        
                 }
-                elsif($playONPath   =~ /\\([^\\]+): (Collection) ([0-9]+)/i)
+                elsif($playONPath   =~ /\\([^\\]+): (Collection|Vol\.) ([0-9]+)/i)
                 {   # Collections don't usually have seasons associated with them
                     $showTitle    = $1;
                 }
@@ -1245,25 +1280,73 @@ FEED_END
         $fileName =~ s/ & / and /g;
         
         $fileName = toWin32($fileName);
-        echoPrint("  + Generating : ($workPath".$FS."$folder".$FS."$fileName.mkv)\n");
+        #echoPrint("  + Generating : ($workPath".$FS."$folder".$FS."$fileName.mkv)\n");
         #echoPrint($propertiesFile);
         
-        if (!(-d "$workPath".$FS."$folder"))
-        {           
-            $mkdirString = "mkdir \"$workPath".$FS."$folder\"";
-            echoPrint("    - mkdir : ($mkdirString)\n");
-            `$mkdirString`; 
-        } 
-              
-        if (open(PROPERTIES,">$workPath".$FS."$folder".$FS."$fileName.mkv.playon"))
+        $fullFileName = "$workPath".$FS."$folder".$FS."$fileName.mkv.playon";
+        $fullFileName =~ s/mythbusters/MythBusters/gi;
+        
+        if (!(-e $fullFileName))
         {
-            print PROPERTIES $path;
-            close PROPERTIES;
-            
-            $copyString = ($linux == 1 ? "cp" : "copy")." \"$executablePath".$FS."$executableEXE".$FS."base.mkv\" \"$workPath".$FS."$folder".$FS."$fileName.mkv\"";
-            echoPrint("    - copying : ($copyString)\n");
-            `$copyString`; 
-        }       
+            $playOnFileHash{$fullFileName} = $path;
+        }
+        else
+        {
+            delete $existingFilesHash{$fullFileName};
+        }
+        
+        #if (!(-d "$workPath".$FS."$folder"))
+        #{           
+        #    $mkdirString = "mkdir \"$workPath".$FS."$folder\"";
+        #    echoPrint("    - mkdir : ($mkdirString)\n");
+        #    `$mkdirString`; 
+        #} 
+              
+        #if (open(PROPERTIES,">$workPath".$FS."$folder".$FS."$fileName.mkv.playon"))
+        #{
+        #    print PROPERTIES $path;
+        #    close PROPERTIES;
+        #    
+        #    $copyString = ($linux == 1 ? "cp" : "copy")." \"$executablePath".$FS."$executableEXE".$FS."base.mkv\" \"$workPath".$FS."$folder".$FS."$fileName.mkv\"";
+        #    echoPrint("    - copying : ($copyString)\n");
+        #    `$copyString`; 
+        #}       
+    }
+    
+##### Scan a directory and return an array of the matching files
+    sub scanDir
+    {
+        my ($inputFile, $fileFilter) = @_;
+        my %files = ();
+        my @dirs  = ();
+        my $file;
+        my $dir;
+        $inputFile =~ s/\"//g;
+        $inputFile =~ s/(\\|\/)$//g;
+        #echoPrint("    - Scanning Directory: $inputFile ($fileFilter)\n");
+        opendir(SCANDIR,"$inputFile");
+        my @filesInDir = readdir(SCANDIR);
+        if (!(-e "$inputFile\\mediaScraper.skip") && $inputFile !~ /.workFolder$/i )
+        {
+            foreach $file (@filesInDir)
+            {
+                #echoPrint("-> $file\n");
+                next if ($file =~ m/^\./);
+                next if !($file =~ m/($fileFilter)$/ || -d "$inputFile\\$file");       
+                if (-d "$inputFile\\$file" && !($file =~ m/VIDEO_TS$/)) { push(@dirs,"$inputFile\\$file"); }
+                else { $files{"$inputFile\\$file"} = 1; } 
+            }
+            foreach $dir (@dirs)
+            {
+                %files = (%files,scanDir($dir,$fileFilter));     
+            }
+        }
+        else
+        {
+            echoPrint("      + Found .skip, ignoring Directory\n");
+        }
+        #echoPrint("!!! @files\n");
+        return %files;  
     }
 
       
