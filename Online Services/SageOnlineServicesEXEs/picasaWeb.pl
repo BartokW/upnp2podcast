@@ -39,8 +39,15 @@
   $executable =~ m#(\\|\/)(([^\\/]*)\.([a-zA-Z0-9]{2,}))$#;
   $executablePath = $`;
   $executableEXE  = $3; 
+    
+  $FS = "\\";
+  if ($^O =~ /linux/i)
+  {
+      $linux = 1;
+      $FS = "/";
+  }
    
-  open(LOGFILE,">$executablePath\\$executableEXE.log");
+  open(LOGFILE,">$executablePath".$FS."$executableEXE.log");
 
   # Get Start Time
   my ( $startSecond, $startMinute, $startHour, $dayOfMonth, $month, $yearOffset, $dayOfWeek, $dayOfYear, $daylightSavings ) = localtime();
@@ -58,10 +65,10 @@
   echoPrint("  + Path: $executablePath\n");
   
   my $key;
-  if (-s "$executablePath\\$executableEXE.key")
+  if (-s "$executablePath".$FS."$executableEXE".$FS."$executableEXE.key")
   {
       echoPrint("  + Retrieving encryption key ($executableEXE.key)\n");
-      if (open(KEYMASTER,"$executablePath\\$executableEXE.key"))
+      if (open(KEYMASTER,"$executablePath".$FS."$executableEXE".$FS."$executableEXE.key"))
       {
           $key = <KEYMASTER>;
           close(KEYMASTER);
@@ -71,7 +78,7 @@
   {
       echoPrint("  ! Encryption Key doesn't exist yet, generating one ($executableEXE.key)\n");
       $key = makerandom( Size => 128, Strength => 1);
-      if (open(KEYMASTER,">$executablePath\\$executableEXE.key"))
+      if (open(KEYMASTER,">$executablePath".$FS."$executableEXE".$FS."$executableEXE.key"))
       {
           print KEYMASTER $key;
           close(KEYMASTER);
@@ -81,10 +88,10 @@
   my $userName;
   my $password;
   my $cipher = new Crypt::CBC ($key, 'Twofish');
-  if (-s "$executablePath\\$executableEXE.username" && defined $key)
+  if (-s "$executablePath".$FS."$executableEXE".$FS."$executableEXE.username" && defined $key)
   {
       echoPrint("  + Retrieving username ($executableEXE.username)\n");
-      if (open(KEYMASTER,"$executablePath\\$executableEXE.username"))
+      if (open(KEYMASTER,"$executablePath".$FS."$executableEXE".$FS."$executableEXE.username"))
       {
           my $ciphertext = <KEYMASTER>;
           $userName = $cipher->decrypt($ciphertext);
@@ -93,10 +100,10 @@
       echoPrint("    - Usename : ($userName)\n");
   }
   
-  if (-s "$executablePath\\$executableEXE.password" && defined $key)
+  if (-s "$executablePath".$FS."$executableEXE".$FS."$executableEXE.password" && defined $key)
   {
-      echoPrint("  + Retrieving password ($executablePath\\$executableEXE.password)\n");
-      if (open(KEYMASTER,"$executablePath\\$executableEXE.password"))
+      echoPrint("  + Retrieving password ($executableEXE.password)\n");
+      if (open(KEYMASTER,"$executablePath".$FS."$executableEXE".$FS."$executableEXE.password"))
       {
           my $ciphertext = <KEYMASTER>;
           $password = $cipher->decrypt($ciphertext);
@@ -107,13 +114,6 @@
 
   # Move arguments into user array so we can modify it
   my @parameters = @ARGV;
-  
-  if (@parameters == 0)
-  {
-      echoPrint("  + No Options!  Priting default menu\n");
-      outputMenu($feed_begin, $feed_item, $feed_end, (defined $userName && defined $password));
-      exit 0;
-  }
 
   # Initilize options data structures
   my %optionsHash;
@@ -132,28 +132,53 @@
   if (exists $optionsHash{lc('setUserName')})
   {
       echoPrint("  + Setting Username (".$optionsHash{lc('setUsername')}.")\n");
-      if (open(USERNAME,">$executablePath\\$executableEXE.username"))
+      if (open(USERNAME,">$executablePath".$FS."$executableEXE".$FS."$executableEXE.username"))
       {
           print USERNAME $cipher->encrypt($optionsHash{lc('setUsername')});
           close(USERNAME);
       }
-      errorToXML('Updated Username','Updated Username, please reenter Picasa Web for the echange to take effect');
   }
   
   if (exists $optionsHash{lc('setPassword')})
   {
       echoPrint("  + Setting Password (**************)\n");
-      if (open(USERNAME,">$executablePath\\$executableEXE.password"))
+      if (open(USERNAME,">$executablePath".$FS."$executableEXE".$FS."$executableEXE.password"))
       {
           print USERNAME $cipher->encrypt($optionsHash{lc('setPassword')});
           close(USERNAME);
       }
-      errorToXML('Updated Password','Updated Password, please reenter Picasa Web for the echange to take effect');
+  }
+  
+  if (exists $optionsHash{lc('setPassword')} || exists $optionsHash{lc('setUserName')})
+  {
+      errorToXML('Updated Username/Password','Updated Username/Password, please wait 5 minutes and reenter Picasa Web for the changes to take effect');
   }
 
   # Login
   my $service = Net::Google::PicasaWeb->new;
   my @items = ();
+  
+  if (@parameters == 0)
+  {
+    # Username/Password
+    $newItem = $feed_item;
+    $video             = toXML('external,"'.$executable.'",/setUserName||%%getuserinput=Picasa Web Username%%||/setPassword||%%getuserinput=Picasa Web Password');
+    $title             = 'Set Username/Password';
+    $description       = 'Set Picasa Web Username and Password';
+    $thumbnail         = '';
+    $type              = 'sagetv/subcategory';
+    
+    $newItem =~ s/%%ITEM_TITLE%%/$title/g;
+    $newItem =~ s/%%ITEM_DATE%%//g;
+    $newItem =~ s/%%ITEM_DESCRIPTION%%/$description/g;
+    $newItem =~ s/%%ITEM_URL%%/$video/g;
+    $newItem =~ s/%%ITEM_DUR%%//g;
+    $newItem =~ s/%%ITEM_SIZE%%//g;
+    $newItem =~ s/%%ITEM_TYPE%%/$type/g;
+    $newItem =~ s/%%ITEM_PICTURE%%/$thumbnail/g;
+    $newItem =~ s/%%ITEM_DUR_SEC%%//g; 
+    push(@items,$newItem);
+  }    
   
   if (defined $userName && defined $password)
   {
@@ -169,7 +194,7 @@
           errorToXML('Login Failure','Picasa Web Login Failure, try entring your user name and password again');  
       }
   
-      if (exists $optionsHash{lc('listAlbums')})
+      if (exists $optionsHash{lc('listAlbums')} || @parameters == 0)
       {
           echoPrint("  + Listing Albums\n");
           my @albums = $service->list_albums( user_id => $userName);
@@ -539,9 +564,9 @@ FEED_END
 
       # User Name
       $newItem = $feed_item;
-      $video             = toXML('external,"'.$executable.'",/setUserName||%%getuserinput=PicasaWeb Username%%');
-      $title             = 'Set Username';
-      $description       = 'Set Picasa Web Username';
+      $video             = toXML('external,"'.$executable.'",/setUserName||%%getuserinput=Picasa Web Username%%||/setPassword||%%getuserinput=Picasa Web Password');
+      $title             = 'Set Username/Password';
+      $description       = 'Set Picasa Web Username and Password';
       $thumbnail         = '';
       $type              = 'sagetv/subcategory';
       
@@ -554,26 +579,7 @@ FEED_END
       $newItem =~ s/%%ITEM_TYPE%%/$type/g;
       $newItem =~ s/%%ITEM_PICTURE%%/$thumbnail/g;
       $newItem =~ s/%%ITEM_DUR_SEC%%//g; 
-      push(@items,$newItem); 
-      
-      # Password
-      $newItem = $feed_item;
-      $video             = toXML('external,"'.$executable.'",/setPassword||%%getuserinput=Picasa Web Password%%');
-      $title             = 'Set Password';
-      $description       = 'Set Picasa Web Password';
-      $thumbnail         = '';
-      $type              = 'sagetv/subcategory';
-      
-      $newItem =~ s/%%ITEM_TITLE%%/$title/g;
-      $newItem =~ s/%%ITEM_DATE%%//g;
-      $newItem =~ s/%%ITEM_DESCRIPTION%%/$description/g;
-      $newItem =~ s/%%ITEM_URL%%/$video/g;
-      $newItem =~ s/%%ITEM_DUR%%//g;
-      $newItem =~ s/%%ITEM_SIZE%%//g;
-      $newItem =~ s/%%ITEM_TYPE%%/$type/g;
-      $newItem =~ s/%%ITEM_PICTURE%%/$thumbnail/g;
-      $newItem =~ s/%%ITEM_DUR_SEC%%//g; 
-      push(@items,$newItem);        
+      push(@items,$newItem);     
             
       print encode('UTF-8', $opening);
       foreach (@items)
