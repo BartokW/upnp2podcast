@@ -1233,7 +1233,14 @@ FEED_END
                 $description = $playONDescription;   
             }        
         }
-        my $path           = "/outputPath||/search||\"$playONPath\\$playONTitle\\+1\"";
+        
+        $playONRegEx =  $playONTitle;
+        if ($playONTitle =~ /s([0-9]+)e([0-9]+)/)
+        {
+            $playONRegEx = $`."s0*".($1 + 0)."e0*".($2 + 0)."".$';
+        }
+        
+        my $path           = "/outputPath||/search||\"$playONPath\\$playONRegEx\\+1\"";
         $path              =~ s/:/./gi;
         $path              =~ s/\\/:/gi;
 
@@ -1282,9 +1289,10 @@ FEED_END
         $fileName = toWin32($fileName);
         #echoPrint("  + Generating : ($workPath".$FS."$folder".$FS."$fileName.mkv)\n");
         #echoPrint($propertiesFile);
-        
+        $fileName =~ s/mythbusters/MythBusters/gi;
+        $folder   =~ s/mythbusters/MythBusters/gi;
+                
         $fullFileName = "$workPath".$FS."$folder".$FS."$fileName.mkv.playon";
-        $fullFileName =~ s/mythbusters/MythBusters/gi;
         
         if (!(-e $fullFileName))
         {
