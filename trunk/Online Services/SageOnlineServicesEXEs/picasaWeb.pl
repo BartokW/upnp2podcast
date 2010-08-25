@@ -162,7 +162,7 @@
   {
     # Username/Password
     $newItem = $feed_item;
-    $video             = toXML('external,"'.$executable.'",/setUserName||%%getuserinput=Picasa Web Username%%||/setPassword||%%getuserinput=Picasa Web Password');
+    $video             = toXML('external,"'.$executable.'",/setUserName||%%getuserinput=Picasa Web Username%%||/setPassword||%%getuserinput=Picasa Web Password%%');
     $title             = 'Set Username/Password';
     $description       = 'Set Picasa Web Username and Password';
     $thumbnail         = '';
@@ -208,7 +208,7 @@
               $newItem = $feed_item;
               $video             = toXML('external,"'.$executable.'",/getAlbum||'.$album->entry_id);
               $title             = $album->title;
-              $description       = "Album : ".$album->title."\nDescription : ".$album->summary."\n";
+              $description       = $album->summary."\n";
               $thumbnail         = toXML(getPhotoThumb($album->photo->content->url));
               $type              = 'sagetv/subcategory';
               
@@ -220,8 +220,14 @@
               $newItem =~ s/%%ITEM_SIZE%%//g;
               $newItem =~ s/%%ITEM_TYPE%%/$type/g;
               $newItem =~ s/%%ITEM_PICTURE%%/$thumbnail/g;
-              $newItem =~ s/%%ITEM_DUR_SEC%%//g; 
-              push(@items,$newItem);  
+              $newItem =~ s/%%ITEM_DUR_SEC%%//g;
+              
+              # Don't show if descrpition contains #hidden
+              if (!($description =~ /#hidden/i)) #;
+              {
+                  push(@items,$newItem);    
+              } 
+
           }   
       }
       elsif (exists $optionsHash{lc('getAlbum')})
@@ -251,7 +257,7 @@
                   $newItem = $feed_item;
                   $video             = toXML($media_info->content->url);
                   $title             = $media_info->title;
-                  $description       = "Title : ".$media_info->title."\nDescription : ".$media_info->description."\n";
+                  $description       = $media_info->description."\n";
                   $thumbnail         = toXML(getPhotoThumb($media_info->content->url));
                   $type              = 'image/jpeg';
                   
@@ -264,7 +270,11 @@
                   $newItem =~ s/%%ITEM_TYPE%%/$type/g;
                   $newItem =~ s/%%ITEM_PICTURE%%/$thumbnail/g;
                   $newItem =~ s/%%ITEM_DUR_SEC%%//g; 
-                  push(@items,$newItem);  
+                  # Don't show if descrpition contains #hidden
+                  if (!($description =~ /#hidden/i)) #;
+                  {
+                      push(@items,$newItem);    
+                  } 
               }      
           }
           else
