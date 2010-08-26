@@ -70,17 +70,16 @@
   my @inputFiles;
   my @emptyArray = ();
   my %emptyHash  = ();
-  
-  $zipCode = 98122;
+  my $zipCode = 98122;
   
   if (-s "$executablePath\\$executableEXE\\$executableEXE.zipcode")
   {
       if (open(ZIPCODE,"$executablePath\\$executableEXE\\$executableEXE.zipcode"))
       {
-          $zipcode = <ZIPCODE>;
-          $zipcode =~ /[0-9]+/;
-          $zipcode = $&;
-          echoPrint("  + Reading zipcode ($zipcode)\n");
+          $zipCode = <ZIPCODE>;
+          $zipCode =~ /[0-9]+/;
+          $zipCode = $&;
+          echoPrint("  + Reading zipcode ($zipCode)\n");
       }
       close(ZIPCODE);
   }
@@ -95,13 +94,20 @@
   
   if (exists $optionsHash{lc("setZipCode")})
   {
-      $zipCode = $optionsHash{lc("setZipCode")};
-      echoPrint("  + /setZipCode : Setting Zip Code ($zipCode)\n");
-      if (open(ZIPCODE,">$executablePath\\$executableEXE\\$executableEXE.zipcode"))
+      if ($optionsHash{lc("setZipCode")} =~ /[0-9]{5}/)
       {
-          print ZIPCODE $zipCode;
+          $zipCode = $optionsHash{lc("setZipCode")};
+          echoPrint("  + /setZipCode : Setting Zip Code ($zipCode)\n");
+          if (open(ZIPCODE,">$executablePath\\$executableEXE\\$executableEXE.zipcode"))
+          {
+              print ZIPCODE $zipCode;
+          }
+          close(ZIPCODE);
       }
-      close(ZIPCODE);
+      else
+      {
+          echoPrint("  ! /setZipCode : bad input, ignoring (".$optionsHash{lc("setZipCode")}.")\n");    
+      }
   }
   
   if (exists $optionsHash{lc("movie")} || exists $optionsHash{lc("listTheaters")})
@@ -175,7 +181,7 @@
           my $foundMovie = 0;
           foreach $movie (@{$theaterHash->{$theater}{movies}})
           {              
-              if ($movie->{movieName} =~ /^$movieFilter$/i && defined $movieFilter)
+              if ($movie->{movieName} =~ /^\Q$movieFilter\E$/i && defined $movieFilter)
               {   # Filter Based on movie
                   echoPrint("      + Movie   \t: ".$movie->{movieName}."\n");
                   foreach $key (sort keys %{$movie})
@@ -280,7 +286,7 @@
       foreach $theater (keys %{$theaterHash})
       {
           echoPrint("    - Theater : $theater (".@{$theaterHash->{$theater}{movies}}.")\n");
-          if (!($theater =~ /^$theaterFilter$/i) && defined $theaterFilter)
+          if (!($theater =~ /^\Q$theaterFilter\E$/i) && defined $theaterFilter)
           {   # Filter Based on theater
               next;
           }
