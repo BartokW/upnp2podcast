@@ -1,192 +1,144 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Module xmlns="urn:tv.sage/stv" Name="default" PersistentPrimaryRefs="true">
- <Hook Name="STVImported" Sym="XDNVX-66356">
-  <Action Name="&quot;REM Deletion of Widgets&quot;" Sym="XDNVX-66357"/>
-  <Action Name="&quot;REM Renaming of Widgets&quot;" Sym="XDNVX-66358"/>
-  <Action Name="&quot;REM Resetting of Widget properties&quot;" Sym="XDNVX-66359"/>
-  <Action Name="&quot;REM Removal of Widget children relationships&quot;" Sym="XDNVX-66360"/>
-  <Action Name="&quot;REM Adding of Widget children relationships&quot;" Sym="XDNVX-66361">
-   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;OPUS4A-179088&quot;)" Sym="XDNVX-66363">
-    <Branch Name="else" Sym="XDNVX-66364">
-     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-66337&quot;)" Sym="XDNVX-66367">
-      <Branch Name="else" Sym="XDNVX-66368">
-       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-66371"/>
+ <Hook Name="STVImported" Sym="XDNVX-67401">
+  <Action Name="&quot;REM Deletion of Widgets&quot;" Sym="XDNVX-67402"/>
+  <Action Name="&quot;REM Renaming of Widgets&quot;" Sym="XDNVX-67403"/>
+  <Action Name="&quot;REM Resetting of Widget properties&quot;" Sym="XDNVX-67404"/>
+  <Action Name="&quot;REM Removal of Widget children relationships&quot;" Sym="XDNVX-67405"/>
+  <Action Name="&quot;REM Adding of Widget children relationships&quot;" Sym="XDNVX-67406">
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;OPUS4A-125824&quot;)" Sym="XDNVX-67408">
+    <Branch Name="else" Sym="XDNVX-67409">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-66980&quot;)" Sym="XDNVX-67412">
+      <Branch Name="else" Sym="XDNVX-67413">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-67416"/>
       </Branch>
-      <Branch Name="null" Sym="XDNVX-66369">
-       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-66337 \&quot;\&quot;xBrowseThisLevel\&quot;\&quot; could not add as child; parent symbol=OPUS4A-179088 \&quot;Picasa Web Albums\&quot;&quot;)" Sym="XDNVX-66370"/>
+      <Branch Name="null" Sym="XDNVX-67414">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-66980 \&quot;Secondary Menu Items Area\&quot; could not add as child; parent symbol=OPUS4A-125824 \&quot;Picasa Web\&quot;&quot;)" Sym="XDNVX-67415"/>
       </Branch>
      </Conditional>
     </Branch>
-    <Branch Name="null" Sym="XDNVX-66365">
-     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=OPUS4A-179088 \&quot;\&quot;xBrowseThisLevel\&quot;\&quot; missing parent; could not add child with symbol=XDNVX-66337 \&quot;Picasa Web Albums\&quot;&quot;)" Sym="XDNVX-66366"/>
+    <Branch Name="null" Sym="XDNVX-67410">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=OPUS4A-125824 \&quot;Secondary Menu Items Area\&quot; missing parent; could not add child with symbol=XDNVX-66980 \&quot;Picasa Web\&quot;&quot;)" Sym="XDNVX-67411"/>
     </Branch>
    </Conditional>
-   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-66337&quot;)" Sym="XDNVX-66372">
-    <Branch Name="else" Sym="XDNVX-66373">
-     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-66338&quot;)" Sym="XDNVX-66376">
-      <Branch Name="else" Sym="XDNVX-66377">
-       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-66380"/>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-66965&quot;)" Sym="XDNVX-67417">
+    <Branch Name="else" Sym="XDNVX-67418">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-66966&quot;)" Sym="XDNVX-67421">
+      <Branch Name="else" Sym="XDNVX-67422">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-67425"/>
       </Branch>
-      <Branch Name="null" Sym="XDNVX-66378">
-       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-66338 \&quot;Picasa Web Albums\&quot; could not add as child; parent symbol=XDNVX-66337 \&quot;ButtonText\&quot;&quot;)" Sym="XDNVX-66379"/>
+      <Branch Name="null" Sym="XDNVX-67423">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-66966 \&quot;SearchURL = \&quot;external,\&quot; + java_lang_System_getProperty(\&quot;user.dir\&quot;) + \&quot;\\\\SageOnlineServicesEXEs\\\\picasaWeb\&quot; + If(IsLinuxOS(),\&quot;.out\&quot;,\&quot;.exe\&quot;) + \&quot;,\&quot; + UPnPBrowserString\&quot; could not add as child; parent symbol=XDNVX-66965 \&quot;AddStaticContext(\&quot;SearchURL\&quot;,SearchURL)\&quot;&quot;)" Sym="XDNVX-67424"/>
       </Branch>
      </Conditional>
     </Branch>
-    <Branch Name="null" Sym="XDNVX-66374">
-     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-66337 \&quot;Picasa Web Albums\&quot; missing parent; could not add child with symbol=XDNVX-66338 \&quot;ButtonText\&quot;&quot;)" Sym="XDNVX-66375"/>
+    <Branch Name="null" Sym="XDNVX-67419">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-66965 \&quot;SearchURL = \&quot;external,\&quot; + java_lang_System_getProperty(\&quot;user.dir\&quot;) + \&quot;\\\\SageOnlineServicesEXEs\\\\picasaWeb\&quot; + If(IsLinuxOS(),\&quot;.out\&quot;,\&quot;.exe\&quot;) + \&quot;,\&quot; + UPnPBrowserString\&quot; missing parent; could not add child with symbol=XDNVX-66966 \&quot;AddStaticContext(\&quot;SearchURL\&quot;,SearchURL)\&quot;&quot;)" Sym="XDNVX-67420"/>
     </Branch>
    </Conditional>
-   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-66337&quot;)" Sym="XDNVX-66381">
-    <Branch Name="else" Sym="XDNVX-66382">
-     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-66339&quot;)" Sym="XDNVX-66385">
-      <Branch Name="else" Sym="XDNVX-66386">
-       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-66389"/>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-66966&quot;)" Sym="XDNVX-67426">
+    <Branch Name="else" Sym="XDNVX-67427">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-66967&quot;)" Sym="XDNVX-67430">
+      <Branch Name="else" Sym="XDNVX-67431">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-67434"/>
       </Branch>
-      <Branch Name="null" Sym="XDNVX-66387">
-       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-66339 \&quot;Picasa Web Albums\&quot; could not add as child; parent symbol=XDNVX-66337 \&quot;ThisItem\&quot;&quot;)" Sym="XDNVX-66388"/>
+      <Branch Name="null" Sym="XDNVX-67432">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-66967 \&quot;AddStaticContext(\&quot;SearchURL\&quot;,SearchURL)\&quot; could not add as child; parent symbol=XDNVX-66966 \&quot;AddStaticContext(\&quot;OnlineVideoType\&quot;,\&quot;xPodcast\&quot;)\&quot;&quot;)" Sym="XDNVX-67433"/>
       </Branch>
      </Conditional>
     </Branch>
-    <Branch Name="null" Sym="XDNVX-66383">
-     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-66337 \&quot;Picasa Web Albums\&quot; missing parent; could not add child with symbol=XDNVX-66339 \&quot;ThisItem\&quot;&quot;)" Sym="XDNVX-66384"/>
+    <Branch Name="null" Sym="XDNVX-67428">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-66966 \&quot;AddStaticContext(\&quot;SearchURL\&quot;,SearchURL)\&quot; missing parent; could not add child with symbol=XDNVX-66967 \&quot;AddStaticContext(\&quot;OnlineVideoType\&quot;,\&quot;xPodcast\&quot;)\&quot;&quot;)" Sym="XDNVX-67429"/>
     </Branch>
    </Conditional>
-   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-66337&quot;)" Sym="XDNVX-66390">
-    <Branch Name="else" Sym="XDNVX-66391">
-     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-66340&quot;)" Sym="XDNVX-66394">
-      <Branch Name="else" Sym="XDNVX-66395">
-       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-66398"/>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-66967&quot;)" Sym="XDNVX-67435">
+    <Branch Name="else" Sym="XDNVX-67436">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;OPUS4A-168105&quot;)" Sym="XDNVX-67439">
+      <Branch Name="else" Sym="XDNVX-67440">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-67443"/>
       </Branch>
-      <Branch Name="null" Sym="XDNVX-66396">
-       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-66340 \&quot;Picasa Web Albums\&quot; could not add as child; parent symbol=XDNVX-66337 \&quot;OnlineMenuTitle = \&quot;Picasa Web Albums\&quot;\&quot;&quot;)" Sym="XDNVX-66397"/>
+      <Branch Name="null" Sym="XDNVX-67441">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=OPUS4A-168105 \&quot;AddStaticContext(\&quot;OnlineVideoType\&quot;,\&quot;xPodcast\&quot;)\&quot; could not add as child; parent symbol=XDNVX-66967 \&quot;\&quot;REM Download the RSS feed for the SearchURL.\&quot;\&quot;&quot;)" Sym="XDNVX-67442"/>
       </Branch>
      </Conditional>
     </Branch>
-    <Branch Name="null" Sym="XDNVX-66392">
-     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-66337 \&quot;Picasa Web Albums\&quot; missing parent; could not add child with symbol=XDNVX-66340 \&quot;OnlineMenuTitle = \&quot;Picasa Web Albums\&quot;\&quot;&quot;)" Sym="XDNVX-66393"/>
+    <Branch Name="null" Sym="XDNVX-67437">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-66967 \&quot;AddStaticContext(\&quot;OnlineVideoType\&quot;,\&quot;xPodcast\&quot;)\&quot; missing parent; could not add child with symbol=OPUS4A-168105 \&quot;\&quot;REM Download the RSS feed for the SearchURL.\&quot;\&quot;&quot;)" Sym="XDNVX-67438"/>
     </Branch>
    </Conditional>
-   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-66340&quot;)" Sym="XDNVX-66399">
-    <Branch Name="else" Sym="XDNVX-66400">
-     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-66341&quot;)" Sym="XDNVX-66403">
-      <Branch Name="else" Sym="XDNVX-66404">
-       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-66407"/>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-66980&quot;)" Sym="XDNVX-67444">
+    <Branch Name="else" Sym="XDNVX-67445">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-66981&quot;)" Sym="XDNVX-67448">
+      <Branch Name="else" Sym="XDNVX-67449">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-67452"/>
       </Branch>
-      <Branch Name="null" Sym="XDNVX-66405">
-       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-66341 \&quot;OnlineMenuTitle = \&quot;Picasa Web Albums\&quot;\&quot; could not add as child; parent symbol=XDNVX-66340 \&quot;UPnPBrowserString = \&quot;\&quot;\&quot;&quot;)" Sym="XDNVX-66406"/>
+      <Branch Name="null" Sym="XDNVX-67450">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-66981 \&quot;Picasa Web\&quot; could not add as child; parent symbol=XDNVX-66980 \&quot;ButtonText\&quot;&quot;)" Sym="XDNVX-67451"/>
       </Branch>
      </Conditional>
     </Branch>
-    <Branch Name="null" Sym="XDNVX-66401">
-     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-66340 \&quot;OnlineMenuTitle = \&quot;Picasa Web Albums\&quot;\&quot; missing parent; could not add child with symbol=XDNVX-66341 \&quot;UPnPBrowserString = \&quot;\&quot;\&quot;&quot;)" Sym="XDNVX-66402"/>
+    <Branch Name="null" Sym="XDNVX-67446">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-66980 \&quot;Picasa Web\&quot; missing parent; could not add child with symbol=XDNVX-66981 \&quot;ButtonText\&quot;&quot;)" Sym="XDNVX-67447"/>
     </Branch>
    </Conditional>
-   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-66341&quot;)" Sym="XDNVX-66408">
-    <Branch Name="else" Sym="XDNVX-66409">
-     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-66342&quot;)" Sym="XDNVX-66412">
-      <Branch Name="else" Sym="XDNVX-66413">
-       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-66416"/>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-66980&quot;)" Sym="XDNVX-67453">
+    <Branch Name="else" Sym="XDNVX-67454">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-66982&quot;)" Sym="XDNVX-67457">
+      <Branch Name="else" Sym="XDNVX-67458">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-67461"/>
       </Branch>
-      <Branch Name="null" Sym="XDNVX-66414">
-       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-66342 \&quot;UPnPBrowserString = \&quot;\&quot;\&quot; could not add as child; parent symbol=XDNVX-66341 \&quot;SearchURL = \&quot;external,\&quot; + java_lang_System_getProperty(\&quot;user.dir\&quot;) + java_io_File_separator + \&quot;SageOnlineServicesEXEs\&quot; + java_io_File_separator  + \&quot;picasaWeb\&quot; + If(IsLinuxOS(),\&quot;.out\&quot;,\&quot;.exe\&quot;) + \&quot;,\&quot; + UPnPBrowserString\&quot;&quot;)" Sym="XDNVX-66415"/>
+      <Branch Name="null" Sym="XDNVX-67459">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-66982 \&quot;Picasa Web\&quot; could not add as child; parent symbol=XDNVX-66980 \&quot;ThisItem\&quot;&quot;)" Sym="XDNVX-67460"/>
       </Branch>
      </Conditional>
     </Branch>
-    <Branch Name="null" Sym="XDNVX-66410">
-     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-66341 \&quot;UPnPBrowserString = \&quot;\&quot;\&quot; missing parent; could not add child with symbol=XDNVX-66342 \&quot;SearchURL = \&quot;external,\&quot; + java_lang_System_getProperty(\&quot;user.dir\&quot;) + java_io_File_separator + \&quot;SageOnlineServicesEXEs\&quot; + java_io_File_separator  + \&quot;picasaWeb\&quot; + If(IsLinuxOS(),\&quot;.out\&quot;,\&quot;.exe\&quot;) + \&quot;,\&quot; + UPnPBrowserString\&quot;&quot;)" Sym="XDNVX-66411"/>
+    <Branch Name="null" Sym="XDNVX-67455">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-66980 \&quot;Picasa Web\&quot; missing parent; could not add child with symbol=XDNVX-66982 \&quot;ThisItem\&quot;&quot;)" Sym="XDNVX-67456"/>
     </Branch>
    </Conditional>
-   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-66342&quot;)" Sym="XDNVX-66417">
-    <Branch Name="else" Sym="XDNVX-66418">
-     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-66343&quot;)" Sym="XDNVX-66421">
-      <Branch Name="else" Sym="XDNVX-66422">
-       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-66425"/>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-66980&quot;)" Sym="XDNVX-67462">
+    <Branch Name="else" Sym="XDNVX-67463">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-66986&quot;)" Sym="XDNVX-67466">
+      <Branch Name="else" Sym="XDNVX-67467">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-67470"/>
       </Branch>
-      <Branch Name="null" Sym="XDNVX-66423">
-       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-66343 \&quot;SearchURL = \&quot;external,\&quot; + java_lang_System_getProperty(\&quot;user.dir\&quot;) + java_io_File_separator + \&quot;SageOnlineServicesEXEs\&quot; + java_io_File_separator  + \&quot;picasaWeb\&quot; + If(IsLinuxOS(),\&quot;.out\&quot;,\&quot;.exe\&quot;) + \&quot;,\&quot; + UPnPBrowserString\&quot; could not add as child; parent symbol=XDNVX-66342 \&quot;AddStaticContext(\&quot;SearchURL\&quot;,SearchURL)\&quot;&quot;)" Sym="XDNVX-66424"/>
+      <Branch Name="null" Sym="XDNVX-67468">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-66986 \&quot;Picasa Web\&quot; could not add as child; parent symbol=XDNVX-66980 \&quot;UPnPBrowserString = \&quot;\&quot;\&quot;&quot;)" Sym="XDNVX-67469"/>
       </Branch>
      </Conditional>
     </Branch>
-    <Branch Name="null" Sym="XDNVX-66419">
-     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-66342 \&quot;SearchURL = \&quot;external,\&quot; + java_lang_System_getProperty(\&quot;user.dir\&quot;) + java_io_File_separator + \&quot;SageOnlineServicesEXEs\&quot; + java_io_File_separator  + \&quot;picasaWeb\&quot; + If(IsLinuxOS(),\&quot;.out\&quot;,\&quot;.exe\&quot;) + \&quot;,\&quot; + UPnPBrowserString\&quot; missing parent; could not add child with symbol=XDNVX-66343 \&quot;AddStaticContext(\&quot;SearchURL\&quot;,SearchURL)\&quot;&quot;)" Sym="XDNVX-66420"/>
+    <Branch Name="null" Sym="XDNVX-67464">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-66980 \&quot;Picasa Web\&quot; missing parent; could not add child with symbol=XDNVX-66986 \&quot;UPnPBrowserString = \&quot;\&quot;\&quot;&quot;)" Sym="XDNVX-67465"/>
     </Branch>
    </Conditional>
-   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-66343&quot;)" Sym="XDNVX-66426">
-    <Branch Name="else" Sym="XDNVX-66427">
-     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-66344&quot;)" Sym="XDNVX-66430">
-      <Branch Name="else" Sym="XDNVX-66431">
-       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-66434"/>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-66986&quot;)" Sym="XDNVX-67471">
+    <Branch Name="else" Sym="XDNVX-67472">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-66965&quot;)" Sym="XDNVX-67475">
+      <Branch Name="else" Sym="XDNVX-67476">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-67479"/>
       </Branch>
-      <Branch Name="null" Sym="XDNVX-66432">
-       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-66344 \&quot;AddStaticContext(\&quot;SearchURL\&quot;,SearchURL)\&quot; could not add as child; parent symbol=XDNVX-66343 \&quot;AddStaticContext(\&quot;OnlineVideoType\&quot;,\&quot;xPodcast\&quot;)\&quot;&quot;)" Sym="XDNVX-66433"/>
-      </Branch>
-     </Conditional>
-    </Branch>
-    <Branch Name="null" Sym="XDNVX-66428">
-     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-66343 \&quot;AddStaticContext(\&quot;SearchURL\&quot;,SearchURL)\&quot; missing parent; could not add child with symbol=XDNVX-66344 \&quot;AddStaticContext(\&quot;OnlineVideoType\&quot;,\&quot;xPodcast\&quot;)\&quot;&quot;)" Sym="XDNVX-66429"/>
-    </Branch>
-   </Conditional>
-   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-66344&quot;)" Sym="XDNVX-66435">
-    <Branch Name="else" Sym="XDNVX-66436">
-     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-66345&quot;)" Sym="XDNVX-66439">
-      <Branch Name="else" Sym="XDNVX-66440">
-       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-66443"/>
-      </Branch>
-      <Branch Name="null" Sym="XDNVX-66441">
-       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-66345 \&quot;AddStaticContext(\&quot;OnlineVideoType\&quot;,\&quot;xPodcast\&quot;)\&quot; could not add as child; parent symbol=XDNVX-66344 \&quot;AddStaticContext(\&quot;CustomName\&quot;, OnlineMenuTitle)\&quot;&quot;)" Sym="XDNVX-66442"/>
+      <Branch Name="null" Sym="XDNVX-67477">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-66965 \&quot;UPnPBrowserString = \&quot;\&quot;\&quot; could not add as child; parent symbol=XDNVX-66986 \&quot;SearchURL = \&quot;external,\&quot; + java_lang_System_getProperty(\&quot;user.dir\&quot;) + \&quot;\\\\SageOnlineServicesEXEs\\\\picasaWeb\&quot; + If(IsLinuxOS(),\&quot;.out\&quot;,\&quot;.exe\&quot;) + \&quot;,\&quot; + UPnPBrowserString\&quot;&quot;)" Sym="XDNVX-67478"/>
       </Branch>
      </Conditional>
     </Branch>
-    <Branch Name="null" Sym="XDNVX-66437">
-     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-66344 \&quot;AddStaticContext(\&quot;OnlineVideoType\&quot;,\&quot;xPodcast\&quot;)\&quot; missing parent; could not add child with symbol=XDNVX-66345 \&quot;AddStaticContext(\&quot;CustomName\&quot;, OnlineMenuTitle)\&quot;&quot;)" Sym="XDNVX-66438"/>
-    </Branch>
-   </Conditional>
-   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-66345&quot;)" Sym="XDNVX-66444">
-    <Branch Name="else" Sym="XDNVX-66445">
-     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-66346&quot;)" Sym="XDNVX-66448">
-      <Branch Name="else" Sym="XDNVX-66449">
-       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-66452"/>
-      </Branch>
-      <Branch Name="null" Sym="XDNVX-66450">
-       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-66346 \&quot;AddStaticContext(\&quot;CustomName\&quot;, OnlineMenuTitle)\&quot; could not add as child; parent symbol=XDNVX-66345 \&quot;AddStaticContext(\&quot;IsCustomName\&quot;, true)\&quot;&quot;)" Sym="XDNVX-66451"/>
-      </Branch>
-     </Conditional>
-    </Branch>
-    <Branch Name="null" Sym="XDNVX-66446">
-     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-66345 \&quot;AddStaticContext(\&quot;CustomName\&quot;, OnlineMenuTitle)\&quot; missing parent; could not add child with symbol=XDNVX-66346 \&quot;AddStaticContext(\&quot;IsCustomName\&quot;, true)\&quot;&quot;)" Sym="XDNVX-66447"/>
-    </Branch>
-   </Conditional>
-   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-66346&quot;)" Sym="XDNVX-66453">
-    <Branch Name="else" Sym="XDNVX-66454">
-     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;OPUS4A-168105&quot;)" Sym="XDNVX-66457">
-      <Branch Name="else" Sym="XDNVX-66458">
-       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-66461"/>
-      </Branch>
-      <Branch Name="null" Sym="XDNVX-66459">
-       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=OPUS4A-168105 \&quot;AddStaticContext(\&quot;IsCustomName\&quot;, true)\&quot; could not add as child; parent symbol=XDNVX-66346 \&quot;\&quot;REM Download the RSS feed for the SearchURL.\&quot;\&quot;&quot;)" Sym="XDNVX-66460"/>
-      </Branch>
-     </Conditional>
-    </Branch>
-    <Branch Name="null" Sym="XDNVX-66455">
-     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-66346 \&quot;AddStaticContext(\&quot;IsCustomName\&quot;, true)\&quot; missing parent; could not add child with symbol=OPUS4A-168105 \&quot;\&quot;REM Download the RSS feed for the SearchURL.\&quot;\&quot;&quot;)" Sym="XDNVX-66456"/>
+    <Branch Name="null" Sym="XDNVX-67473">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-66986 \&quot;UPnPBrowserString = \&quot;\&quot;\&quot; missing parent; could not add child with symbol=XDNVX-66965 \&quot;SearchURL = \&quot;external,\&quot; + java_lang_System_getProperty(\&quot;user.dir\&quot;) + \&quot;\\\\SageOnlineServicesEXEs\\\\picasaWeb\&quot; + If(IsLinuxOS(),\&quot;.out\&quot;,\&quot;.exe\&quot;) + \&quot;,\&quot; + UPnPBrowserString\&quot;&quot;)" Sym="XDNVX-67474"/>
     </Branch>
    </Conditional>
   </Action>
-  <Action Name="&quot;REM Repositioning of child Widgets&quot;" Sym="XDNVX-66362"/>
-  <Action Name="ReturnValue = &quot;AutoCleanupSTVImportedHook&quot;" Sym="XDNVX-66462"/>
+  <Action Name="&quot;REM Repositioning of child Widgets&quot;" Sym="XDNVX-67407"/>
+  <Action Name="ReturnValue = &quot;AutoCleanupSTVImportedHook&quot;" Sym="XDNVX-67480"/>
  </Hook>
- <Action Name="OnlineMenuTitle = &quot;Picasa Web Albums&quot;" Sym="XDNVX-66340"/>
- <Action Name="UPnPBrowserString = &quot;&quot;" Sym="XDNVX-66341"/>
- <Action Name="SearchURL = &quot;external,&quot; + java_lang_System_getProperty(&quot;user.dir&quot;) + java_io_File_separator + &quot;SageOnlineServicesEXEs&quot; + java_io_File_separator  + &quot;picasaWeb&quot; + If(IsLinuxOS(),&quot;.out&quot;,&quot;.exe&quot;) + &quot;,&quot; + UPnPBrowserString" Sym="XDNVX-66342"/>
- <Action Name="AddStaticContext(&quot;SearchURL&quot;,SearchURL)" Sym="XDNVX-66343"/>
- <Action Name="AddStaticContext(&quot;OnlineVideoType&quot;,&quot;xPodcast&quot;)" Sym="XDNVX-66344"/>
- <Action Name="AddStaticContext(&quot;CustomName&quot;, OnlineMenuTitle)" Sym="XDNVX-66345"/>
- <Action Name="AddStaticContext(&quot;IsCustomName&quot;, true)" Sym="XDNVX-66346"/>
- <Item Name="Picasa Web Albums" Sym="XDNVX-66337"/>
- <Attribute Name="ButtonText" Sym="XDNVX-66338">
+ <Action Name="SearchURL = &quot;external,&quot; + java_lang_System_getProperty(&quot;user.dir&quot;) + &quot;\\SageOnlineServicesEXEs\\picasaWeb&quot; + If(IsLinuxOS(),&quot;.out&quot;,&quot;.exe&quot;) + &quot;,&quot; + UPnPBrowserString" Sym="XDNVX-66965"/>
+ <Action Name="AddStaticContext(&quot;SearchURL&quot;,SearchURL)" Sym="XDNVX-66966"/>
+ <Action Name="AddStaticContext(&quot;OnlineVideoType&quot;,&quot;xPodcast&quot;)" Sym="XDNVX-66967"/>
+ <Action Name="UPnPBrowserString = &quot;&quot;" Sym="XDNVX-66986"/>
+ <Item Name="Picasa Web" Sym="XDNVX-66980"/>
+ <Attribute Name="ButtonText" Sym="XDNVX-66981">
   <Value>"Picasa Web Albums"</Value>
  </Attribute>
- <Attribute Name="ThisItem" Sym="XDNVX-66339">
-  <Value>"xItemPicasa_Web_Albums"</Value>
+ <Attribute Name="ThisItem" Sym="XDNVX-66982">
+  <Value>"xItemPicasaWeb"</Value>
  </Attribute>
 </Module>
