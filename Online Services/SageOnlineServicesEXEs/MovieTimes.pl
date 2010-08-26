@@ -46,7 +46,9 @@
   # Get Start Time
   my ( $startSecond, $startMinute, $startHour, $dayOfMonth, $month, $yearOffset, $dayOfWeek, $dayOfYear, $daylightSavings ) = localtime();
   my $year = 1900 + $yearOffset;
+  $month++;
   my $dateString = sprintf("%04d%02d%02d",$year,$month,$dayOfMonth);
+  $dateXMLString = sprintf("%04d-%02d-%02d",$year,$month,$dayOfMonth);
 
   # Code version
   my $codeVersion = "$executableEXE v1.0 (SNIP:BUILT)".($debug ? "(debug)" : "");
@@ -102,7 +104,7 @@
       close(ZIPCODE);
   }
   
-  if (exists $optionsHash{lc("movie")})
+  if (exists $optionsHash{lc("movie")} || exists $optionsHash{lc("listTheaters")})
   {
       echoPrint("  + /movie : Printing List of theaters showing specified movie\n");
       my %theaterHash = getMovieHash($zipCode);
@@ -121,15 +123,22 @@
       my $movieFilter     = shift @_;
       my @items = ();
       my ($feed_begin, $feed_item, $feed_end) = populateFeedStrings();
+      my $movieList;
+      my $feedType;
+      my $feedLink;
+      my $feedTitle = "Movie Theaters";
       
       echoPrint("  + Outputing Theaters ($movieFilter)\n");
       
       foreach $theater (keys %{$theaterHash})
       {
           echoPrint("    - Theater : $theater (".@{$theaterHash->{$theater}{movies}}.")\n");
+          $movieList =  "";
+          $feedLink = toXML('external,"'.$executable.'",/theater||'.$theater);
+          my $foundMovie = 0;
           foreach $movie (@{$theaterHash->{$theater}{movies}})
           {              
-              if ($movie->{movieName} =~ /^$movieFilter$/i || !(defined $movieFilter))
+              if ($movie->{movieName} =~ /^$movieFilter$/i && defined $movieFilter)
               {   # Filter Based on movie
                   echoPrint("      + Movie   \t: ".$movie->{movieName}."\n");
                   foreach $key (sort keys %{$movie})
@@ -141,31 +150,68 @@
                       echoPrint("        - $key\t: ".$movie->{$key}."\n");
                   }
                   
-                  $newItem = $feed_item;
-                  $video             = '';
-                  $title             = $theater;
-                  $description       = $movie->{movieTimes};
-                  $thumbnail         = '';
-                  $type              = 'sagetv/textonly';
-                  
-                  $newItem =~ s/%%ITEM_TITLE%%/$title/g;
-                  $newItem =~ s/%%ITEM_DATE%%//g;
-                  $newItem =~ s/%%ITEM_DESCRIPTION%%/$description/g;
-                  $newItem =~ s/%%ITEM_URL%%/$video/g;
-                  $newItem =~ s/%%ITEM_DUR%%//g;
-                  $newItem =~ s/%%ITEM_SIZE%%//g;
-                  $newItem =~ s/%%ITEM_TYPE%%/$type/g;
-                  $newItem =~ s/%%ITEM_PICTURE%%/$thumbnail/g;
-                  $newItem =~ s/%%ITEM_DUR_SEC%%//g; 
-                  push(@items,$newItem); 
+                  $feedLink = toXML('external,"'.$executable.'",/theater||'.$theater);
+                  $movieList = $movie->{movieTimes};
+                  $feedType  = 'image/jpeg';
+                  $foundMovie = 1;
                   last; 
               }
+              elsif (!(defined $movieFilter))
+              {   # Filter Based on movie
+                  echoPrint("      + Movie   \t: ".$movie->{movieName}."\n");
+                  foreach $key (sort keys %{$movie})
+                  {
+                      if ($key =~ /movieName/i)
+                      {
+                          next;
+                      }
+                      echoPrint("        - $key\t: ".$movie->{$key}."\n");
+                  }
+                  $movieList .= $movie->{movieName}.", ";
+                  $feedType  = 'sagetv/subcategory';       
+              }
           }
+          
+          if ((defined $movieFilter && $foundMovie) || !(defined $movieFilter))
+          {   # If we found it or we're not filtering
+              my $address = $theaterHash->{$theater}{address};
+              $address =~ s/&/and/g;
+              $address =~ s/ /+/g;
+              my $mapThumb = "http://maps.google.com/maps/api/staticmap?center=".$address."&zoom=15&size=300x300&sensor=false&markers=color:blue|".$address;
+              my $mapFull  = "http://maps.google.com/maps/api/staticmap?center=".$address."&zoom=16&size=640x640&sensor=false&markers=color:blue|".$address;
+              
+              if (defined $movieFilter)
+              {
+                  $feedLink  = toXML($mapFull);
+                  $feedTitle = $movieFilter; 
+              }
+              
+              $movieList =~ s/, $//g;          
+    
+              $newItem           = $feed_item;
+              $video             = $feedLink;
+              $title             = $theater;
+              $description       = $movieList;
+              $thumbnail         = toXML($mapThumb);
+              $type              = $feedType;
+              
+              $newItem =~ s/%%ITEM_TITLE%%/$title/g;
+              $newItem =~ s/%%ITEM_DATE%%/$dateXMLString/g;
+              $newItem =~ s/%%ITEM_DESCRIPTION%%/$description/g;
+              $newItem =~ s/%%ITEM_URL%%/$video/g;
+              $newItem =~ s/%%ITEM_DUR%%/1/g;
+              $newItem =~ s/%%ITEM_SIZE%%/1/g;
+              $newItem =~ s/%%ITEM_TYPE%%/$type/g;
+              $newItem =~ s/%%ITEM_PICTURE%%/$thumbnail/g;
+              $newItem =~ s/%%ITEM_DUR_SEC%%/1/g; 
+              push(@items,$newItem);
+          }
+ 
       }
       
-      #my ($feed_begin, $feed_item, $feed_end, $textOnlyDescription) = populateFeedStrings();
       my $opening = $feed_begin;
-      $opening =~ s/%%FEED_TITLE%%/Movie Times/g;
+      
+      $opening =~ s/%%FEED_TITLE%%/$feedTitle/g;
       $opening =~ s/%%FEED_DESCRIPTION%%/$codeVersion @ARGV/g;
       print encode('UTF-8', $opening);
       foreach (@items)
@@ -185,6 +231,12 @@
       my %movieList = ();
       my @items = ();
       my ($feed_begin, $feed_item, $feed_end) = populateFeedStrings();
+      my $feedTitle = "Movies";
+            
+      if (defined $movieFilter)
+      {
+          $feedTitle = $theaterFilter;    
+      }
       
       echoPrint("  + Outputing Movies ($theaterFilter)\n");
       
@@ -211,21 +263,21 @@
               {
                   $movieList{$movie->{movieName}} = 1;
                   $newItem = $feed_item;
-                  $video             = toXML('external,"'.$executable.'",/movie||".$movie->{movieName}>"||/listTheaters');
+                  $video             = toXML('external,"'.$executable.'",/movie||'.$movie->{movieName}.'||/listTheaters');
                   $title             = $movie->{movieName};
-                  $description       = $movie->{synopsis};
+                  $description       = (defined $theaterFilter ? $movie->{movieTimes} : $movie->{synopsis});
                   $thumbnail         = $movie->{moviePoster};
                   $type              = 'sagetv/subcategory';
                   
                   $newItem =~ s/%%ITEM_TITLE%%/$title/g;
-                  $newItem =~ s/%%ITEM_DATE%%//g;
+                  $newItem =~ s/%%ITEM_DATE%%/$dateXMLString/g;
                   $newItem =~ s/%%ITEM_DESCRIPTION%%/$description/g;
                   $newItem =~ s/%%ITEM_URL%%/$video/g;
-                  $newItem =~ s/%%ITEM_DUR%%//g;
-                  $newItem =~ s/%%ITEM_SIZE%%//g;
+                  $newItem =~ s/%%ITEM_DUR%%/1/g;
+                  $newItem =~ s/%%ITEM_SIZE%%/1/g;
                   $newItem =~ s/%%ITEM_TYPE%%/$type/g;
                   $newItem =~ s/%%ITEM_PICTURE%%/$thumbnail/g;
-                  $newItem =~ s/%%ITEM_DUR_SEC%%//g; 
+                  $newItem =~ s/%%ITEM_DUR_SEC%%/1/g; 
                   push(@items,$newItem);    
               }
           }
@@ -233,7 +285,7 @@
       
       #my ($feed_begin, $feed_item, $feed_end, $textOnlyDescription) = populateFeedStrings();
       my $opening = $feed_begin;
-      $opening =~ s/%%FEED_TITLE%%/Movie Times/g;
+      $opening =~ s/%%FEED_TITLE%%/$feedTitle/g;
       $opening =~ s/%%FEED_DESCRIPTION%%/$codeVersion @ARGV/g;
       print encode('UTF-8', $opening);
       foreach (@items)
@@ -660,7 +712,7 @@ FEED_BEGIN
     <item> 
       <title><![CDATA[%%ITEM_TITLE%%]]></title> 
       <description><![CDATA[%%ITEM_DESCRIPTION%%]]></description> 
-      <pubDate>1981-09-15</pubDate> 
+      <pubDate>%%ITEM_DATE%%</pubDate> 
       <itunes:subtitle><![CDATA[%%ITEM_DESCRIPTION%%]]></itunes:subtitle>
       <itunes:duration>%%ITEM_DUR%%</itunes:duration>
       <enclosure url="%%ITEM_URL%%" length="%%ITEM_SIZE%%" type="%%ITEM_TYPE%%" /> 
