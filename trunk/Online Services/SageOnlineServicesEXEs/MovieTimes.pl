@@ -71,7 +71,7 @@
   my @emptyArray = ();
   my %emptyHash  = ();
   
-  my $zipCode = 98122;
+  $zipCode = 98122;
   
   if (-s "$executablePath\\$executableEXE\\$executableEXE.zipcode")
   {
@@ -109,13 +109,50 @@
       echoPrint("  + /movie : Printing List of theaters showing specified movie\n");
       my %theaterHash = getMovieHash($zipCode);
       outputTheaters(\%theaterHash, $optionsHash{lc("movie")});
+      cleanCache(\%theaterHash);
       exit 0;
   }
   
   echoPrint("  + Default : Printing out movies from last used zipcode\n");
   my %theaterHash = getMovieHash($zipCode);
   outputMovies(\%theaterHash, $optionsHash{lc("theater")});
+  cleanCache(\%theaterHash);
   exit 0;
+  
+  sub cleanCache
+  {
+      my $theaterHash = shift @_;     
+      my %existingFilesHash = scanDir("$executablePath\\$executableEXE","cache");
+
+      echoPrint("  + Cleaning up old cache files\n");
+      foreach $theater (keys %{$theaterHash})
+      {
+          foreach $movie (@{$theaterHash->{$theater}{movies}})
+          {
+              foreach $cacheFiles (keys %existingFilesHash)
+              {
+                  if (getFile($cacheFiles) eq toWin32($movie->{movieName}))
+                  {
+                      #echoPrint("  ! MATCH: ".getFile($cacheFiles)."\n");
+                      delete $existingFilesHash{$cacheFiles};
+                  }
+              }
+          }
+          
+          
+      }
+      
+      foreach $staleFiles (keys %existingFilesHash)
+      {
+          if (getFile($staleFiles) =~ /^[0-9]{5}$/)
+          {   # Leave zipcode caches
+              next;
+          }
+          echoPrint("    ! STALE: $staleFiles\n");
+          $delString = "del \"$staleFiles\"";
+          `$delString`;
+      }      
+  }
   
   sub outputTheaters
   {
@@ -749,7 +786,95 @@ FEED_END
       my $illCharFileRegEx = "('|\"|\\\\|/|\\||<|>|:|\\*|\\?|\\&|\\;|`)";
       $replaceString =~ s/$illCharFileRegEx//g;
       return $replaceString;
-  } 
+  }
+  
+##### Scan a directory and return an array of the matching files
+    sub scanDir
+    {
+        my ($inputFile, $fileFilter) = @_;
+        my %files = ();
+        my @dirs  = ();
+        my $file;
+        my $dir;
+        $inputFile =~ s/\"//g;
+        $inputFile =~ s/(\\|\/)$//g;
+        #echoPrint("    - Scanning Directory: $inputFile ($fileFilter)\n");
+        opendir(SCANDIR,"$inputFile");
+        my @filesInDir = readdir(SCANDIR);
+        if (!(-e "$inputFile\\mediaScraper.skip") && $inputFile !~ /.workFolder$/i )
+        {
+            foreach $file (@filesInDir)
+            {
+                #echoPrint("-> $file\n");
+                next if ($file =~ m/^\./);
+                next if !($file =~ m/($fileFilter)$/ || -d "$inputFile\\$file");       
+                if (-d "$inputFile\\$file" && !($file =~ m/VIDEO_TS$/)) { push(@dirs,"$inputFile\\$file"); }
+                else { $files{"$inputFile\\$file"} = 1; } 
+            }
+            foreach $dir (@dirs)
+            {
+                %files = (%files,scanDir($dir,$fileFilter));     
+            }
+        }
+        else
+        {
+            echoPrint("      + Found .skip, ignoring Directory\n");
+        }
+        #echoPrint("!!! @files\n");
+        return %files;  
+    }
+    
+sub getFullFile
+    {   # (G:\videos\filename).avi
+        my ( $fileName ) = @_;
+        my $rv = getPath($fileName).$FS.getFile($fileName);
+        return $rv;
+    }
+    
+    sub getFile
+    {   # G:\videos\(filename).avi
+        my ( $fileName ) = @_;
+        my $rv = "";
+        
+        if ($fileName =~ m#(([^\\/]*)\.([a-zA-Z0-9]{2,}))$#)
+        {
+            $rv = $2;
+        }
+        elsif ($fileName =~ m#[^\\/]*$#)
+        {
+          $rv = $&;      
+        }
+    
+        return $rv;
+    }
+    
+    sub getFileWExt
+    {   # G:\videos\(filename.avi)
+        my ( $fileName ) = @_;
+        my $rv = getFile($fileName).getExt($fileName);    
+        return $rv;
+    }
+    
+    sub getPath
+    {   # (G:\videos\)filename.avi
+        my ( $fileName ) = @_;
+        $fileName .= ".txt";  # Always append an extention
+        my $rv = "";
+        if ($fileName =~ m#([^\\/]*)$#)
+        {
+            $rv = $`;
+        }
+      
+        $rv =~ s#(\\|/)$##;
+        return $rv;
+    }
+    
+    sub getParentDir
+    {   # (C:\some\path)\name\
+        my $fileName = shift;
+        my $rv = getPath(getPath($fileName));
+        return $rv;
+    } 
   
   exit;
 
