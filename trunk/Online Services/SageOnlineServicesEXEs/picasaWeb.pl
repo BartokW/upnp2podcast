@@ -157,6 +157,7 @@
   # Login
   my $service = Net::Google::PicasaWeb->new;
   my @items = ();
+  my $feedTitle = "Picasa Web Albums";
   
   if (@parameters == 0)
   {
@@ -172,11 +173,11 @@
     $newItem =~ s/%%ITEM_DATE%%//g;
     $newItem =~ s/%%ITEM_DESCRIPTION%%/$description/g;
     $newItem =~ s/%%ITEM_URL%%/$video/g;
-    $newItem =~ s/%%ITEM_DUR%%//g;
-    $newItem =~ s/%%ITEM_SIZE%%//g;
+    $newItem =~ s/%%ITEM_DUR%%/1/g;
+    $newItem =~ s/%%ITEM_SIZE%%/1/g;
     $newItem =~ s/%%ITEM_TYPE%%/$type/g;
     $newItem =~ s/%%ITEM_PICTURE%%/$thumbnail/g;
-    $newItem =~ s/%%ITEM_DUR_SEC%%//g; 
+    $newItem =~ s/%%ITEM_DUR_SEC%%/1/g; 
     push(@items,$newItem);
   }    
   
@@ -216,11 +217,11 @@
               $newItem =~ s/%%ITEM_DATE%%//g;
               $newItem =~ s/%%ITEM_DESCRIPTION%%/$description/g;
               $newItem =~ s/%%ITEM_URL%%/$video/g;
-              $newItem =~ s/%%ITEM_DUR%%//g;
-              $newItem =~ s/%%ITEM_SIZE%%//g;
+              $newItem =~ s/%%ITEM_DUR%%/1/g;
+              $newItem =~ s/%%ITEM_SIZE%%/1/g;
               $newItem =~ s/%%ITEM_TYPE%%/$type/g;
               $newItem =~ s/%%ITEM_PICTURE%%/$thumbnail/g;
-              $newItem =~ s/%%ITEM_DUR_SEC%%//g;
+              $newItem =~ s/%%ITEM_DUR_SEC%%/1/g;
               
               # Don't show if descrpition contains #hidden
               if (!($description =~ /#hidden/i)) #;
@@ -234,13 +235,14 @@
       {
           echoPrint("  + Getting Album (".$optionsHash{lc('getAlbum')}.")\n");
           my $album = $service->get_album( user_id => $userName,
-                                          album_id => $optionsHash{lc('getAlbum')});
+                                          album_id => $optionsHash{lc('getAlbum')});          
           if ($album)
           {
               echoPrint("    - Title    : ".$album->title."\n");
               echoPrint("      + Author : ".$album->author_name." (".$album->author_uri.")\n");
               echoPrint("      + ID     : ".$album->entry_id."\n");
               echoPrint("      + Summary: ".$album->summary."\n");
+              $feedTitle = $album->title;
               my @photos = $album->list_media_entries;
               for my $photo (@photos) 
               {
@@ -265,11 +267,11 @@
                   $newItem =~ s/%%ITEM_DATE%%//g;
                   $newItem =~ s/%%ITEM_DESCRIPTION%%/$description/g;
                   $newItem =~ s/%%ITEM_URL%%/$video/g;
-                  $newItem =~ s/%%ITEM_DUR%%//g;
-                  $newItem =~ s/%%ITEM_SIZE%%//g;
+                  $newItem =~ s/%%ITEM_DUR%%/1/g;
+                  $newItem =~ s/%%ITEM_SIZE%%/1/g;
                   $newItem =~ s/%%ITEM_TYPE%%/$type/g;
                   $newItem =~ s/%%ITEM_PICTURE%%/$thumbnail/g;
-                  $newItem =~ s/%%ITEM_DUR_SEC%%//g; 
+                  $newItem =~ s/%%ITEM_DUR_SEC%%/1/g; 
                   # Don't show if descrpition contains #hidden
                   if (!($description =~ /#hidden/i)) #;
                   {
@@ -289,7 +291,7 @@
   
   #my ($feed_begin, $feed_item, $feed_end, $textOnlyDescription) = populateFeedStrings();
   my $opening = $feed_begin;
-  $opening =~ s/%%FEED_TITLE%%/Picasa Web/g;
+  $opening =~ s/%%FEED_TITLE%%/$feedTitle/g;
   $opening =~ s/%%FEED_DESCRIPTION%%/$codeVersion @ARGV/g;
   print encode('UTF-8', $opening);
   foreach (@items)
@@ -519,7 +521,6 @@ FEED_BEGIN
     <item> 
       <title><![CDATA[%%ITEM_TITLE%%]]></title> 
       <description><![CDATA[%%ITEM_DESCRIPTION%%]]></description> 
-      <pubDate>1981-09-15</pubDate> 
       <itunes:subtitle><![CDATA[%%ITEM_DESCRIPTION%%]]></itunes:subtitle>
       <itunes:duration>%%ITEM_DUR%%</itunes:duration>
       <enclosure url="%%ITEM_URL%%" length="%%ITEM_SIZE%%" type="%%ITEM_TYPE%%" /> 
