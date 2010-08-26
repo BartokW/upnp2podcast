@@ -555,20 +555,6 @@
       #         
       #}
   }
-      
-  #my ($feed_begin, $feed_item, $feed_end, $textOnlyDescription) = populateFeedStrings();
-  $opening = $feed_begin;
-  $opening =~ s/%%FEED_TITLE%%/Online Services Test/g;
-  $opening =~ s/%%FEED_DESCRIPTION%%/$codeVersion @ARGV/g;
-  print encode('UTF-8', $opening);
-  foreach (@items)
-  {
-      if (!($_ eq ""))
-      {
-          print encode('UTF-8', $_);
-      }
-  }  
-  print encode('UTF-8', $feed_end);
   
   ##### Overwrite echoPrint for compatability
     sub echoPrint
