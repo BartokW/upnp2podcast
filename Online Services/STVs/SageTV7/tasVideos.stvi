@@ -1,144 +1,160 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Module xmlns="urn:tv.sage/stv" Name="default" PersistentPrimaryRefs="true">
- <Hook Name="STVImported" Sym="XDNVX-67777">
-  <Action Name="&quot;REM Deletion of Widgets&quot;" Sym="XDNVX-67778"/>
-  <Action Name="&quot;REM Renaming of Widgets&quot;" Sym="XDNVX-67779"/>
-  <Action Name="&quot;REM Resetting of Widget properties&quot;" Sym="XDNVX-67780"/>
-  <Action Name="&quot;REM Removal of Widget children relationships&quot;" Sym="XDNVX-67781"/>
-  <Action Name="&quot;REM Adding of Widget children relationships&quot;" Sym="XDNVX-67782">
-   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;OPUS4A-125824&quot;)" Sym="XDNVX-67784">
-    <Branch Name="else" Sym="XDNVX-67785">
-     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-66980&quot;)" Sym="XDNVX-67788">
-      <Branch Name="else" Sym="XDNVX-67789">
-       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-67792"/>
+ <Hook Name="STVImported" Sym="XDNVX-68058">
+  <Action Name="&quot;REM Deletion of Widgets&quot;" Sym="XDNVX-68059"/>
+  <Action Name="&quot;REM Renaming of Widgets&quot;" Sym="XDNVX-68060"/>
+  <Action Name="&quot;REM Resetting of Widget properties&quot;" Sym="XDNVX-68061"/>
+  <Action Name="&quot;REM Removal of Widget children relationships&quot;" Sym="XDNVX-68062"/>
+  <Action Name="&quot;REM Adding of Widget children relationships&quot;" Sym="XDNVX-68063">
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;OPUS4A-125824&quot;)" Sym="XDNVX-68065">
+    <Branch Name="else" Sym="XDNVX-68066">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-67864&quot;)" Sym="XDNVX-68069">
+      <Branch Name="else" Sym="XDNVX-68070">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-68073"/>
       </Branch>
-      <Branch Name="null" Sym="XDNVX-67790">
-       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-66980 \&quot;Secondary Menu Items Area\&quot; could not add as child; parent symbol=OPUS4A-125824 \&quot;TAS Videos\&quot;&quot;)" Sym="XDNVX-67791"/>
+      <Branch Name="null" Sym="XDNVX-68071">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-67864 \&quot;Secondary Menu Items Area\&quot; could not add as child; parent symbol=OPUS4A-125824 \&quot;\&quot;REM tasVideos\&quot;\&quot;&quot;)" Sym="XDNVX-68072"/>
       </Branch>
      </Conditional>
     </Branch>
-    <Branch Name="null" Sym="XDNVX-67786">
-     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=OPUS4A-125824 \&quot;Secondary Menu Items Area\&quot; missing parent; could not add child with symbol=XDNVX-66980 \&quot;TAS Videos\&quot;&quot;)" Sym="XDNVX-67787"/>
+    <Branch Name="null" Sym="XDNVX-68067">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=OPUS4A-125824 \&quot;Secondary Menu Items Area\&quot; missing parent; could not add child with symbol=XDNVX-67864 \&quot;\&quot;REM tasVideos\&quot;\&quot;&quot;)" Sym="XDNVX-68068"/>
     </Branch>
    </Conditional>
-   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-66965&quot;)" Sym="XDNVX-67793">
-    <Branch Name="else" Sym="XDNVX-67794">
-     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-66966&quot;)" Sym="XDNVX-67797">
-      <Branch Name="else" Sym="XDNVX-67798">
-       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-67801"/>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-67864&quot;)" Sym="XDNVX-68074">
+    <Branch Name="else" Sym="XDNVX-68075">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68051&quot;)" Sym="XDNVX-68078">
+      <Branch Name="else" Sym="XDNVX-68079">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-68082"/>
       </Branch>
-      <Branch Name="null" Sym="XDNVX-67799">
-       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-66966 \&quot;SearchURL = \&quot;external,\&quot; + java_lang_System_getProperty(\&quot;user.dir\&quot;) + \&quot;\\\\SageOnlineServicesEXEs\\\\tasVideos\&quot; + If(IsLinuxOS(),\&quot;.out\&quot;,\&quot;.exe\&quot;) + \&quot;,\&quot; + UPnPBrowserString\&quot; could not add as child; parent symbol=XDNVX-66965 \&quot;AddStaticContext(\&quot;SearchURL\&quot;,SearchURL)\&quot;&quot;)" Sym="XDNVX-67800"/>
+      <Branch Name="null" Sym="XDNVX-68080">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68051 \&quot;\&quot;REM tasVideos\&quot;\&quot; could not add as child; parent symbol=XDNVX-67864 \&quot;TAS Videos\&quot;&quot;)" Sym="XDNVX-68081"/>
       </Branch>
      </Conditional>
     </Branch>
-    <Branch Name="null" Sym="XDNVX-67795">
-     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-66965 \&quot;SearchURL = \&quot;external,\&quot; + java_lang_System_getProperty(\&quot;user.dir\&quot;) + \&quot;\\\\SageOnlineServicesEXEs\\\\tasVideos\&quot; + If(IsLinuxOS(),\&quot;.out\&quot;,\&quot;.exe\&quot;) + \&quot;,\&quot; + UPnPBrowserString\&quot; missing parent; could not add child with symbol=XDNVX-66966 \&quot;AddStaticContext(\&quot;SearchURL\&quot;,SearchURL)\&quot;&quot;)" Sym="XDNVX-67796"/>
+    <Branch Name="null" Sym="XDNVX-68076">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-67864 \&quot;\&quot;REM tasVideos\&quot;\&quot; missing parent; could not add child with symbol=XDNVX-68051 \&quot;TAS Videos\&quot;&quot;)" Sym="XDNVX-68077"/>
     </Branch>
    </Conditional>
-   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-66966&quot;)" Sym="XDNVX-67802">
-    <Branch Name="else" Sym="XDNVX-67803">
-     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-66967&quot;)" Sym="XDNVX-67806">
-      <Branch Name="else" Sym="XDNVX-67807">
-       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-67810"/>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68051&quot;)" Sym="XDNVX-68083">
+    <Branch Name="else" Sym="XDNVX-68084">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68052&quot;)" Sym="XDNVX-68087">
+      <Branch Name="else" Sym="XDNVX-68088">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-68091"/>
       </Branch>
-      <Branch Name="null" Sym="XDNVX-67808">
-       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-66967 \&quot;AddStaticContext(\&quot;SearchURL\&quot;,SearchURL)\&quot; could not add as child; parent symbol=XDNVX-66966 \&quot;AddStaticContext(\&quot;OnlineVideoType\&quot;,\&quot;xPodcast\&quot;)\&quot;&quot;)" Sym="XDNVX-67809"/>
+      <Branch Name="null" Sym="XDNVX-68089">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68052 \&quot;TAS Videos\&quot; could not add as child; parent symbol=XDNVX-68051 \&quot;ButtonText\&quot;&quot;)" Sym="XDNVX-68090"/>
       </Branch>
      </Conditional>
     </Branch>
-    <Branch Name="null" Sym="XDNVX-67804">
-     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-66966 \&quot;AddStaticContext(\&quot;SearchURL\&quot;,SearchURL)\&quot; missing parent; could not add child with symbol=XDNVX-66967 \&quot;AddStaticContext(\&quot;OnlineVideoType\&quot;,\&quot;xPodcast\&quot;)\&quot;&quot;)" Sym="XDNVX-67805"/>
+    <Branch Name="null" Sym="XDNVX-68085">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68051 \&quot;TAS Videos\&quot; missing parent; could not add child with symbol=XDNVX-68052 \&quot;ButtonText\&quot;&quot;)" Sym="XDNVX-68086"/>
     </Branch>
    </Conditional>
-   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-66967&quot;)" Sym="XDNVX-67811">
-    <Branch Name="else" Sym="XDNVX-67812">
-     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;OPUS4A-168105&quot;)" Sym="XDNVX-67815">
-      <Branch Name="else" Sym="XDNVX-67816">
-       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-67819"/>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68051&quot;)" Sym="XDNVX-68092">
+    <Branch Name="else" Sym="XDNVX-68093">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68053&quot;)" Sym="XDNVX-68096">
+      <Branch Name="else" Sym="XDNVX-68097">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-68100"/>
       </Branch>
-      <Branch Name="null" Sym="XDNVX-67817">
-       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=OPUS4A-168105 \&quot;AddStaticContext(\&quot;OnlineVideoType\&quot;,\&quot;xPodcast\&quot;)\&quot; could not add as child; parent symbol=XDNVX-66967 \&quot;\&quot;REM Download the RSS feed for the SearchURL.\&quot;\&quot;&quot;)" Sym="XDNVX-67818"/>
+      <Branch Name="null" Sym="XDNVX-68098">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68053 \&quot;TAS Videos\&quot; could not add as child; parent symbol=XDNVX-68051 \&quot;ThisItem\&quot;&quot;)" Sym="XDNVX-68099"/>
       </Branch>
      </Conditional>
     </Branch>
-    <Branch Name="null" Sym="XDNVX-67813">
-     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-66967 \&quot;AddStaticContext(\&quot;OnlineVideoType\&quot;,\&quot;xPodcast\&quot;)\&quot; missing parent; could not add child with symbol=OPUS4A-168105 \&quot;\&quot;REM Download the RSS feed for the SearchURL.\&quot;\&quot;&quot;)" Sym="XDNVX-67814"/>
+    <Branch Name="null" Sym="XDNVX-68094">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68051 \&quot;TAS Videos\&quot; missing parent; could not add child with symbol=XDNVX-68053 \&quot;ThisItem\&quot;&quot;)" Sym="XDNVX-68095"/>
     </Branch>
    </Conditional>
-   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-66986&quot;)" Sym="XDNVX-67820">
-    <Branch Name="else" Sym="XDNVX-67821">
-     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-66965&quot;)" Sym="XDNVX-67824">
-      <Branch Name="else" Sym="XDNVX-67825">
-       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-67828"/>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68051&quot;)" Sym="XDNVX-68101">
+    <Branch Name="else" Sym="XDNVX-68102">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68054&quot;)" Sym="XDNVX-68105">
+      <Branch Name="else" Sym="XDNVX-68106">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-68109"/>
       </Branch>
-      <Branch Name="null" Sym="XDNVX-67826">
-       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-66965 \&quot;UPnPBrowserString = \&quot;\&quot;\&quot; could not add as child; parent symbol=XDNVX-66986 \&quot;SearchURL = \&quot;external,\&quot; + java_lang_System_getProperty(\&quot;user.dir\&quot;) + \&quot;\\\\SageOnlineServicesEXEs\\\\tasVideos\&quot; + If(IsLinuxOS(),\&quot;.out\&quot;,\&quot;.exe\&quot;) + \&quot;,\&quot; + UPnPBrowserString\&quot;&quot;)" Sym="XDNVX-67827"/>
+      <Branch Name="null" Sym="XDNVX-68107">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68054 \&quot;TAS Videos\&quot; could not add as child; parent symbol=XDNVX-68051 \&quot;UPnPBrowserString = \&quot;\&quot;\&quot;&quot;)" Sym="XDNVX-68108"/>
       </Branch>
      </Conditional>
     </Branch>
-    <Branch Name="null" Sym="XDNVX-67822">
-     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-66986 \&quot;UPnPBrowserString = \&quot;\&quot;\&quot; missing parent; could not add child with symbol=XDNVX-66965 \&quot;SearchURL = \&quot;external,\&quot; + java_lang_System_getProperty(\&quot;user.dir\&quot;) + \&quot;\\\\SageOnlineServicesEXEs\\\\tasVideos\&quot; + If(IsLinuxOS(),\&quot;.out\&quot;,\&quot;.exe\&quot;) + \&quot;,\&quot; + UPnPBrowserString\&quot;&quot;)" Sym="XDNVX-67823"/>
+    <Branch Name="null" Sym="XDNVX-68103">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68051 \&quot;TAS Videos\&quot; missing parent; could not add child with symbol=XDNVX-68054 \&quot;UPnPBrowserString = \&quot;\&quot;\&quot;&quot;)" Sym="XDNVX-68104"/>
     </Branch>
    </Conditional>
-   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-66980&quot;)" Sym="XDNVX-67829">
-    <Branch Name="else" Sym="XDNVX-67830">
-     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-66981&quot;)" Sym="XDNVX-67833">
-      <Branch Name="else" Sym="XDNVX-67834">
-       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-67837"/>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68054&quot;)" Sym="XDNVX-68110">
+    <Branch Name="else" Sym="XDNVX-68111">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68055&quot;)" Sym="XDNVX-68114">
+      <Branch Name="else" Sym="XDNVX-68115">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-68118"/>
       </Branch>
-      <Branch Name="null" Sym="XDNVX-67835">
-       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-66981 \&quot;TAS Videos\&quot; could not add as child; parent symbol=XDNVX-66980 \&quot;ButtonText\&quot;&quot;)" Sym="XDNVX-67836"/>
+      <Branch Name="null" Sym="XDNVX-68116">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68055 \&quot;UPnPBrowserString = \&quot;\&quot;\&quot; could not add as child; parent symbol=XDNVX-68054 \&quot;SearchURL = \&quot;external,\&quot; + java_lang_System_getProperty(\&quot;user.dir\&quot;) + \&quot;\\\\SageOnlineServicesEXEs\\\\tasVideos\&quot; + If(IsLinuxOS(),\&quot;.out\&quot;,\&quot;.exe\&quot;) + \&quot;,\&quot; + UPnPBrowserString\&quot;&quot;)" Sym="XDNVX-68117"/>
       </Branch>
      </Conditional>
     </Branch>
-    <Branch Name="null" Sym="XDNVX-67831">
-     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-66980 \&quot;TAS Videos\&quot; missing parent; could not add child with symbol=XDNVX-66981 \&quot;ButtonText\&quot;&quot;)" Sym="XDNVX-67832"/>
+    <Branch Name="null" Sym="XDNVX-68112">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68054 \&quot;UPnPBrowserString = \&quot;\&quot;\&quot; missing parent; could not add child with symbol=XDNVX-68055 \&quot;SearchURL = \&quot;external,\&quot; + java_lang_System_getProperty(\&quot;user.dir\&quot;) + \&quot;\\\\SageOnlineServicesEXEs\\\\tasVideos\&quot; + If(IsLinuxOS(),\&quot;.out\&quot;,\&quot;.exe\&quot;) + \&quot;,\&quot; + UPnPBrowserString\&quot;&quot;)" Sym="XDNVX-68113"/>
     </Branch>
    </Conditional>
-   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-66980&quot;)" Sym="XDNVX-67838">
-    <Branch Name="else" Sym="XDNVX-67839">
-     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-66982&quot;)" Sym="XDNVX-67842">
-      <Branch Name="else" Sym="XDNVX-67843">
-       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-67846"/>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68055&quot;)" Sym="XDNVX-68119">
+    <Branch Name="else" Sym="XDNVX-68120">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68056&quot;)" Sym="XDNVX-68123">
+      <Branch Name="else" Sym="XDNVX-68124">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-68127"/>
       </Branch>
-      <Branch Name="null" Sym="XDNVX-67844">
-       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-66982 \&quot;TAS Videos\&quot; could not add as child; parent symbol=XDNVX-66980 \&quot;ThisItem\&quot;&quot;)" Sym="XDNVX-67845"/>
+      <Branch Name="null" Sym="XDNVX-68125">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68056 \&quot;SearchURL = \&quot;external,\&quot; + java_lang_System_getProperty(\&quot;user.dir\&quot;) + \&quot;\\\\SageOnlineServicesEXEs\\\\tasVideos\&quot; + If(IsLinuxOS(),\&quot;.out\&quot;,\&quot;.exe\&quot;) + \&quot;,\&quot; + UPnPBrowserString\&quot; could not add as child; parent symbol=XDNVX-68055 \&quot;AddStaticContext(\&quot;SearchURL\&quot;,SearchURL)\&quot;&quot;)" Sym="XDNVX-68126"/>
       </Branch>
      </Conditional>
     </Branch>
-    <Branch Name="null" Sym="XDNVX-67840">
-     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-66980 \&quot;TAS Videos\&quot; missing parent; could not add child with symbol=XDNVX-66982 \&quot;ThisItem\&quot;&quot;)" Sym="XDNVX-67841"/>
+    <Branch Name="null" Sym="XDNVX-68121">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68055 \&quot;SearchURL = \&quot;external,\&quot; + java_lang_System_getProperty(\&quot;user.dir\&quot;) + \&quot;\\\\SageOnlineServicesEXEs\\\\tasVideos\&quot; + If(IsLinuxOS(),\&quot;.out\&quot;,\&quot;.exe\&quot;) + \&quot;,\&quot; + UPnPBrowserString\&quot; missing parent; could not add child with symbol=XDNVX-68056 \&quot;AddStaticContext(\&quot;SearchURL\&quot;,SearchURL)\&quot;&quot;)" Sym="XDNVX-68122"/>
     </Branch>
    </Conditional>
-   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-66980&quot;)" Sym="XDNVX-67847">
-    <Branch Name="else" Sym="XDNVX-67848">
-     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-66986&quot;)" Sym="XDNVX-67851">
-      <Branch Name="else" Sym="XDNVX-67852">
-       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-67855"/>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68056&quot;)" Sym="XDNVX-68128">
+    <Branch Name="else" Sym="XDNVX-68129">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68057&quot;)" Sym="XDNVX-68132">
+      <Branch Name="else" Sym="XDNVX-68133">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-68136"/>
       </Branch>
-      <Branch Name="null" Sym="XDNVX-67853">
-       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-66986 \&quot;TAS Videos\&quot; could not add as child; parent symbol=XDNVX-66980 \&quot;UPnPBrowserString = \&quot;\&quot;\&quot;&quot;)" Sym="XDNVX-67854"/>
+      <Branch Name="null" Sym="XDNVX-68134">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68057 \&quot;AddStaticContext(\&quot;SearchURL\&quot;,SearchURL)\&quot; could not add as child; parent symbol=XDNVX-68056 \&quot;AddStaticContext(\&quot;OnlineVideoType\&quot;,\&quot;xPodcast\&quot;)\&quot;&quot;)" Sym="XDNVX-68135"/>
       </Branch>
      </Conditional>
     </Branch>
-    <Branch Name="null" Sym="XDNVX-67849">
-     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-66980 \&quot;TAS Videos\&quot; missing parent; could not add child with symbol=XDNVX-66986 \&quot;UPnPBrowserString = \&quot;\&quot;\&quot;&quot;)" Sym="XDNVX-67850"/>
+    <Branch Name="null" Sym="XDNVX-68130">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68056 \&quot;AddStaticContext(\&quot;SearchURL\&quot;,SearchURL)\&quot; missing parent; could not add child with symbol=XDNVX-68057 \&quot;AddStaticContext(\&quot;OnlineVideoType\&quot;,\&quot;xPodcast\&quot;)\&quot;&quot;)" Sym="XDNVX-68131"/>
+    </Branch>
+   </Conditional>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68057&quot;)" Sym="XDNVX-68137">
+    <Branch Name="else" Sym="XDNVX-68138">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;OPUS4A-168105&quot;)" Sym="XDNVX-68141">
+      <Branch Name="else" Sym="XDNVX-68142">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-68145"/>
+      </Branch>
+      <Branch Name="null" Sym="XDNVX-68143">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=OPUS4A-168105 \&quot;AddStaticContext(\&quot;OnlineVideoType\&quot;,\&quot;xPodcast\&quot;)\&quot; could not add as child; parent symbol=XDNVX-68057 \&quot;\&quot;REM Download the RSS feed for the SearchURL.\&quot;\&quot;&quot;)" Sym="XDNVX-68144"/>
+      </Branch>
+     </Conditional>
+    </Branch>
+    <Branch Name="null" Sym="XDNVX-68139">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68057 \&quot;AddStaticContext(\&quot;OnlineVideoType\&quot;,\&quot;xPodcast\&quot;)\&quot; missing parent; could not add child with symbol=OPUS4A-168105 \&quot;\&quot;REM Download the RSS feed for the SearchURL.\&quot;\&quot;&quot;)" Sym="XDNVX-68140"/>
     </Branch>
    </Conditional>
   </Action>
-  <Action Name="&quot;REM Repositioning of child Widgets&quot;" Sym="XDNVX-67783"/>
-  <Action Name="ReturnValue = &quot;AutoCleanupSTVImportedHook&quot;" Sym="XDNVX-67856"/>
+  <Action Name="&quot;REM Repositioning of child Widgets&quot;" Sym="XDNVX-68064"/>
+  <Action Name="ReturnValue = &quot;AutoCleanupSTVImportedHook&quot;" Sym="XDNVX-68146"/>
  </Hook>
- <Action Name="SearchURL = &quot;external,&quot; + java_lang_System_getProperty(&quot;user.dir&quot;) + &quot;\\SageOnlineServicesEXEs\\tasVideos&quot; + If(IsLinuxOS(),&quot;.out&quot;,&quot;.exe&quot;) + &quot;,&quot; + UPnPBrowserString" Sym="XDNVX-66965"/>
- <Action Name="AddStaticContext(&quot;SearchURL&quot;,SearchURL)" Sym="XDNVX-66966"/>
- <Action Name="AddStaticContext(&quot;OnlineVideoType&quot;,&quot;xPodcast&quot;)" Sym="XDNVX-66967"/>
- <Action Name="UPnPBrowserString = &quot;&quot;" Sym="XDNVX-66986"/>
- <Item Name="TAS Videos" Sym="XDNVX-66980"/>
- <Attribute Name="ButtonText" Sym="XDNVX-66981">
+ <Action Name="&quot;REM tasVideos&quot;" Sym="XDNVX-67864"/>
+ <Action Name="UPnPBrowserString = &quot;&quot;" Sym="XDNVX-68054"/>
+ <Action Name="SearchURL = &quot;external,&quot; + java_lang_System_getProperty(&quot;user.dir&quot;) + &quot;\\SageOnlineServicesEXEs\\tasVideos&quot; + If(IsLinuxOS(),&quot;.out&quot;,&quot;.exe&quot;) + &quot;,&quot; + UPnPBrowserString" Sym="XDNVX-68055"/>
+ <Action Name="AddStaticContext(&quot;SearchURL&quot;,SearchURL)" Sym="XDNVX-68056"/>
+ <Action Name="AddStaticContext(&quot;OnlineVideoType&quot;,&quot;xPodcast&quot;)" Sym="XDNVX-68057"/>
+ <Item Name="TAS Videos" Sym="XDNVX-68051"/>
+ <Attribute Name="ButtonText" Sym="XDNVX-68052">
   <Value>"TAS Videos"</Value>
  </Attribute>
- <Attribute Name="ThisItem" Sym="XDNVX-66982">
+ <Attribute Name="ThisItem" Sym="XDNVX-68053">
   <Value>"xItemTASVideos"</Value>
  </Attribute>
 </Module>
