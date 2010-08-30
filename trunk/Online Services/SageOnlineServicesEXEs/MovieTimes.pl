@@ -77,8 +77,6 @@
       if (open(ZIPCODE,"$executablePath\\$executableEXE\\$executableEXE.zipcode"))
       {
           $zipCode = <ZIPCODE>;
-          $zipCode =~ /[0-9]+/;
-          $zipCode = $&;
           echoPrint("  + Reading zipcode ($zipCode)\n");
       }
       close(ZIPCODE);
@@ -94,20 +92,13 @@
   
   if (exists $optionsHash{lc("setZipCode")})
   {
-      if ($optionsHash{lc("setZipCode")} =~ /[0-9]{5}/)
+      $zipCode = $optionsHash{lc("setZipCode")};
+      echoPrint("  + /setZipCode : Setting Zip Code ($zipCode)\n");
+      if (open(ZIPCODE,">$executablePath\\$executableEXE\\$executableEXE.zipcode"))
       {
-          $zipCode = $optionsHash{lc("setZipCode")};
-          echoPrint("  + /setZipCode : Setting Zip Code ($zipCode)\n");
-          if (open(ZIPCODE,">$executablePath\\$executableEXE\\$executableEXE.zipcode"))
-          {
-              print ZIPCODE $zipCode;
-          }
-          close(ZIPCODE);
+          print ZIPCODE $zipCode;
       }
-      else
-      {
-          echoPrint("  ! /setZipCode : bad input, ignoring (".$optionsHash{lc("setZipCode")}.")\n");    
-      }
+      close(ZIPCODE);
   }
   
   if (exists $optionsHash{lc("movie")} || exists $optionsHash{lc("listTheaters")})
@@ -144,16 +135,10 @@
                   }
               }
           }
-          
-          
       }
       
       foreach $staleFiles (keys %existingFilesHash)
       {
-          if (getFile($staleFiles) =~ /^[0-9]{5}$/)
-          {   # Leave zipcode caches
-              next;
-          }
           echoPrint("    ! STALE: $staleFiles\n");
           $delString = "del \"$staleFiles\"";
           `$delString`;
@@ -170,12 +155,17 @@
       my $feedType;
       my $feedLink;
       my $feedTitle = "Movie Theaters";
+      my $trailerItem;
       
       echoPrint("  + Outputing Theaters ($movieFilter)\n");
       
-      foreach $theater (keys %{$theaterHash})
+      foreach $theater (sort {$theaterHash->{$b}{screens} <=> $theaterHash->{$a}{screens}} keys %{$theaterHash})
       {
-          echoPrint("    - Theater : $theater (".@{$theaterHash->{$theater}{movies}}.")\n");
+          if ($theater =~ /numberOfScreens/)
+          {   # Skip special key
+              next;
+          }
+          echoPrint("    - Theater : $theater (".@{$theaterHash->{$theater}{movies}}.")(".$theaterHash->{$theater}{screens}.")\n");
           $movieList =  "";
           $feedLink = toXML('external,"'.$executable.'",/theater||'.$theater);
           my $foundMovie = 0;
@@ -197,6 +187,26 @@
                   $movieList = $movie->{movieTimes};
                   $feedType  = 'image/jpeg';
                   $foundMovie = 1;
+                  
+                  if( !(defined $trailerItem)  && exists $movie->{youtube})
+                  {  # Make item for trailer
+                      $trailerItem       = $feed_item;
+                      $video             = $movie->{youtube};
+                      $title             = 'See the Trailer...';
+                      $description       = $movie->{synopsis};
+                      $thumbnail         = toXML($movie->{moviePoster});
+                      $type              = "video/flv";
+                      
+                      $trailerItem =~ s/%%ITEM_TITLE%%/$title/g;
+                      $trailerItem =~ s/%%ITEM_DATE%%/$movie->{info}/g;
+                      $trailerItem =~ s/%%ITEM_DESCRIPTION%%/$description/g;
+                      $trailerItem =~ s/%%ITEM_URL%%/$video/g;
+                      $trailerItem =~ s/%%ITEM_DUR%%/1/g;
+                      $trailerItem =~ s/%%ITEM_SIZE%%/1/g;
+                      $trailerItem =~ s/%%ITEM_TYPE%%/$type/g;
+                      $trailerItem =~ s/%%ITEM_PICTURE%%/$thumbnail/g;
+                      $trailerItem =~ s/%%ITEM_DUR_SEC%%/1/g;                   
+                  }
                   last; 
               }
               elsif (!(defined $movieFilter))
@@ -239,7 +249,7 @@
               $type              = $feedType;
               
               $newItem =~ s/%%ITEM_TITLE%%/$title/g;
-              $newItem =~ s/%%ITEM_DATE%%/$dateXMLString/g;
+              $newItem =~ s/%%ITEM_DATE%%/$theaterHash->{$theater}{phone}/g;
               $newItem =~ s/%%ITEM_DESCRIPTION%%/$description/g;
               $newItem =~ s/%%ITEM_URL%%/$video/g;
               $newItem =~ s/%%ITEM_DUR%%/1/g;
@@ -250,6 +260,11 @@
               push(@items,$newItem);
           }
  
+      }
+      
+      if (defined $trailerItem)
+      {   # Put trailer at the top
+          unshift(@items,$trailerItem);
       }
       
       my $opening = $feed_begin;
@@ -283,16 +298,20 @@
       
       echoPrint("  + Outputing Movies ($theaterFilter)\n");
       
-      foreach $theater (keys %{$theaterHash})
+      foreach $theater (sort {$theaterHash->{$b}{screens} <=> $theaterHash->{$a}{screens}} keys %{$theaterHash})
       {
-          echoPrint("    - Theater : $theater (".@{$theaterHash->{$theater}{movies}}.")\n");
+          if ($theater =~ /numberOfScreens/)
+          {   # Skip special key
+              next;
+          }
+          echoPrint("    - Theater : $theater (".@{$theaterHash->{$theater}{movies}}.")(".$theaterHash->{$theater}{screens}.")\n");
           if (!($theater =~ /^\Q$theaterFilter\E$/i) && defined $theaterFilter)
           {   # Filter Based on theater
               next;
           }
-          foreach $movie (@{$theaterHash->{$theater}{movies}})
+          foreach $movie (sort {$theaterHash->{numberOfScreens}{$b->{movieName}} <=> $theaterHash->{numberOfScreens}{$a->{movieName}}} @{$theaterHash->{$theater}{movies}})
           {
-              echoPrint("      + Movie   \t: ".$movie->{movieName}."\n");
+              echoPrint("      + Movie   \t: ".$movie->{movieName}." (".$theaterHash->{numberOfScreens}{$movie->{movieName}}.")\n");
               foreach $key (sort keys %{$movie})
               {
                   if ($key =~ /movieName/i)
@@ -311,9 +330,14 @@
                   $description       = (defined $theaterFilter ? $movie->{movieTimes} : $movie->{synopsis});
                   $thumbnail         = $movie->{moviePoster};
                   $type              = 'sagetv/subcategory';
+                  $info              = $movie->{info};
+                  if (exists $movie->{youtube})
+                  {
+                      $info = "*$info"; 
+                  }
                   
                   $newItem =~ s/%%ITEM_TITLE%%/$title/g;
-                  $newItem =~ s/%%ITEM_DATE%%/$dateXMLString/g;
+                  $newItem =~ s/%%ITEM_DATE%%/$info/g;
                   $newItem =~ s/%%ITEM_DESCRIPTION%%/$description/g;
                   $newItem =~ s/%%ITEM_URL%%/$video/g;
                   $newItem =~ s/%%ITEM_DUR%%/1/g;
@@ -348,8 +372,8 @@
       my $useCache = 0;
       my $content  = "";
       
-      echoPrint("  + Looking for cache: (".$zipCode.".cache)\n");
-      if (open(CACHE,"$executablePath\\$executableEXE\\".$zipCode.".cache"))
+      echoPrint("  + Looking for cache: (".toWin32($zipCode).".locCache)\n");
+      if (open(CACHE,"$executablePath\\$executableEXE\\".toWin32($zipCode).".locCache"))
       {
           my $cacheDate   = <CACHE>;
           $cacheDate   =~ /version=([0-9]+)/i;
@@ -367,15 +391,18 @@
       
       if (!$useCache)
       {
-          my $searchURL =  "http://www.bing.com/movies/search?q=theaters+".$zipCode."&date=0&first=";
-          $content = decode('UTF-8', get $searchURL."1").decode('UTF-8', get $searchURL."6");
+          my $searchURL =  "http://www.google.com/movies?near=".toURL($zipCode)."&hl=en";
+          $content = decode('UTF-8', get $searchURL).decode('UTF-8', get $searchURL."&start=10");
           $content =~ s/&amp;/&/g;
           $content =~ s/&quot;/"/g;#"
           $content =~ s/&nbsp;/ /g;
           $content =~ s/&middot;/-/g;
-          if (open(CACHE,">$executablePath\\$executableEXE\\".$zipCode.".cache"))
+          $content =~ s/&#39;/'/g;
+          $content =~ s/&#8206;/ /g;
+          if (open(CACHE,">$executablePath\\$executableEXE\\".toWin32($zipCode).".locCache"))
           {
               print CACHE "version=$dateString\n";
+              print CACHE "URL=$searchURL\n";
               print CACHE $content;  
           }
       }
@@ -386,19 +413,23 @@
   {
       my $content = shift @_;
       
+      # Clean out links to buy tickets
+      $content =~ s/<a href="\/url\?q=http:\/\/www.fandango.com[^>]*>([0-9]+:[0-9]+(am|pm)?)<\/a>/$1/gm; #"
+      
       # Regexs
-      $regExTheatersHTML    = '(<div class="v_s_b">.*)<div class="v_s_b">';
-      $regExTheatersName    = '<a class="P3_2"[^>]+>([^<]+)</a>';
-      $regExTheatersAddress = '<div class="v_l_b"><span class="P1_1">([^<]+)</span>';
-      $regExTheatersNumber  = '(\([0-9]{3}\) *[0-9A-Za-z]{3}-[0-9A-Za-z]{4})';
+      $regExTheatersHTML    = '(link_1_theater.*</div></div>)';
+      $regExTheatersName    = 'link_1_theater[^>]*>([^<]*)';
+      $regExTheatersAddress = 'link_1_theater[^>]*>[^<]*</a></h2><div class=info>([^<\-]*) ';
+      $regExTheatersNumber  = 'link_1_theater[^>]*>[^<]*</a></h2><div class=info>[^<\-]* - ([^<]*)';
       
-      $regExTheatersMoviesHTML  = '<table class="theater_table"(.*)</table>'; 
-      $regExTheatersMovieHTML   = '(movie_poster.*times_end_spacer">[^<]+)';
+      $regExTheatersMoviesHTML  = '(link_1_theater.*)link_1_theater';; 
+      $regExTheatersMovieHTML   = '(movies\?near=[^>]+mid=[^>]+>.*)</div></div>';
       
-      $regExMoviesTitle         = '<a class="P1_4"[^>]+>([^<]+)</a>';
-      $regExMoviesPoster        = 'movie_poster" src="([^"]+)"'; 
-      $regExMoviesRated         = '<div class="preStars"><span class="P1_2">([^<]+)'; 
+      $regExMoviesTitle         = '(movies\?near=[^>]*)">([^<]*)';
+      #$regExMoviesPoster        = 'movie_poster" src="([^"]+)"'; 
+      $regExMoviesDetails       = 'movies\?near=[^>]*>[^<]*</a></div><span class=info>([^<]*)'; 
       $regExMoviesDur           = '([0-9]+hr[^<]*[0-9]+min)';
+      $regExMoviesRated         = 'Rated ([^&]*)';
  
       #decode content
       $theaterBlock = matchShortest($content,$regExTheatersHTML);
@@ -407,74 +438,85 @@
       {
           $rv = matchShortest($theaterBlock,$regExTheatersName);
           my $theater = $rv;
-          #echoPrint("  +  Found Theater: ($theater)\n");
+          echoPrint("  +  Found Theater: ($theater)\n");
           
           $rv = matchShortest($theaterBlock,$regExTheatersAddress);
           my $address = $rv;
-          #echoPrint("    -  Address    : ($address)\n");
+          echoPrint("    -  Address    : ($address)\n");
           
           $rv = matchShortest($theaterBlock,$regExTheatersNumber);
           my $phoneNumber = $rv;
-          #echoPrint("    -  Number     : ($phoneNumber)\n");
+          echoPrint("    -  Number     : ($phoneNumber)\n");
           
-          $moviesBlock = matchShortest($theaterBlock,$regExTheatersMoviesHTML);
+          $moviesBlock     = $theaterBlock;
           $movieBlock      = matchShortest($moviesBlock,$regExTheatersMovieHTML);
+          
+          #echoPrint("    -  Movie Block     : ($movieBlock)\n");
+          my $numberOfMovies = 0;
           
           my @moviesAtTheater = ();
           while (!($movieBlock eq ""))
           {
-              $movie      = matchShortest($movieBlock,$regExMoviesTitle);
-              $poster     = matchShortest($movieBlock,$regExMoviesPoster);
-              $rated      = matchShortest($movieBlock,$regExMoviesRated);
-              $dur        = matchShortest($movieBlock,$regExMoviesDur);
-              if ($dur        =~ /([0-9]+hr)[^0-9]*([0-9]+min)/)
-              {
-                  $dur        = "$1 $2";
-              }
-              
-              if ($movieBlock =~ /timeListBlock">([^<]*)<.*times_end_spacer">(.*)/)
-              {
-                  $showTimes  = "$1 $2";
-                  $showTimes  =~ /[0-9]{2}(.)(am|pm)/;
-                  $showTimes =~  s/$1/ /g;
-              }
-              
-              #echoPrint("      + Movie     : ($movie)($rated)($dur)\n");
-              #echoPrint("        + Times : ($showTimes)\n");
-              #echoPrint("        + Poster: ($poster)\n");
-              
+              $numberOfMovies++;
               my %movieHash = ();
-              $movieHash{movieName}         = $movie;
-              $movieHash{moviePoster}       = $poster;
-              $movieHash{movieTimes}        = $showTimes;
-              $movieHash{movieRating}       = $rated;
-              $movieHash{movieDuration}     = $dur;
-              $movieHash{synopsis}          = getMovieDetails($movie);;
+              if ($movieBlock =~ /$regExMoviesTitle/)
+              {
+                  $movieHash{movieName}      = $2;
+                  $theaterHash{numberOfScreens}{$movieHash{movieName}}++;
+                  $detailPage = $1;
+              }
+              
+              if ($movieBlock =~ /$regExMoviesDetails/)
+              {
+                  $details = $1;
+              }
+
+              if ($details    =~ /$regExMoviesDur/)
+              {
+                  $movieHash{movieDuration}        = $1;
+              }
+              
+              if ($details    =~ /$regExMoviesRated/)
+              {
+                  $movieHash{movieRating}      = $1;
+              }
+                            
+              if ($movieBlock =~ /class=times>(<[^>]+>)?([^<]*)/)
+              {
+                  $movieHash{movieTimes}  = "$2";
+              }
+              
+              echoPrint("      + Movie : (".$movieHash{movieName}.")(".$movieHash{movieRating}.")(".$movieHash{movieDuration} .")\n");
+              echoPrint("        + Times   : (".$movieHash{movieTimes}.")\n");
+              #echoPrint("        + Details : ($detailPage)\n");
+              
+              getMovieDetails($detailPage,\%movieHash); # Poster, Trailer, Synopsis
               
               push(@moviesAtTheater,\%movieHash);
               
               $moviesBlock =~ s/\Q$movieBlock\E//gsm;
               $movieBlock = matchShortest($moviesBlock,$regExTheatersMovieHTML);
           }
-          $theaterHash{$theater}{movies}  = \@moviesAtTheater;
-          $theaterHash{$theater}{address} = $address;
-          $theaterHash{$theater}{phone}   = $phoneNumber;
+          $theaterHash{$theater}{movies}   = \@moviesAtTheater;
+          $theaterHash{$theater}{address}  = $address;
+          $theaterHash{$theater}{phone}    = $phoneNumber;
+          $theaterHash{$theater}{screens}  = $numberOfMovies;
                    
           #echoPrint("\n");
           $content =~ s/\Q$theaterBlock\E//gsm;
           $theaterBlock = matchShortest($content,$regExTheatersHTML);   
-      }
-            
+      } 
       return %theaterHash;      
   }
   
   sub getMovieDetails
   {
-      my $movieName = shift @_;
+      my $detailPage   = shift @_;
+      my $movieHashRef = shift @_;
       my $content;
       my $useCache = 0;
       #echoPrint("        + Looking for cache: (".toWin32($movieName).".cache)\n");
-      if (open(CACHE,"$executablePath\\$executableEXE\\".toWin32($movieName).".cache"))
+      if (open(CACHE,"$executablePath\\$executableEXE\\".toWin32($movieHashRef->{movieName}).".cache"))
       {
           #echoPrint("          - Found cache\n");
           $useCache    = 1;
@@ -487,46 +529,74 @@
       {
           my $movieURLName = $movieName;
           $movieURLName =~ s/ /+/g;  
-          my $searchURL =  "http://www.bing.com/movies/search?q=".$movieURLName."&date=0&form=DTPSHO";
-          #echoPrint("        + Detail URL: $searchURL\n");
+          my $searchURL =  "http://www.google.com/$detailPage";
+          echoPrint("        + Detail URL: $searchURL\n");
           $content = decode('UTF-8', get $searchURL);
           $content =~ s/&amp;/&/g;
           $content =~ s/&quot;/"/g;#"
           $content =~ s/&nbsp;/ /g;
           $content =~ s/&middot;/-/g;
-          if (open(CACHE,">$executablePath\\$executableEXE\\".toWin32($movieName).".cache"))
+          $content =~ s/&#39;/'/g;
+          $content =~ s/&#8206;/ /g;
+          if (open(CACHE,">$executablePath\\$executableEXE\\".toWin32($movieHashRef->{movieName}).".cache"))
           {
               print CACHE encode('UTF-8',$content);  
           }
       }
-      decodeMovieDetails($content);
+      decodeMovieDetails($content, $movieHashRef);
   }
   
   sub decodeMovieDetails
   {
-      my $content = shift @_;
+      my $content      = shift @_;
+      my $movieHashRef = shift @_;
       
       # Regexs
-      $regExSynopsisHTML    = '(id="movie_plot_full.*a class="P1_5")';
-      $regExSynopsisText    = '</span>([^<]*)';
+      $regExSynopsisHTML    = '<div class=syn>(.*)<span id=LessAfterSynopsisSecond0';
+      $regExSynopsisText    = '<span id=MoreAfterSynopsisFirst0.*id=SynopsisSecond0>';
+      $regExSynopsisHTML2    = '<div class=syn>([^<]*)<';
       
       $regExTrailerHTML     = '<([^<>]+)>See trailer';
       $regExTrailerLink     = 'href="([^"]*)"';
       $regExTrailerCache    = 'Trailer=="([^"]*)"';
       
-      my $synopsis;
-      my $trailer;
-      
       if ($content =~ /$regExSynopsisHTML/gsm)
       {
           my $result = $1;
-          if ($result =~ /$regExSynopsisText/)
-          {              
-              $synopsis = $1;
-              #echoPrint("        + Synopsis: $synopsis\n");
-          }     
+          $result =~ s/$regExSynopsisText//gsm;         
+          $movieHashRef->{synopsis} = $result;
+          echoPrint("        + Synopsis: ".$movieHashRef->{synopsis}."\n");
+              
       }
-      return $synopsis;
+      elsif ($content =~ /$regExSynopsisHTML2/gsm)
+      {
+          $movieHashRef->{synopsis} = $1;
+          echoPrint("        + Synopsis (2): ".$movieHashRef->{synopsis}."\n");
+      }
+      
+      $regExPoster       = '(movies/image\?tbn=[^&]*)&';
+      if ($content =~ /$regExPoster/)
+      {
+          $movieHashRef->{moviePoster} = "http://www.google.com/$1";
+          echoPrint("        + Poster: ".$movieHashRef->{moviePoster}."\n"); 
+      }
+
+      $regExYoutube      = 'http:\/\/www.youtube.com\/v\/([^&]+)';
+      if ($content =~ /$regExYoutube/)
+      {
+          $movieHashRef->{youtube} = "http://www.youtube.com/watch?v=$1";
+          echoPrint("        + Youtube : ".$movieHashRef->{youtube}."\n");
+      }
+      
+      $regExInfo     = '<div class=info>[^<0-9]+([^<]+)';
+      if ($content =~ /$regExInfo/)
+      {
+          $movieHashRef->{info} = "$1";
+          $movieHashRef->{info} =~ /[^a-zA-Z]+$/;
+          $movieHashRef->{info} = $`;
+          #echoPrint("        + Info : ($&)($1)\n");
+          echoPrint("        + Info : ".$movieHashRef->{info}."\n");
+      }
       
       #if ($content =~ /$regExTrailerCache/gsm)
       #{
@@ -717,6 +787,7 @@
             #last;
         }
         $$rvRef = $shortest;
+        #echoPrint("SHORTEST - $shortest\n");
         return $shortest;
     }
 
@@ -778,6 +849,13 @@ FEED_END
       my $illCharFileRegEx = "('|\"|\\\\|/|\\||<|>|:|\\*|\\?|\\&|\\;|`)";
       $replaceString =~ s/$illCharFileRegEx//g;
       return $replaceString;
+  }
+  
+  sub toURL
+  {
+      my $string = shift @_;
+      $string =~ s/ /+/g;
+      return $string;
   }
   
 ##### Scan a directory and return an array of the matching files
