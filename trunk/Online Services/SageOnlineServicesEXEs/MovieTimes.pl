@@ -21,9 +21,7 @@
   #use strict;
 ##### Import libraries
   use Encode qw(encode decode);
-  use utf8;
   use LWP::Simple qw($ua get head);
-  use Data::Dumper;
     
   $ua->timeout(30);
   $ua->agent( 'Mozilla/4.0 (compatible; MSIE 5.12; Mac_PowerPC)' );
@@ -51,7 +49,7 @@
   $dateXMLString = sprintf("%04d-%02d-%02d",$year,$month,$dayOfMonth);
 
   # Code version
-  my $codeVersion = "$executableEXE v1.0 (SNIP:BUILT)".($debug ? "(debug)" : "");
+  my $codeVersion = "$executableEXE v1.1 (SNIP:BUILT)".($debug ? "(debug)" : "");
   
   my $invalidMsg .= "\n$codeVersion\n";
   $invalidMsg .= "\tUSAGE:";
@@ -71,6 +69,7 @@
   my @emptyArray = ();
   my %emptyHash  = ();
   my $zipCode = 98122;
+  my $trailerRes = "720p";
   
   if (-s "$executablePath\\$executableEXE\\$executableEXE.zipcode")
   {
@@ -78,6 +77,16 @@
       {
           $zipCode = <ZIPCODE>;
           echoPrint("  + Reading zipcode ($zipCode)\n");
+      }
+      close(ZIPCODE);
+  }
+  
+  if (-s "$executablePath\\$executableEXE\\$executableEXE.trailerRes")
+  {
+      if (open(ZIPCODE,"$executablePath\\$executableEXE\\$executableEXE.trailerRes"))
+      {
+          $trailerRes = <ZIPCODE>;
+          echoPrint("  + Reading prefered trailer resolution ($trailerRes)\n");
       }
       close(ZIPCODE);
   }
@@ -101,10 +110,31 @@
       close(ZIPCODE);
   }
   
+  if (exists $optionsHash{lc("setTrailerRes")})
+  {
+      $trailerRes = $optionsHash{lc("setTrailerRes")};
+      echoPrint("  + /setTrailerRes : Setting prefered trailer resolution to ($trailerRes)\n");
+      if (open(ZIPCODE,">$executablePath\\$executableEXE\\$executableEXE.trailerRes"))
+      {
+          print ZIPCODE $trailerRes;
+      }
+      close(ZIPCODE);
+  }
+
+  if (exists $optionsHash{lc("movie")} && exists $optionsHash{lc("getTrailers")})
+  {
+      echoPrint("  + /getTrailers : Getting Trailers for (".$optionsHash{lc("movie")}.")\n");
+      my %theaterHash = getMovieHash($zipCode);
+      getTrailers($optionsHash{lc("movie")}, \%theaterHash, $trailerRes);
+      cleanCache(\%theaterHash);
+      exit 0;
+  }
+  
   if (exists $optionsHash{lc("movie")} || exists $optionsHash{lc("listTheaters")})
   {
       echoPrint("  + /movie : Printing List of theaters showing specified movie\n");
       my %theaterHash = getMovieHash($zipCode);
+      echoPrint("  ! GOT HASH\n");
       outputTheaters(\%theaterHash, $optionsHash{lc("movie")});
       cleanCache(\%theaterHash);
       exit 0;
@@ -115,6 +145,238 @@
   outputMovies(\%theaterHash, $optionsHash{lc("theater")});
   cleanCache(\%theaterHash);
   exit 0;
+  
+  sub getTrailers
+  {      
+      # Check .cache
+      my $movie          = shift @_;
+      my $theaterHashRef = shift @_;
+      my $trailerRes     = shift @_;
+      my $movieURL       = $movie;
+      my $content        = "";
+      
+      echoPrint("  + Looking for cache: (".toWin32($movie).".trailerCache)\n");
+      if (open(CACHE,"$executablePath\\$executableEXE\\".toWin32($movie).".trailerCache"))
+      {
+          my $cacheDate   = <CACHE>;
+          $cacheDate   =~ /version=([0-9]+)/i;
+          $cacheDate   = $1;
+          echoPrint("    + Found cache ($cacheDate)($dateString)\n");
+          if ($cacheDate == $dateString)
+          {
+              @searchCache = <CACHE>;
+              $content     = "@searchCache";
+              $useCache    = 1;
+              echoPrint("    ! Using cache\n"); 
+          }
+          close(CACHE);
+      }
+      
+      $movieURL =~ s/[^0-9a-zA-Z ]//gi; # Remove any non alpha-numeric chars
+      $movieURL =~ s/ /-/g;            # Replace Spaces with  dashes
+      
+      if (!$useCache)
+      {
+          my $searchURL =  "http://www.hd-trailers.net/movie/".$movieURL."/";
+          $content = decode('UTF-8', get $searchURL);
+          $content =~ s/&amp;/&/g;
+          $content =~ s/&quot;/"/g;#"
+          $content =~ s/&nbsp;/ /g;
+          $content =~ s/&middot;/-/g;
+          $content =~ s/&#39;/'/g;
+          $content =~ s/&#8206;/ /g;
+          if (open(CACHE,">$executablePath\\$executableEXE\\".toWin32($movie).".trailerCache"))
+          {
+              print CACHE "version=$dateString\n";
+              print CACHE "URL=$searchURL\n";
+              print CACHE $content;  
+          }
+      }
+      return decodeTrailerHTML($content, $movie, $theaterHashRef, $trailerRes);
+  }
+  
+  sub decodeTrailerHTML
+  {
+      my $content        = shift @_;
+      my $movieTitle     = shift @_;
+      my $theaterHash    = shift @_;
+      my $trailerRes     = shift @_;
+      
+      my $theater;
+      my $movieHash;
+      my @items;
+      
+      foreach $theater (keys %{$theaterHash})
+      {   # get
+      
+          if ($theater =~ /numberOfScreens/)
+          {   # Skip special key
+              next;
+          }
+          echoPrint("Checking For Theater: (".$theater.")\n"); 
+          foreach $movie (@{$theaterHash->{$theater}{movies}})
+          {
+              echoPrint("Checking For Movie: (".$movie->{movieName}.")\n");              
+              if ($movie->{movieName} =~ /^\Q$movieTitle\E$/i)
+              {   # Filter Based on movie
+                  $movieHash = $movie;
+                  last;
+              }
+          }
+          if (defined  $movieHash)
+          {
+              last;
+          }
+      }
+      
+      echoPrint("! Found Movie: (".$movieHash->{movieName}.")\n"); 
+      
+      # Regexs
+      $regExTrailerHTML    = 'class="bottomTableName"(.+)class="bottomTableDate"';
+      $regExTrailerName    = '^[^>]+>([^<]+) ?';
+
+      $regExTrailerLinkHTML = '(class="bottomTableResolution"><a href=[^>]+>[^<]+)';
+      $regExTrailerLinkURL  = 'class="bottomTableResolution"><a href="([^"]+)'; 
+      $regExTrailerLinkRes  = 'class="bottomTableResolution"><a href=[^>]+>([^<]+)';
+      $regExTrailerLinkSrc  = '(apple|moviefone|yahoo|krunk4ever|myspacecdn)';
+      
+      #decode content
+      $trailerBlock = matchShortest($content,$regExTrailerHTML);
+      
+       
+      while (!($trailerBlock eq ""))
+      {
+          my $trailerName = "";
+          $trailerBlock =~ /$regExTrailerName/;
+          $trailerName = $1;
+          echoPrint("  +  Found Trailer: ($trailerName)\n");
+          
+          if ($trailerBlock =~ /trailers.apple.com/)
+          {
+              echoPrint("    !  Skipping Apple Trailer!\n");
+              $content =~ s/\Q$trailerBlock\E//gsm;
+              $trailerBlock = matchShortest($content,$regExTrailerHTML);
+              next;
+          }
+          
+          $linksBlock     = $trailerBlock;
+          $linkBlock      = matchShortest($linksBlock,$regExTrailerLinkHTML);
+          while (!($linkBlock eq ""))
+          {
+              my $link    = "";
+              my $linkRes = "";
+              my $linkSrc = "Trailer";
+              if ($linkBlock =~ /$regExTrailerLinkURL/)
+              {
+                  $link = $1;
+                  echoPrint("    -  Found URL : ($link)\n"); 
+              }
+              
+              if ($linkBlock =~ /$regExTrailerLinkRes/)
+              {
+                  $linkRes = $1; 
+                  echoPrint("    -  Found Res : ($linkRes)\n");
+              }
+              
+              if ($linkBlock =~ /$regExTrailerLinkSrc/)
+              {
+                  $linkSrc = $1;
+                  #$regExTrailerLinkSrc  = '(apple|moviefone|yahoo|krunk4ever|myspacecdn)';
+                  if ($linkSrc =~ /apple/i)
+                  {
+                      $linkSrc = "Apple";
+                  }
+                  elsif ($linkSrc =~ /moviefone/i)
+                  {
+                      $linkSrc = "Moviefone";
+                  }
+                  elsif ($linkSrc =~ /yahoo/i)
+                  {
+                      $linkSrc = "Yahoo";
+                  }
+                  elsif ($linkSrc =~ /krunk4ever/i)
+                  {
+                      $linkSrc = "Krunk4Ever";
+                  }
+                  elsif ($linkSrc =~ /myspacecdn/i)
+                  {
+                      $linkSrc = "Myspace";
+                  }    
+                    
+                  echoPrint("    -  Found Src : ($linkSrc)\n");
+              }
+              
+              if ($trailerRes eq "" || $trailerRes =~ /$linkRes/i)
+              {
+                      $trailerItem       = $feed_item;
+                      $video             = toXML($link);
+                      $title             = $trailerName;
+                      $description       = " ";#$movieHash->{synopsis};
+                      $thumbnail         = toXML($movieHash->{moviePoster});
+                      $type              = "video/flv";
+                      $date              = $linkSrc;
+                      
+                      $trailerItem =~ s/%%ITEM_TITLE%%/$title/g;
+                      $trailerItem =~ s/%%ITEM_DATE%%/$date/g;
+                      $trailerItem =~ s/%%ITEM_DESCRIPTION%%/$description/g;
+                      $trailerItem =~ s/%%ITEM_URL%%/$video/g;
+                      $trailerItem =~ s/%%ITEM_DUR%%/1/g;
+                      $trailerItem =~ s/%%ITEM_SIZE%%/1/g;
+                      $trailerItem =~ s/%%ITEM_TYPE%%/$type/g;
+                      $trailerItem =~ s/%%ITEM_PICTURE%%/$thumbnail/g;
+                      $trailerItem =~ s/%%ITEM_DUR_SEC%%/1/g;
+                      push(@items,$trailerItem);                  
+              }
+
+                           
+              $linksBlock  =~ s/\Q$linkBlock\E//gsm;
+              $linkBlock      = matchShortest($linksBlock,$regExTrailerLinkHTML); 
+          }                   
+          #echoPrint("\n");
+          $content =~ s/\Q$trailerBlock\E//gsm;
+          $trailerBlock = matchShortest($content,$regExTrailerHTML);
+          #echoPrint(" TRAILER BLOCK:\n$content\n");  
+      }
+      
+      if (exists $movieHash->{youtube})
+      {
+          $trailerItem       = $feed_item;
+          $video             = toXML($movieHash->{youtube});
+          $title             = "Official Trailer";
+          $description       = " ";#$movieHash->{synopsis};
+          $thumbnail         = toXML($movieHash->{moviePoster});
+          $type              = "video/flv";
+          $date              = "Youtube";
+          
+          $trailerItem =~ s/%%ITEM_TITLE%%/$title/g;
+          $trailerItem =~ s/%%ITEM_DATE%%/$date/g;
+          $trailerItem =~ s/%%ITEM_DESCRIPTION%%/$description/g;
+          $trailerItem =~ s/%%ITEM_URL%%/$video/g;
+          $trailerItem =~ s/%%ITEM_DUR%%/1/g;
+          $trailerItem =~ s/%%ITEM_SIZE%%/1/g;
+          $trailerItem =~ s/%%ITEM_TYPE%%/$type/g;
+          $trailerItem =~ s/%%ITEM_PICTURE%%/$thumbnail/g;
+          $trailerItem =~ s/%%ITEM_DUR_SEC%%/1/g;
+          unshift(@items,$trailerItem);
+      }  
+      
+      
+      my $opening = $feed_begin;
+      
+      $opening =~ s/%%FEED_TITLE%%/$movieHash->{movieName} Trailers/g;
+      $opening =~ s/%%FEED_DESCRIPTION%%/$codeVersion @ARGV/g;
+      print encode('UTF-8', $opening);
+      foreach (@items)
+      {
+          if (!($_ eq ""))
+          {
+              print encode('UTF-8', $_);
+          }
+      }  
+      print encode('UTF-8', $feed_end);
+       
+      return;      
+  }
   
   sub cleanCache
   {
@@ -188,25 +450,24 @@
                   $feedType  = 'image/jpeg';
                   $foundMovie = 1;
                   
-                  if( !(defined $trailerItem)  && exists $movie->{youtube})
-                  {  # Make item for trailer
-                      $trailerItem       = $feed_item;
-                      $video             = $movie->{youtube};
-                      $title             = 'See the Trailer...';
-                      $description       = $movie->{synopsis};
-                      $thumbnail         = toXML($movie->{moviePoster});
-                      $type              = "video/flv";
-                      
-                      $trailerItem =~ s/%%ITEM_TITLE%%/$title/g;
-                      $trailerItem =~ s/%%ITEM_DATE%%/$movie->{info}/g;
-                      $trailerItem =~ s/%%ITEM_DESCRIPTION%%/$description/g;
-                      $trailerItem =~ s/%%ITEM_URL%%/$video/g;
-                      $trailerItem =~ s/%%ITEM_DUR%%/1/g;
-                      $trailerItem =~ s/%%ITEM_SIZE%%/1/g;
-                      $trailerItem =~ s/%%ITEM_TYPE%%/$type/g;
-                      $trailerItem =~ s/%%ITEM_PICTURE%%/$thumbnail/g;
-                      $trailerItem =~ s/%%ITEM_DUR_SEC%%/1/g;                   
-                  }
+                  # Make subcat for trailer
+                  $trailerItem       = $feed_item;
+                  $video             = toXML('external,"'.$executable.'",/movie||'.$movie->{movieName}.'||/getTrailers');
+                  $title             = 'Check for trailers...';
+                  $description       = "Search the internet for available trailers.";
+                  $thumbnail         = toXML($movie->{moviePoster});
+                  $type              = "sagetv/subcategory";
+                  
+                  $trailerItem =~ s/%%ITEM_TITLE%%/$title/g;
+                  $trailerItem =~ s/%%ITEM_DATE%%/ /g;
+                  $trailerItem =~ s/%%ITEM_DESCRIPTION%%/$description/g;
+                  $trailerItem =~ s/%%ITEM_URL%%/$video/g;
+                  $trailerItem =~ s/%%ITEM_DUR%%/1/g;
+                  $trailerItem =~ s/%%ITEM_SIZE%%/1/g;
+                  $trailerItem =~ s/%%ITEM_TYPE%%/$type/g;
+                  $trailerItem =~ s/%%ITEM_PICTURE%%/$thumbnail/g;
+                  $trailerItem =~ s/%%ITEM_DUR_SEC%%/1/g;                   
+
                   last; 
               }
               elsif (!(defined $movieFilter))
@@ -331,10 +592,6 @@
                   $thumbnail         = $movie->{moviePoster};
                   $type              = 'sagetv/subcategory';
                   $info              = $movie->{info};
-                  if (exists $movie->{youtube})
-                  {
-                      $info = "*$info"; 
-                  }
                   
                   $newItem =~ s/%%ITEM_TITLE%%/$title/g;
                   $newItem =~ s/%%ITEM_DATE%%/$info/g;
@@ -491,6 +748,7 @@
               #echoPrint("        + Details : ($detailPage)\n");
               
               getMovieDetails($detailPage,\%movieHash); # Poster, Trailer, Synopsis
+              #getTrailers($movieHash{movieName});
               
               push(@moviesAtTheater,\%movieHash);
               
