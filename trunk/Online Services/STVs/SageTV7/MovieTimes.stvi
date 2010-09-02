@@ -1,554 +1,689 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Module xmlns="urn:tv.sage/stv" Name="default" PersistentPrimaryRefs="true">
- <Hook Name="STVImported" Sym="XDNVX-71249">
-  <Action Name="&quot;REM Deletion of Widgets&quot;" Sym="XDNVX-71250"/>
-  <Action Name="&quot;REM Renaming of Widgets&quot;" Sym="XDNVX-71251"/>
-  <Action Name="&quot;REM Resetting of Widget properties&quot;" Sym="XDNVX-71252"/>
-  <Action Name="&quot;REM Removal of Widget children relationships&quot;" Sym="XDNVX-71253"/>
-  <Action Name="&quot;REM Adding of Widget children relationships&quot;" Sym="XDNVX-71254">
-   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;OPUS4A-125824&quot;)" Sym="XDNVX-71256">
-    <Branch Name="else" Sym="XDNVX-71257">
-     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68244&quot;)" Sym="XDNVX-71260">
-      <Branch Name="else" Sym="XDNVX-71261">
-       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71264"/>
+ <Hook Name="STVImported" Sym="XDNVX-71589">
+  <Action Name="&quot;REM Deletion of Widgets&quot;" Sym="XDNVX-71590"/>
+  <Action Name="&quot;REM Renaming of Widgets&quot;" Sym="XDNVX-71591"/>
+  <Action Name="&quot;REM Resetting of Widget properties&quot;" Sym="XDNVX-71592"/>
+  <Action Name="&quot;REM Removal of Widget children relationships&quot;" Sym="XDNVX-71593"/>
+  <Action Name="&quot;REM Adding of Widget children relationships&quot;" Sym="XDNVX-71594">
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;OPUS4A-125824&quot;)" Sym="XDNVX-71596">
+    <Branch Name="else" Sym="XDNVX-71597">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68244&quot;)" Sym="XDNVX-71600">
+      <Branch Name="else" Sym="XDNVX-71601">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71604"/>
       </Branch>
-      <Branch Name="null" Sym="XDNVX-71262">
-       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68244 \&quot;Secondary Menu Items Area\&quot; could not add as child; parent symbol=OPUS4A-125824 \&quot;\&quot;REM Movie Times\&quot;\&quot;&quot;)" Sym="XDNVX-71263"/>
+      <Branch Name="null" Sym="XDNVX-71602">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68244 \&quot;Secondary Menu Items Area\&quot; could not add as child; parent symbol=OPUS4A-125824 \&quot;\&quot;REM Movie Times\&quot;\&quot;&quot;)" Sym="XDNVX-71603"/>
       </Branch>
      </Conditional>
     </Branch>
-    <Branch Name="null" Sym="XDNVX-71258">
-     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=OPUS4A-125824 \&quot;Secondary Menu Items Area\&quot; missing parent; could not add child with symbol=XDNVX-68244 \&quot;\&quot;REM Movie Times\&quot;\&quot;&quot;)" Sym="XDNVX-71259"/>
+    <Branch Name="null" Sym="XDNVX-71598">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=OPUS4A-125824 \&quot;Secondary Menu Items Area\&quot; missing parent; could not add child with symbol=XDNVX-68244 \&quot;\&quot;REM Movie Times\&quot;\&quot;&quot;)" Sym="XDNVX-71599"/>
     </Branch>
    </Conditional>
-   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;OPUS4A-126139&quot;)" Sym="XDNVX-71265">
-    <Branch Name="else" Sym="XDNVX-71266">
-     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68255&quot;)" Sym="XDNVX-71269">
-      <Branch Name="else" Sym="XDNVX-71270">
-       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71273"/>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;OPUS4A-126139&quot;)" Sym="XDNVX-71605">
+    <Branch Name="else" Sym="XDNVX-71606">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68255&quot;)" Sym="XDNVX-71609">
+      <Branch Name="else" Sym="XDNVX-71610">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71613"/>
       </Branch>
-      <Branch Name="null" Sym="XDNVX-71271">
-       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68255 \&quot;TertiaryMenuType\&quot; could not add as child; parent symbol=OPUS4A-126139 \&quot;\&quot;xSubmenuMovieTimes\&quot;\&quot;&quot;)" Sym="XDNVX-71272"/>
+      <Branch Name="null" Sym="XDNVX-71611">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68255 \&quot;TertiaryMenuType\&quot; could not add as child; parent symbol=OPUS4A-126139 \&quot;\&quot;xSubmenuMovieTimes\&quot;\&quot;&quot;)" Sym="XDNVX-71612"/>
       </Branch>
      </Conditional>
     </Branch>
-    <Branch Name="null" Sym="XDNVX-71267">
-     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=OPUS4A-126139 \&quot;TertiaryMenuType\&quot; missing parent; could not add child with symbol=XDNVX-68255 \&quot;\&quot;xSubmenuMovieTimes\&quot;\&quot;&quot;)" Sym="XDNVX-71268"/>
+    <Branch Name="null" Sym="XDNVX-71607">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=OPUS4A-126139 \&quot;TertiaryMenuType\&quot; missing parent; could not add child with symbol=XDNVX-68255 \&quot;\&quot;xSubmenuMovieTimes\&quot;\&quot;&quot;)" Sym="XDNVX-71608"/>
     </Branch>
    </Conditional>
-   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68244&quot;)" Sym="XDNVX-71274">
-    <Branch Name="else" Sym="XDNVX-71275">
-     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68245&quot;)" Sym="XDNVX-71278">
-      <Branch Name="else" Sym="XDNVX-71279">
-       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71282"/>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68244&quot;)" Sym="XDNVX-71614">
+    <Branch Name="else" Sym="XDNVX-71615">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68245&quot;)" Sym="XDNVX-71618">
+      <Branch Name="else" Sym="XDNVX-71619">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71622"/>
       </Branch>
-      <Branch Name="null" Sym="XDNVX-71280">
-       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68245 \&quot;\&quot;REM Movie Times\&quot;\&quot; could not add as child; parent symbol=XDNVX-68244 \&quot;Movie Times\&quot;&quot;)" Sym="XDNVX-71281"/>
+      <Branch Name="null" Sym="XDNVX-71620">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68245 \&quot;\&quot;REM Movie Times\&quot;\&quot; could not add as child; parent symbol=XDNVX-68244 \&quot;Movie Times\&quot;&quot;)" Sym="XDNVX-71621"/>
       </Branch>
      </Conditional>
     </Branch>
-    <Branch Name="null" Sym="XDNVX-71276">
-     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68244 \&quot;\&quot;REM Movie Times\&quot;\&quot; missing parent; could not add child with symbol=XDNVX-68245 \&quot;Movie Times\&quot;&quot;)" Sym="XDNVX-71277"/>
+    <Branch Name="null" Sym="XDNVX-71616">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68244 \&quot;\&quot;REM Movie Times\&quot;\&quot; missing parent; could not add child with symbol=XDNVX-68245 \&quot;Movie Times\&quot;&quot;)" Sym="XDNVX-71617"/>
     </Branch>
    </Conditional>
-   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68250&quot;)" Sym="XDNVX-71283">
-    <Branch Name="else" Sym="XDNVX-71284">
-     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68251&quot;)" Sym="XDNVX-71287">
-      <Branch Name="else" Sym="XDNVX-71288">
-       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71291"/>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68250&quot;)" Sym="XDNVX-71623">
+    <Branch Name="else" Sym="XDNVX-71624">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68251&quot;)" Sym="XDNVX-71627">
+      <Branch Name="else" Sym="XDNVX-71628">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71631"/>
       </Branch>
-      <Branch Name="null" Sym="XDNVX-71289">
-       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68251 \&quot;UPnPBrowserString = \&quot;\&quot;\&quot; could not add as child; parent symbol=XDNVX-68250 \&quot;SearchURL = \&quot;external,\&quot; + java_lang_System_getProperty(\&quot;user.dir\&quot;) + \&quot;\\\\SageOnlineServicesEXEs\\\\MovieTimes\&quot; + If(IsLinuxOS(),\&quot;.out\&quot;,\&quot;.exe\&quot;) + \&quot;,\&quot; + UPnPBrowserString\&quot;&quot;)" Sym="XDNVX-71290"/>
+      <Branch Name="null" Sym="XDNVX-71629">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68251 \&quot;UPnPBrowserString = \&quot;\&quot;\&quot; could not add as child; parent symbol=XDNVX-68250 \&quot;SearchURL = \&quot;external,\&quot; + java_lang_System_getProperty(\&quot;user.dir\&quot;) + \&quot;\\\\SageOnlineServicesEXEs\\\\MovieTimes\&quot; + If(IsLinuxOS(),\&quot;.out\&quot;,\&quot;.exe\&quot;) + \&quot;,\&quot; + UPnPBrowserString\&quot;&quot;)" Sym="XDNVX-71630"/>
       </Branch>
      </Conditional>
     </Branch>
-    <Branch Name="null" Sym="XDNVX-71285">
-     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68250 \&quot;UPnPBrowserString = \&quot;\&quot;\&quot; missing parent; could not add child with symbol=XDNVX-68251 \&quot;SearchURL = \&quot;external,\&quot; + java_lang_System_getProperty(\&quot;user.dir\&quot;) + \&quot;\\\\SageOnlineServicesEXEs\\\\MovieTimes\&quot; + If(IsLinuxOS(),\&quot;.out\&quot;,\&quot;.exe\&quot;) + \&quot;,\&quot; + UPnPBrowserString\&quot;&quot;)" Sym="XDNVX-71286"/>
+    <Branch Name="null" Sym="XDNVX-71625">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68250 \&quot;UPnPBrowserString = \&quot;\&quot;\&quot; missing parent; could not add child with symbol=XDNVX-68251 \&quot;SearchURL = \&quot;external,\&quot; + java_lang_System_getProperty(\&quot;user.dir\&quot;) + \&quot;\\\\SageOnlineServicesEXEs\\\\MovieTimes\&quot; + If(IsLinuxOS(),\&quot;.out\&quot;,\&quot;.exe\&quot;) + \&quot;,\&quot; + UPnPBrowserString\&quot;&quot;)" Sym="XDNVX-71626"/>
     </Branch>
    </Conditional>
-   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68251&quot;)" Sym="XDNVX-71292">
-    <Branch Name="else" Sym="XDNVX-71293">
-     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68252&quot;)" Sym="XDNVX-71296">
-      <Branch Name="else" Sym="XDNVX-71297">
-       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71300"/>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68251&quot;)" Sym="XDNVX-71632">
+    <Branch Name="else" Sym="XDNVX-71633">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68252&quot;)" Sym="XDNVX-71636">
+      <Branch Name="else" Sym="XDNVX-71637">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71640"/>
       </Branch>
-      <Branch Name="null" Sym="XDNVX-71298">
-       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68252 \&quot;SearchURL = \&quot;external,\&quot; + java_lang_System_getProperty(\&quot;user.dir\&quot;) + \&quot;\\\\SageOnlineServicesEXEs\\\\MovieTimes\&quot; + If(IsLinuxOS(),\&quot;.out\&quot;,\&quot;.exe\&quot;) + \&quot;,\&quot; + UPnPBrowserString\&quot; could not add as child; parent symbol=XDNVX-68251 \&quot;AddStaticContext(\&quot;SearchURL\&quot;,SearchURL)\&quot;&quot;)" Sym="XDNVX-71299"/>
+      <Branch Name="null" Sym="XDNVX-71638">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68252 \&quot;SearchURL = \&quot;external,\&quot; + java_lang_System_getProperty(\&quot;user.dir\&quot;) + \&quot;\\\\SageOnlineServicesEXEs\\\\MovieTimes\&quot; + If(IsLinuxOS(),\&quot;.out\&quot;,\&quot;.exe\&quot;) + \&quot;,\&quot; + UPnPBrowserString\&quot; could not add as child; parent symbol=XDNVX-68251 \&quot;AddStaticContext(\&quot;SearchURL\&quot;,SearchURL)\&quot;&quot;)" Sym="XDNVX-71639"/>
       </Branch>
      </Conditional>
     </Branch>
-    <Branch Name="null" Sym="XDNVX-71294">
-     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68251 \&quot;SearchURL = \&quot;external,\&quot; + java_lang_System_getProperty(\&quot;user.dir\&quot;) + \&quot;\\\\SageOnlineServicesEXEs\\\\MovieTimes\&quot; + If(IsLinuxOS(),\&quot;.out\&quot;,\&quot;.exe\&quot;) + \&quot;,\&quot; + UPnPBrowserString\&quot; missing parent; could not add child with symbol=XDNVX-68252 \&quot;AddStaticContext(\&quot;SearchURL\&quot;,SearchURL)\&quot;&quot;)" Sym="XDNVX-71295"/>
+    <Branch Name="null" Sym="XDNVX-71634">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68251 \&quot;SearchURL = \&quot;external,\&quot; + java_lang_System_getProperty(\&quot;user.dir\&quot;) + \&quot;\\\\SageOnlineServicesEXEs\\\\MovieTimes\&quot; + If(IsLinuxOS(),\&quot;.out\&quot;,\&quot;.exe\&quot;) + \&quot;,\&quot; + UPnPBrowserString\&quot; missing parent; could not add child with symbol=XDNVX-68252 \&quot;AddStaticContext(\&quot;SearchURL\&quot;,SearchURL)\&quot;&quot;)" Sym="XDNVX-71635"/>
     </Branch>
    </Conditional>
-   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68252&quot;)" Sym="XDNVX-71301">
-    <Branch Name="else" Sym="XDNVX-71302">
-     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68253&quot;)" Sym="XDNVX-71305">
-      <Branch Name="else" Sym="XDNVX-71306">
-       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71309"/>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68252&quot;)" Sym="XDNVX-71641">
+    <Branch Name="else" Sym="XDNVX-71642">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68253&quot;)" Sym="XDNVX-71645">
+      <Branch Name="else" Sym="XDNVX-71646">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71649"/>
       </Branch>
-      <Branch Name="null" Sym="XDNVX-71307">
-       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68253 \&quot;AddStaticContext(\&quot;SearchURL\&quot;,SearchURL)\&quot; could not add as child; parent symbol=XDNVX-68252 \&quot;AddStaticContext(\&quot;OnlineVideoType\&quot;,\&quot;xPodcast\&quot;)\&quot;&quot;)" Sym="XDNVX-71308"/>
+      <Branch Name="null" Sym="XDNVX-71647">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68253 \&quot;AddStaticContext(\&quot;SearchURL\&quot;,SearchURL)\&quot; could not add as child; parent symbol=XDNVX-68252 \&quot;AddStaticContext(\&quot;OnlineVideoType\&quot;,\&quot;xPodcast\&quot;)\&quot;&quot;)" Sym="XDNVX-71648"/>
       </Branch>
      </Conditional>
     </Branch>
-    <Branch Name="null" Sym="XDNVX-71303">
-     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68252 \&quot;AddStaticContext(\&quot;SearchURL\&quot;,SearchURL)\&quot; missing parent; could not add child with symbol=XDNVX-68253 \&quot;AddStaticContext(\&quot;OnlineVideoType\&quot;,\&quot;xPodcast\&quot;)\&quot;&quot;)" Sym="XDNVX-71304"/>
+    <Branch Name="null" Sym="XDNVX-71643">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68252 \&quot;AddStaticContext(\&quot;SearchURL\&quot;,SearchURL)\&quot; missing parent; could not add child with symbol=XDNVX-68253 \&quot;AddStaticContext(\&quot;OnlineVideoType\&quot;,\&quot;xPodcast\&quot;)\&quot;&quot;)" Sym="XDNVX-71644"/>
     </Branch>
    </Conditional>
-   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68253&quot;)" Sym="XDNVX-71310">
-    <Branch Name="else" Sym="XDNVX-71311">
-     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-71248&quot;)" Sym="XDNVX-71314">
-      <Branch Name="else" Sym="XDNVX-71315">
-       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71318"/>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68253&quot;)" Sym="XDNVX-71650">
+    <Branch Name="else" Sym="XDNVX-71651">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-71248&quot;)" Sym="XDNVX-71654">
+      <Branch Name="else" Sym="XDNVX-71655">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71658"/>
       </Branch>
-      <Branch Name="null" Sym="XDNVX-71316">
-       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-71248 \&quot;AddStaticContext(\&quot;OnlineVideoType\&quot;,\&quot;xPodcast\&quot;)\&quot; could not add as child; parent symbol=XDNVX-68253 \&quot;AddStaticContext(\&quot;NewResultsIndex\&quot;,0)\&quot;&quot;)" Sym="XDNVX-71317"/>
+      <Branch Name="null" Sym="XDNVX-71656">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-71248 \&quot;AddStaticContext(\&quot;OnlineVideoType\&quot;,\&quot;xPodcast\&quot;)\&quot; could not add as child; parent symbol=XDNVX-68253 \&quot;AddStaticContext(\&quot;NewResultsIndex\&quot;,0)\&quot;&quot;)" Sym="XDNVX-71657"/>
       </Branch>
      </Conditional>
     </Branch>
-    <Branch Name="null" Sym="XDNVX-71312">
-     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68253 \&quot;AddStaticContext(\&quot;OnlineVideoType\&quot;,\&quot;xPodcast\&quot;)\&quot; missing parent; could not add child with symbol=XDNVX-71248 \&quot;AddStaticContext(\&quot;NewResultsIndex\&quot;,0)\&quot;&quot;)" Sym="XDNVX-71313"/>
+    <Branch Name="null" Sym="XDNVX-71652">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68253 \&quot;AddStaticContext(\&quot;OnlineVideoType\&quot;,\&quot;xPodcast\&quot;)\&quot; missing parent; could not add child with symbol=XDNVX-71248 \&quot;AddStaticContext(\&quot;NewResultsIndex\&quot;,0)\&quot;&quot;)" Sym="XDNVX-71653"/>
     </Branch>
    </Conditional>
-   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68266&quot;)" Sym="XDNVX-71319">
-    <Branch Name="else" Sym="XDNVX-71320">
-     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68251&quot;)" Sym="XDNVX-71323">
-      <Branch Name="else" Sym="XDNVX-71324">
-       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71327"/>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68266&quot;)" Sym="XDNVX-71659">
+    <Branch Name="else" Sym="XDNVX-71660">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68251&quot;)" Sym="XDNVX-71663">
+      <Branch Name="else" Sym="XDNVX-71664">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71667"/>
       </Branch>
-      <Branch Name="null" Sym="XDNVX-71325">
-       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68251 \&quot;UPnPBrowserString = \&quot;\&quot;\&quot; could not add as child; parent symbol=XDNVX-68266 \&quot;SearchURL = \&quot;external,\&quot; + java_lang_System_getProperty(\&quot;user.dir\&quot;) + \&quot;\\\\SageOnlineServicesEXEs\\\\MovieTimes\&quot; + If(IsLinuxOS(),\&quot;.out\&quot;,\&quot;.exe\&quot;) + \&quot;,\&quot; + UPnPBrowserString\&quot;&quot;)" Sym="XDNVX-71326"/>
+      <Branch Name="null" Sym="XDNVX-71665">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68251 \&quot;UPnPBrowserString = \&quot;\&quot;\&quot; could not add as child; parent symbol=XDNVX-68266 \&quot;SearchURL = \&quot;external,\&quot; + java_lang_System_getProperty(\&quot;user.dir\&quot;) + \&quot;\\\\SageOnlineServicesEXEs\\\\MovieTimes\&quot; + If(IsLinuxOS(),\&quot;.out\&quot;,\&quot;.exe\&quot;) + \&quot;,\&quot; + UPnPBrowserString\&quot;&quot;)" Sym="XDNVX-71666"/>
       </Branch>
      </Conditional>
     </Branch>
-    <Branch Name="null" Sym="XDNVX-71321">
-     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68266 \&quot;UPnPBrowserString = \&quot;\&quot;\&quot; missing parent; could not add child with symbol=XDNVX-68251 \&quot;SearchURL = \&quot;external,\&quot; + java_lang_System_getProperty(\&quot;user.dir\&quot;) + \&quot;\\\\SageOnlineServicesEXEs\\\\MovieTimes\&quot; + If(IsLinuxOS(),\&quot;.out\&quot;,\&quot;.exe\&quot;) + \&quot;,\&quot; + UPnPBrowserString\&quot;&quot;)" Sym="XDNVX-71322"/>
+    <Branch Name="null" Sym="XDNVX-71661">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68266 \&quot;UPnPBrowserString = \&quot;\&quot;\&quot; missing parent; could not add child with symbol=XDNVX-68251 \&quot;SearchURL = \&quot;external,\&quot; + java_lang_System_getProperty(\&quot;user.dir\&quot;) + \&quot;\\\\SageOnlineServicesEXEs\\\\MovieTimes\&quot; + If(IsLinuxOS(),\&quot;.out\&quot;,\&quot;.exe\&quot;) + \&quot;,\&quot; + UPnPBrowserString\&quot;&quot;)" Sym="XDNVX-71662"/>
     </Branch>
    </Conditional>
-   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68270&quot;)" Sym="XDNVX-71328">
-    <Branch Name="else" Sym="XDNVX-71329">
-     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68251&quot;)" Sym="XDNVX-71332">
-      <Branch Name="else" Sym="XDNVX-71333">
-       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71336"/>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68270&quot;)" Sym="XDNVX-71668">
+    <Branch Name="else" Sym="XDNVX-71669">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68251&quot;)" Sym="XDNVX-71672">
+      <Branch Name="else" Sym="XDNVX-71673">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71676"/>
       </Branch>
-      <Branch Name="null" Sym="XDNVX-71334">
-       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68251 \&quot;UPnPBrowserString = \&quot;/listTheaters\&quot;\&quot; could not add as child; parent symbol=XDNVX-68270 \&quot;SearchURL = \&quot;external,\&quot; + java_lang_System_getProperty(\&quot;user.dir\&quot;) + \&quot;\\\\SageOnlineServicesEXEs\\\\MovieTimes\&quot; + If(IsLinuxOS(),\&quot;.out\&quot;,\&quot;.exe\&quot;) + \&quot;,\&quot; + UPnPBrowserString\&quot;&quot;)" Sym="XDNVX-71335"/>
+      <Branch Name="null" Sym="XDNVX-71674">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68251 \&quot;UPnPBrowserString = \&quot;/listTheaters\&quot;\&quot; could not add as child; parent symbol=XDNVX-68270 \&quot;SearchURL = \&quot;external,\&quot; + java_lang_System_getProperty(\&quot;user.dir\&quot;) + \&quot;\\\\SageOnlineServicesEXEs\\\\MovieTimes\&quot; + If(IsLinuxOS(),\&quot;.out\&quot;,\&quot;.exe\&quot;) + \&quot;,\&quot; + UPnPBrowserString\&quot;&quot;)" Sym="XDNVX-71675"/>
       </Branch>
      </Conditional>
     </Branch>
-    <Branch Name="null" Sym="XDNVX-71330">
-     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68270 \&quot;UPnPBrowserString = \&quot;/listTheaters\&quot;\&quot; missing parent; could not add child with symbol=XDNVX-68251 \&quot;SearchURL = \&quot;external,\&quot; + java_lang_System_getProperty(\&quot;user.dir\&quot;) + \&quot;\\\\SageOnlineServicesEXEs\\\\MovieTimes\&quot; + If(IsLinuxOS(),\&quot;.out\&quot;,\&quot;.exe\&quot;) + \&quot;,\&quot; + UPnPBrowserString\&quot;&quot;)" Sym="XDNVX-71331"/>
+    <Branch Name="null" Sym="XDNVX-71670">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68270 \&quot;UPnPBrowserString = \&quot;/listTheaters\&quot;\&quot; missing parent; could not add child with symbol=XDNVX-68251 \&quot;SearchURL = \&quot;external,\&quot; + java_lang_System_getProperty(\&quot;user.dir\&quot;) + \&quot;\\\\SageOnlineServicesEXEs\\\\MovieTimes\&quot; + If(IsLinuxOS(),\&quot;.out\&quot;,\&quot;.exe\&quot;) + \&quot;,\&quot; + UPnPBrowserString\&quot;&quot;)" Sym="XDNVX-71671"/>
     </Branch>
    </Conditional>
-   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68274&quot;)" Sym="XDNVX-71337">
-    <Branch Name="else" Sym="XDNVX-71338">
-     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68251&quot;)" Sym="XDNVX-71341">
-      <Branch Name="else" Sym="XDNVX-71342">
-       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71345"/>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68274&quot;)" Sym="XDNVX-71677">
+    <Branch Name="else" Sym="XDNVX-71678">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68251&quot;)" Sym="XDNVX-71681">
+      <Branch Name="else" Sym="XDNVX-71682">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71685"/>
       </Branch>
-      <Branch Name="null" Sym="XDNVX-71343">
-       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68251 \&quot;UPnPBrowserString = \&quot;/setZipcode||%%getuserinput=Set Location%%\&quot;\&quot; could not add as child; parent symbol=XDNVX-68274 \&quot;SearchURL = \&quot;external,\&quot; + java_lang_System_getProperty(\&quot;user.dir\&quot;) + \&quot;\\\\SageOnlineServicesEXEs\\\\MovieTimes\&quot; + If(IsLinuxOS(),\&quot;.out\&quot;,\&quot;.exe\&quot;) + \&quot;,\&quot; + UPnPBrowserString\&quot;&quot;)" Sym="XDNVX-71344"/>
+      <Branch Name="null" Sym="XDNVX-71683">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68251 \&quot;UPnPBrowserString = \&quot;/settings\&quot;\&quot; could not add as child; parent symbol=XDNVX-68274 \&quot;SearchURL = \&quot;external,\&quot; + java_lang_System_getProperty(\&quot;user.dir\&quot;) + \&quot;\\\\SageOnlineServicesEXEs\\\\MovieTimes\&quot; + If(IsLinuxOS(),\&quot;.out\&quot;,\&quot;.exe\&quot;) + \&quot;,\&quot; + UPnPBrowserString\&quot;&quot;)" Sym="XDNVX-71684"/>
       </Branch>
      </Conditional>
     </Branch>
-    <Branch Name="null" Sym="XDNVX-71339">
-     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68274 \&quot;UPnPBrowserString = \&quot;/setZipcode||%%getuserinput=Set Location%%\&quot;\&quot; missing parent; could not add child with symbol=XDNVX-68251 \&quot;SearchURL = \&quot;external,\&quot; + java_lang_System_getProperty(\&quot;user.dir\&quot;) + \&quot;\\\\SageOnlineServicesEXEs\\\\MovieTimes\&quot; + If(IsLinuxOS(),\&quot;.out\&quot;,\&quot;.exe\&quot;) + \&quot;,\&quot; + UPnPBrowserString\&quot;&quot;)" Sym="XDNVX-71340"/>
+    <Branch Name="null" Sym="XDNVX-71679">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68274 \&quot;UPnPBrowserString = \&quot;/settings\&quot;\&quot; missing parent; could not add child with symbol=XDNVX-68251 \&quot;SearchURL = \&quot;external,\&quot; + java_lang_System_getProperty(\&quot;user.dir\&quot;) + \&quot;\\\\SageOnlineServicesEXEs\\\\MovieTimes\&quot; + If(IsLinuxOS(),\&quot;.out\&quot;,\&quot;.exe\&quot;) + \&quot;,\&quot; + UPnPBrowserString\&quot;&quot;)" Sym="XDNVX-71680"/>
     </Branch>
    </Conditional>
-   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68255&quot;)" Sym="XDNVX-71346">
-    <Branch Name="else" Sym="XDNVX-71347">
-     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68256&quot;)" Sym="XDNVX-71350">
-      <Branch Name="else" Sym="XDNVX-71351">
-       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71354"/>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-71248&quot;)" Sym="XDNVX-71686">
+    <Branch Name="else" Sym="XDNVX-71687">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;BASE-51823&quot;)" Sym="XDNVX-71690">
+      <Branch Name="else" Sym="XDNVX-71691">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71694"/>
       </Branch>
-      <Branch Name="null" Sym="XDNVX-71352">
-       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68256 \&quot;\&quot;xSubmenuMovieTimes\&quot;\&quot; could not add as child; parent symbol=XDNVX-68255 \&quot;Tertiary Menu Content Area\&quot;&quot;)" Sym="XDNVX-71353"/>
+      <Branch Name="null" Sym="XDNVX-71692">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=BASE-51823 \&quot;AddStaticContext(\&quot;NewResultsIndex\&quot;,0)\&quot; could not add as child; parent symbol=XDNVX-71248 \&quot;\&quot;REM If the Online Videos properties files are not loaded, load them. Force reload if ForceReload is true.\&quot;\&quot;&quot;)" Sym="XDNVX-71693"/>
       </Branch>
      </Conditional>
     </Branch>
-    <Branch Name="null" Sym="XDNVX-71348">
-     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68255 \&quot;\&quot;xSubmenuMovieTimes\&quot;\&quot; missing parent; could not add child with symbol=XDNVX-68256 \&quot;Tertiary Menu Content Area\&quot;&quot;)" Sym="XDNVX-71349"/>
+    <Branch Name="null" Sym="XDNVX-71688">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-71248 \&quot;AddStaticContext(\&quot;NewResultsIndex\&quot;,0)\&quot; missing parent; could not add child with symbol=BASE-51823 \&quot;\&quot;REM If the Online Videos properties files are not loaded, load them. Force reload if ForceReload is true.\&quot;\&quot;&quot;)" Sym="XDNVX-71689"/>
     </Branch>
    </Conditional>
-   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68245&quot;)" Sym="XDNVX-71355">
-    <Branch Name="else" Sym="XDNVX-71356">
-     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68246&quot;)" Sym="XDNVX-71359">
-      <Branch Name="else" Sym="XDNVX-71360">
-       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71363"/>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-71248&quot;)" Sym="XDNVX-71695">
+    <Branch Name="else" Sym="XDNVX-71696">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;OPUS4A-168105&quot;)" Sym="XDNVX-71699">
+      <Branch Name="else" Sym="XDNVX-71700">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71703"/>
       </Branch>
-      <Branch Name="null" Sym="XDNVX-71361">
-       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68246 \&quot;Movie Times\&quot; could not add as child; parent symbol=XDNVX-68245 \&quot;ButtonText\&quot;&quot;)" Sym="XDNVX-71362"/>
+      <Branch Name="null" Sym="XDNVX-71701">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=OPUS4A-168105 \&quot;AddStaticContext(\&quot;NewResultsIndex\&quot;,0)\&quot; could not add as child; parent symbol=XDNVX-71248 \&quot;\&quot;REM Download the RSS feed for the SearchURL.\&quot;\&quot;&quot;)" Sym="XDNVX-71702"/>
       </Branch>
      </Conditional>
     </Branch>
-    <Branch Name="null" Sym="XDNVX-71357">
-     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68245 \&quot;Movie Times\&quot; missing parent; could not add child with symbol=XDNVX-68246 \&quot;ButtonText\&quot;&quot;)" Sym="XDNVX-71358"/>
+    <Branch Name="null" Sym="XDNVX-71697">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-71248 \&quot;AddStaticContext(\&quot;NewResultsIndex\&quot;,0)\&quot; missing parent; could not add child with symbol=OPUS4A-168105 \&quot;\&quot;REM Download the RSS feed for the SearchURL.\&quot;\&quot;&quot;)" Sym="XDNVX-71698"/>
     </Branch>
    </Conditional>
-   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68245&quot;)" Sym="XDNVX-71364">
-    <Branch Name="else" Sym="XDNVX-71365">
-     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68247&quot;)" Sym="XDNVX-71368">
-      <Branch Name="else" Sym="XDNVX-71369">
-       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71372"/>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68255&quot;)" Sym="XDNVX-71704">
+    <Branch Name="else" Sym="XDNVX-71705">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68256&quot;)" Sym="XDNVX-71708">
+      <Branch Name="else" Sym="XDNVX-71709">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71712"/>
       </Branch>
-      <Branch Name="null" Sym="XDNVX-71370">
-       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68247 \&quot;Movie Times\&quot; could not add as child; parent symbol=XDNVX-68245 \&quot;ThisItem\&quot;&quot;)" Sym="XDNVX-71371"/>
+      <Branch Name="null" Sym="XDNVX-71710">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68256 \&quot;\&quot;xSubmenuMovieTimes\&quot;\&quot; could not add as child; parent symbol=XDNVX-68255 \&quot;Tertiary Menu Content Area\&quot;&quot;)" Sym="XDNVX-71711"/>
       </Branch>
      </Conditional>
     </Branch>
-    <Branch Name="null" Sym="XDNVX-71366">
-     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68245 \&quot;Movie Times\&quot; missing parent; could not add child with symbol=XDNVX-68247 \&quot;ThisItem\&quot;&quot;)" Sym="XDNVX-71367"/>
+    <Branch Name="null" Sym="XDNVX-71706">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68255 \&quot;\&quot;xSubmenuMovieTimes\&quot;\&quot; missing parent; could not add child with symbol=XDNVX-68256 \&quot;Tertiary Menu Content Area\&quot;&quot;)" Sym="XDNVX-71707"/>
     </Branch>
    </Conditional>
-   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68245&quot;)" Sym="XDNVX-71373">
-    <Branch Name="else" Sym="XDNVX-71374">
-     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68248&quot;)" Sym="XDNVX-71377">
-      <Branch Name="else" Sym="XDNVX-71378">
-       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71381"/>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68245&quot;)" Sym="XDNVX-71713">
+    <Branch Name="else" Sym="XDNVX-71714">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68246&quot;)" Sym="XDNVX-71717">
+      <Branch Name="else" Sym="XDNVX-71718">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71721"/>
       </Branch>
-      <Branch Name="null" Sym="XDNVX-71379">
-       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68248 \&quot;Movie Times\&quot; could not add as child; parent symbol=XDNVX-68245 \&quot;SubMenuType\&quot;&quot;)" Sym="XDNVX-71380"/>
+      <Branch Name="null" Sym="XDNVX-71719">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68246 \&quot;Movie Times\&quot; could not add as child; parent symbol=XDNVX-68245 \&quot;ButtonText\&quot;&quot;)" Sym="XDNVX-71720"/>
       </Branch>
      </Conditional>
     </Branch>
-    <Branch Name="null" Sym="XDNVX-71375">
-     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68245 \&quot;Movie Times\&quot; missing parent; could not add child with symbol=XDNVX-68248 \&quot;SubMenuType\&quot;&quot;)" Sym="XDNVX-71376"/>
+    <Branch Name="null" Sym="XDNVX-71715">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68245 \&quot;Movie Times\&quot; missing parent; could not add child with symbol=XDNVX-68246 \&quot;ButtonText\&quot;&quot;)" Sym="XDNVX-71716"/>
     </Branch>
    </Conditional>
-   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68245&quot;)" Sym="XDNVX-71382">
-    <Branch Name="else" Sym="XDNVX-71383">
-     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68249&quot;)" Sym="XDNVX-71386">
-      <Branch Name="else" Sym="XDNVX-71387">
-       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71390"/>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68245&quot;)" Sym="XDNVX-71722">
+    <Branch Name="else" Sym="XDNVX-71723">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68247&quot;)" Sym="XDNVX-71726">
+      <Branch Name="else" Sym="XDNVX-71727">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71730"/>
       </Branch>
-      <Branch Name="null" Sym="XDNVX-71388">
-       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68249 \&quot;Movie Times\&quot; could not add as child; parent symbol=XDNVX-68245 \&quot;HasDefaultAction\&quot;&quot;)" Sym="XDNVX-71389"/>
+      <Branch Name="null" Sym="XDNVX-71728">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68247 \&quot;Movie Times\&quot; could not add as child; parent symbol=XDNVX-68245 \&quot;ThisItem\&quot;&quot;)" Sym="XDNVX-71729"/>
       </Branch>
      </Conditional>
     </Branch>
-    <Branch Name="null" Sym="XDNVX-71384">
-     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68245 \&quot;Movie Times\&quot; missing parent; could not add child with symbol=XDNVX-68249 \&quot;HasDefaultAction\&quot;&quot;)" Sym="XDNVX-71385"/>
+    <Branch Name="null" Sym="XDNVX-71724">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68245 \&quot;Movie Times\&quot; missing parent; could not add child with symbol=XDNVX-68247 \&quot;ThisItem\&quot;&quot;)" Sym="XDNVX-71725"/>
     </Branch>
    </Conditional>
-   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68245&quot;)" Sym="XDNVX-71391">
-    <Branch Name="else" Sym="XDNVX-71392">
-     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68250&quot;)" Sym="XDNVX-71395">
-      <Branch Name="else" Sym="XDNVX-71396">
-       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71399"/>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68245&quot;)" Sym="XDNVX-71731">
+    <Branch Name="else" Sym="XDNVX-71732">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68248&quot;)" Sym="XDNVX-71735">
+      <Branch Name="else" Sym="XDNVX-71736">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71739"/>
       </Branch>
-      <Branch Name="null" Sym="XDNVX-71397">
-       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68250 \&quot;Movie Times\&quot; could not add as child; parent symbol=XDNVX-68245 \&quot;UPnPBrowserString = \&quot;\&quot;\&quot;&quot;)" Sym="XDNVX-71398"/>
+      <Branch Name="null" Sym="XDNVX-71737">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68248 \&quot;Movie Times\&quot; could not add as child; parent symbol=XDNVX-68245 \&quot;SubMenuType\&quot;&quot;)" Sym="XDNVX-71738"/>
       </Branch>
      </Conditional>
     </Branch>
-    <Branch Name="null" Sym="XDNVX-71393">
-     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68245 \&quot;Movie Times\&quot; missing parent; could not add child with symbol=XDNVX-68250 \&quot;UPnPBrowserString = \&quot;\&quot;\&quot;&quot;)" Sym="XDNVX-71394"/>
+    <Branch Name="null" Sym="XDNVX-71733">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68245 \&quot;Movie Times\&quot; missing parent; could not add child with symbol=XDNVX-68248 \&quot;SubMenuType\&quot;&quot;)" Sym="XDNVX-71734"/>
     </Branch>
    </Conditional>
-   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68260&quot;)" Sym="XDNVX-71400">
-    <Branch Name="else" Sym="XDNVX-71401">
-     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68263&quot;)" Sym="XDNVX-71404">
-      <Branch Name="else" Sym="XDNVX-71405">
-       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71408"/>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68245&quot;)" Sym="XDNVX-71740">
+    <Branch Name="else" Sym="XDNVX-71741">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68249&quot;)" Sym="XDNVX-71744">
+      <Branch Name="else" Sym="XDNVX-71745">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71748"/>
       </Branch>
-      <Branch Name="null" Sym="XDNVX-71406">
-       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68263 \&quot;View By Movie\&quot; could not add as child; parent symbol=XDNVX-68260 \&quot;ButtonText\&quot;&quot;)" Sym="XDNVX-71407"/>
+      <Branch Name="null" Sym="XDNVX-71746">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68249 \&quot;Movie Times\&quot; could not add as child; parent symbol=XDNVX-68245 \&quot;HasDefaultAction\&quot;&quot;)" Sym="XDNVX-71747"/>
       </Branch>
      </Conditional>
     </Branch>
-    <Branch Name="null" Sym="XDNVX-71402">
-     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68260 \&quot;View By Movie\&quot; missing parent; could not add child with symbol=XDNVX-68263 \&quot;ButtonText\&quot;&quot;)" Sym="XDNVX-71403"/>
+    <Branch Name="null" Sym="XDNVX-71742">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68245 \&quot;Movie Times\&quot; missing parent; could not add child with symbol=XDNVX-68249 \&quot;HasDefaultAction\&quot;&quot;)" Sym="XDNVX-71743"/>
     </Branch>
    </Conditional>
-   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68260&quot;)" Sym="XDNVX-71409">
-    <Branch Name="else" Sym="XDNVX-71410">
-     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68264&quot;)" Sym="XDNVX-71413">
-      <Branch Name="else" Sym="XDNVX-71414">
-       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71417"/>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68245&quot;)" Sym="XDNVX-71749">
+    <Branch Name="else" Sym="XDNVX-71750">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68250&quot;)" Sym="XDNVX-71753">
+      <Branch Name="else" Sym="XDNVX-71754">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71757"/>
       </Branch>
-      <Branch Name="null" Sym="XDNVX-71415">
-       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68264 \&quot;View By Movie\&quot; could not add as child; parent symbol=XDNVX-68260 \&quot;ThisItem\&quot;&quot;)" Sym="XDNVX-71416"/>
+      <Branch Name="null" Sym="XDNVX-71755">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68250 \&quot;Movie Times\&quot; could not add as child; parent symbol=XDNVX-68245 \&quot;UPnPBrowserString = \&quot;\&quot;\&quot;&quot;)" Sym="XDNVX-71756"/>
       </Branch>
      </Conditional>
     </Branch>
-    <Branch Name="null" Sym="XDNVX-71411">
-     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68260 \&quot;View By Movie\&quot; missing parent; could not add child with symbol=XDNVX-68264 \&quot;ThisItem\&quot;&quot;)" Sym="XDNVX-71412"/>
+    <Branch Name="null" Sym="XDNVX-71751">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68245 \&quot;Movie Times\&quot; missing parent; could not add child with symbol=XDNVX-68250 \&quot;UPnPBrowserString = \&quot;\&quot;\&quot;&quot;)" Sym="XDNVX-71752"/>
     </Branch>
    </Conditional>
-   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68260&quot;)" Sym="XDNVX-71418">
-    <Branch Name="else" Sym="XDNVX-71419">
-     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68265&quot;)" Sym="XDNVX-71422">
-      <Branch Name="else" Sym="XDNVX-71423">
-       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71426"/>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68260&quot;)" Sym="XDNVX-71758">
+    <Branch Name="else" Sym="XDNVX-71759">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68263&quot;)" Sym="XDNVX-71762">
+      <Branch Name="else" Sym="XDNVX-71763">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71766"/>
       </Branch>
-      <Branch Name="null" Sym="XDNVX-71424">
-       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68265 \&quot;View By Movie\&quot; could not add as child; parent symbol=XDNVX-68260 \&quot;SubItemDefaultFocus\&quot;&quot;)" Sym="XDNVX-71425"/>
+      <Branch Name="null" Sym="XDNVX-71764">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68263 \&quot;View By Movie\&quot; could not add as child; parent symbol=XDNVX-68260 \&quot;ButtonText\&quot;&quot;)" Sym="XDNVX-71765"/>
       </Branch>
      </Conditional>
     </Branch>
-    <Branch Name="null" Sym="XDNVX-71420">
-     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68260 \&quot;View By Movie\&quot; missing parent; could not add child with symbol=XDNVX-68265 \&quot;SubItemDefaultFocus\&quot;&quot;)" Sym="XDNVX-71421"/>
+    <Branch Name="null" Sym="XDNVX-71760">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68260 \&quot;View By Movie\&quot; missing parent; could not add child with symbol=XDNVX-68263 \&quot;ButtonText\&quot;&quot;)" Sym="XDNVX-71761"/>
     </Branch>
    </Conditional>
-   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68260&quot;)" Sym="XDNVX-71427">
-    <Branch Name="else" Sym="XDNVX-71428">
-     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68266&quot;)" Sym="XDNVX-71431">
-      <Branch Name="else" Sym="XDNVX-71432">
-       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71435"/>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68260&quot;)" Sym="XDNVX-71767">
+    <Branch Name="else" Sym="XDNVX-71768">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68264&quot;)" Sym="XDNVX-71771">
+      <Branch Name="else" Sym="XDNVX-71772">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71775"/>
       </Branch>
-      <Branch Name="null" Sym="XDNVX-71433">
-       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68266 \&quot;View By Movie\&quot; could not add as child; parent symbol=XDNVX-68260 \&quot;UPnPBrowserString = \&quot;\&quot;\&quot;&quot;)" Sym="XDNVX-71434"/>
+      <Branch Name="null" Sym="XDNVX-71773">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68264 \&quot;View By Movie\&quot; could not add as child; parent symbol=XDNVX-68260 \&quot;ThisItem\&quot;&quot;)" Sym="XDNVX-71774"/>
       </Branch>
      </Conditional>
     </Branch>
-    <Branch Name="null" Sym="XDNVX-71429">
-     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68260 \&quot;View By Movie\&quot; missing parent; could not add child with symbol=XDNVX-68266 \&quot;UPnPBrowserString = \&quot;\&quot;\&quot;&quot;)" Sym="XDNVX-71430"/>
+    <Branch Name="null" Sym="XDNVX-71769">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68260 \&quot;View By Movie\&quot; missing parent; could not add child with symbol=XDNVX-68264 \&quot;ThisItem\&quot;&quot;)" Sym="XDNVX-71770"/>
     </Branch>
    </Conditional>
-   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68261&quot;)" Sym="XDNVX-71436">
-    <Branch Name="else" Sym="XDNVX-71437">
-     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68267&quot;)" Sym="XDNVX-71440">
-      <Branch Name="else" Sym="XDNVX-71441">
-       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71444"/>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68260&quot;)" Sym="XDNVX-71776">
+    <Branch Name="else" Sym="XDNVX-71777">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68265&quot;)" Sym="XDNVX-71780">
+      <Branch Name="else" Sym="XDNVX-71781">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71784"/>
       </Branch>
-      <Branch Name="null" Sym="XDNVX-71442">
-       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68267 \&quot;\&quot; could not add as child; parent symbol=XDNVX-68261 \&quot;ButtonText\&quot;&quot;)" Sym="XDNVX-71443"/>
+      <Branch Name="null" Sym="XDNVX-71782">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68265 \&quot;View By Movie\&quot; could not add as child; parent symbol=XDNVX-68260 \&quot;SubItemDefaultFocus\&quot;&quot;)" Sym="XDNVX-71783"/>
       </Branch>
      </Conditional>
     </Branch>
-    <Branch Name="null" Sym="XDNVX-71438">
-     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68261 \&quot;\&quot; missing parent; could not add child with symbol=XDNVX-68267 \&quot;ButtonText\&quot;&quot;)" Sym="XDNVX-71439"/>
+    <Branch Name="null" Sym="XDNVX-71778">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68260 \&quot;View By Movie\&quot; missing parent; could not add child with symbol=XDNVX-68265 \&quot;SubItemDefaultFocus\&quot;&quot;)" Sym="XDNVX-71779"/>
     </Branch>
    </Conditional>
-   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68261&quot;)" Sym="XDNVX-71445">
-    <Branch Name="else" Sym="XDNVX-71446">
-     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68268&quot;)" Sym="XDNVX-71449">
-      <Branch Name="else" Sym="XDNVX-71450">
-       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71453"/>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68260&quot;)" Sym="XDNVX-71785">
+    <Branch Name="else" Sym="XDNVX-71786">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68266&quot;)" Sym="XDNVX-71789">
+      <Branch Name="else" Sym="XDNVX-71790">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71793"/>
       </Branch>
-      <Branch Name="null" Sym="XDNVX-71451">
-       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68268 \&quot;\&quot; could not add as child; parent symbol=XDNVX-68261 \&quot;ThisItem\&quot;&quot;)" Sym="XDNVX-71452"/>
+      <Branch Name="null" Sym="XDNVX-71791">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68266 \&quot;View By Movie\&quot; could not add as child; parent symbol=XDNVX-68260 \&quot;UPnPBrowserString = \&quot;\&quot;\&quot;&quot;)" Sym="XDNVX-71792"/>
       </Branch>
      </Conditional>
     </Branch>
-    <Branch Name="null" Sym="XDNVX-71447">
-     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68261 \&quot;\&quot; missing parent; could not add child with symbol=XDNVX-68268 \&quot;ThisItem\&quot;&quot;)" Sym="XDNVX-71448"/>
+    <Branch Name="null" Sym="XDNVX-71787">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68260 \&quot;View By Movie\&quot; missing parent; could not add child with symbol=XDNVX-68266 \&quot;UPnPBrowserString = \&quot;\&quot;\&quot;&quot;)" Sym="XDNVX-71788"/>
     </Branch>
    </Conditional>
-   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68261&quot;)" Sym="XDNVX-71454">
-    <Branch Name="else" Sym="XDNVX-71455">
-     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68270&quot;)" Sym="XDNVX-71458">
-      <Branch Name="else" Sym="XDNVX-71459">
-       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71462"/>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68261&quot;)" Sym="XDNVX-71794">
+    <Branch Name="else" Sym="XDNVX-71795">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68267&quot;)" Sym="XDNVX-71798">
+      <Branch Name="else" Sym="XDNVX-71799">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71802"/>
       </Branch>
-      <Branch Name="null" Sym="XDNVX-71460">
-       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68270 \&quot;\&quot; could not add as child; parent symbol=XDNVX-68261 \&quot;UPnPBrowserString = \&quot;/listTheaters\&quot;\&quot;&quot;)" Sym="XDNVX-71461"/>
+      <Branch Name="null" Sym="XDNVX-71800">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68267 \&quot;View By Theater\&quot; could not add as child; parent symbol=XDNVX-68261 \&quot;ButtonText\&quot;&quot;)" Sym="XDNVX-71801"/>
       </Branch>
      </Conditional>
     </Branch>
-    <Branch Name="null" Sym="XDNVX-71456">
-     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68261 \&quot;\&quot; missing parent; could not add child with symbol=XDNVX-68270 \&quot;UPnPBrowserString = \&quot;/listTheaters\&quot;\&quot;&quot;)" Sym="XDNVX-71457"/>
+    <Branch Name="null" Sym="XDNVX-71796">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68261 \&quot;View By Theater\&quot; missing parent; could not add child with symbol=XDNVX-68267 \&quot;ButtonText\&quot;&quot;)" Sym="XDNVX-71797"/>
     </Branch>
    </Conditional>
-   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68262&quot;)" Sym="XDNVX-71463">
-    <Branch Name="else" Sym="XDNVX-71464">
-     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68271&quot;)" Sym="XDNVX-71467">
-      <Branch Name="else" Sym="XDNVX-71468">
-       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71471"/>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68261&quot;)" Sym="XDNVX-71803">
+    <Branch Name="else" Sym="XDNVX-71804">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68268&quot;)" Sym="XDNVX-71807">
+      <Branch Name="else" Sym="XDNVX-71808">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71811"/>
       </Branch>
-      <Branch Name="null" Sym="XDNVX-71469">
-       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68271 \&quot;Set Zipcode\&quot; could not add as child; parent symbol=XDNVX-68262 \&quot;ButtonText\&quot;&quot;)" Sym="XDNVX-71470"/>
+      <Branch Name="null" Sym="XDNVX-71809">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68268 \&quot;View By Theater\&quot; could not add as child; parent symbol=XDNVX-68261 \&quot;ThisItem\&quot;&quot;)" Sym="XDNVX-71810"/>
       </Branch>
      </Conditional>
     </Branch>
-    <Branch Name="null" Sym="XDNVX-71465">
-     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68262 \&quot;Set Zipcode\&quot; missing parent; could not add child with symbol=XDNVX-68271 \&quot;ButtonText\&quot;&quot;)" Sym="XDNVX-71466"/>
+    <Branch Name="null" Sym="XDNVX-71805">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68261 \&quot;View By Theater\&quot; missing parent; could not add child with symbol=XDNVX-68268 \&quot;ThisItem\&quot;&quot;)" Sym="XDNVX-71806"/>
     </Branch>
    </Conditional>
-   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68262&quot;)" Sym="XDNVX-71472">
-    <Branch Name="else" Sym="XDNVX-71473">
-     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68272&quot;)" Sym="XDNVX-71476">
-      <Branch Name="else" Sym="XDNVX-71477">
-       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71480"/>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68261&quot;)" Sym="XDNVX-71812">
+    <Branch Name="else" Sym="XDNVX-71813">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68270&quot;)" Sym="XDNVX-71816">
+      <Branch Name="else" Sym="XDNVX-71817">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71820"/>
       </Branch>
-      <Branch Name="null" Sym="XDNVX-71478">
-       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68272 \&quot;Set Zipcode\&quot; could not add as child; parent symbol=XDNVX-68262 \&quot;ThisItem\&quot;&quot;)" Sym="XDNVX-71479"/>
+      <Branch Name="null" Sym="XDNVX-71818">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68270 \&quot;View By Theater\&quot; could not add as child; parent symbol=XDNVX-68261 \&quot;UPnPBrowserString = \&quot;/listTheaters\&quot;\&quot;&quot;)" Sym="XDNVX-71819"/>
       </Branch>
      </Conditional>
     </Branch>
-    <Branch Name="null" Sym="XDNVX-71474">
-     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68262 \&quot;Set Zipcode\&quot; missing parent; could not add child with symbol=XDNVX-68272 \&quot;ThisItem\&quot;&quot;)" Sym="XDNVX-71475"/>
+    <Branch Name="null" Sym="XDNVX-71814">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68261 \&quot;View By Theater\&quot; missing parent; could not add child with symbol=XDNVX-68270 \&quot;UPnPBrowserString = \&quot;/listTheaters\&quot;\&quot;&quot;)" Sym="XDNVX-71815"/>
     </Branch>
    </Conditional>
-   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68262&quot;)" Sym="XDNVX-71481">
-    <Branch Name="else" Sym="XDNVX-71482">
-     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68273&quot;)" Sym="XDNVX-71485">
-      <Branch Name="else" Sym="XDNVX-71486">
-       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71489"/>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68262&quot;)" Sym="XDNVX-71821">
+    <Branch Name="else" Sym="XDNVX-71822">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68271&quot;)" Sym="XDNVX-71825">
+      <Branch Name="else" Sym="XDNVX-71826">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71829"/>
       </Branch>
-      <Branch Name="null" Sym="XDNVX-71487">
-       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68273 \&quot;Set Zipcode\&quot; could not add as child; parent symbol=XDNVX-68262 \&quot;ThisItem\&quot;&quot;)" Sym="XDNVX-71488"/>
+      <Branch Name="null" Sym="XDNVX-71827">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68271 \&quot;Settings\&quot; could not add as child; parent symbol=XDNVX-68262 \&quot;ButtonText\&quot;&quot;)" Sym="XDNVX-71828"/>
       </Branch>
      </Conditional>
     </Branch>
-    <Branch Name="null" Sym="XDNVX-71483">
-     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68262 \&quot;Set Zipcode\&quot; missing parent; could not add child with symbol=XDNVX-68273 \&quot;ThisItem\&quot;&quot;)" Sym="XDNVX-71484"/>
+    <Branch Name="null" Sym="XDNVX-71823">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68262 \&quot;Settings\&quot; missing parent; could not add child with symbol=XDNVX-68271 \&quot;ButtonText\&quot;&quot;)" Sym="XDNVX-71824"/>
     </Branch>
    </Conditional>
-   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68262&quot;)" Sym="XDNVX-71490">
-    <Branch Name="else" Sym="XDNVX-71491">
-     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68274&quot;)" Sym="XDNVX-71494">
-      <Branch Name="else" Sym="XDNVX-71495">
-       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71498"/>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68262&quot;)" Sym="XDNVX-71830">
+    <Branch Name="else" Sym="XDNVX-71831">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68272&quot;)" Sym="XDNVX-71834">
+      <Branch Name="else" Sym="XDNVX-71835">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71838"/>
       </Branch>
-      <Branch Name="null" Sym="XDNVX-71496">
-       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68274 \&quot;Set Zipcode\&quot; could not add as child; parent symbol=XDNVX-68262 \&quot;UPnPBrowserString = \&quot;/setZipcode||%%getuserinput=Set Location%%\&quot;\&quot;&quot;)" Sym="XDNVX-71497"/>
+      <Branch Name="null" Sym="XDNVX-71836">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68272 \&quot;Settings\&quot; could not add as child; parent symbol=XDNVX-68262 \&quot;ThisItem\&quot;&quot;)" Sym="XDNVX-71837"/>
       </Branch>
      </Conditional>
     </Branch>
-    <Branch Name="null" Sym="XDNVX-71492">
-     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68262 \&quot;Set Zipcode\&quot; missing parent; could not add child with symbol=XDNVX-68274 \&quot;UPnPBrowserString = \&quot;/setZipcode||%%getuserinput=Set Location%%\&quot;\&quot;&quot;)" Sym="XDNVX-71493"/>
+    <Branch Name="null" Sym="XDNVX-71832">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68262 \&quot;Settings\&quot; missing parent; could not add child with symbol=XDNVX-68272 \&quot;ThisItem\&quot;&quot;)" Sym="XDNVX-71833"/>
     </Branch>
    </Conditional>
-   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68256&quot;)" Sym="XDNVX-71499">
-    <Branch Name="else" Sym="XDNVX-71500">
-     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;OPUS4A-126141&quot;)" Sym="XDNVX-71503">
-      <Branch Name="else" Sym="XDNVX-71504">
-       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71507"/>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68262&quot;)" Sym="XDNVX-71839">
+    <Branch Name="else" Sym="XDNVX-71840">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68274&quot;)" Sym="XDNVX-71843">
+      <Branch Name="else" Sym="XDNVX-71844">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71847"/>
       </Branch>
-      <Branch Name="null" Sym="XDNVX-71505">
-       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=OPUS4A-126141 \&quot;Tertiary Menu Content Area\&quot; could not add as child; parent symbol=XDNVX-68256 \&quot;TertiaryMenuContentAreaTheme\&quot;&quot;)" Sym="XDNVX-71506"/>
+      <Branch Name="null" Sym="XDNVX-71845">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68274 \&quot;Settings\&quot; could not add as child; parent symbol=XDNVX-68262 \&quot;UPnPBrowserString = \&quot;/settings\&quot;\&quot;&quot;)" Sym="XDNVX-71846"/>
       </Branch>
      </Conditional>
     </Branch>
-    <Branch Name="null" Sym="XDNVX-71501">
-     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68256 \&quot;Tertiary Menu Content Area\&quot; missing parent; could not add child with symbol=OPUS4A-126141 \&quot;TertiaryMenuContentAreaTheme\&quot;&quot;)" Sym="XDNVX-71502"/>
+    <Branch Name="null" Sym="XDNVX-71841">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68262 \&quot;Settings\&quot; missing parent; could not add child with symbol=XDNVX-68274 \&quot;UPnPBrowserString = \&quot;/settings\&quot;\&quot;&quot;)" Sym="XDNVX-71842"/>
     </Branch>
    </Conditional>
-   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68256&quot;)" Sym="XDNVX-71508">
-    <Branch Name="else" Sym="XDNVX-71509">
-     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68257&quot;)" Sym="XDNVX-71512">
-      <Branch Name="else" Sym="XDNVX-71513">
-       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71516"/>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68256&quot;)" Sym="XDNVX-71848">
+    <Branch Name="else" Sym="XDNVX-71849">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;OPUS4A-126141&quot;)" Sym="XDNVX-71852">
+      <Branch Name="else" Sym="XDNVX-71853">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71856"/>
       </Branch>
-      <Branch Name="null" Sym="XDNVX-71514">
-       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68257 \&quot;Tertiary Menu Content Area\&quot; could not add as child; parent symbol=XDNVX-68256 \&quot;Tertiary Menu Items Area\&quot;&quot;)" Sym="XDNVX-71515"/>
+      <Branch Name="null" Sym="XDNVX-71854">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=OPUS4A-126141 \&quot;Tertiary Menu Content Area\&quot; could not add as child; parent symbol=XDNVX-68256 \&quot;TertiaryMenuContentAreaTheme\&quot;&quot;)" Sym="XDNVX-71855"/>
       </Branch>
      </Conditional>
     </Branch>
-    <Branch Name="null" Sym="XDNVX-71510">
-     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68256 \&quot;Tertiary Menu Content Area\&quot; missing parent; could not add child with symbol=XDNVX-68257 \&quot;Tertiary Menu Items Area\&quot;&quot;)" Sym="XDNVX-71511"/>
+    <Branch Name="null" Sym="XDNVX-71850">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68256 \&quot;Tertiary Menu Content Area\&quot; missing parent; could not add child with symbol=OPUS4A-126141 \&quot;TertiaryMenuContentAreaTheme\&quot;&quot;)" Sym="XDNVX-71851"/>
     </Branch>
    </Conditional>
-   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68257&quot;)" Sym="XDNVX-71517">
-    <Branch Name="else" Sym="XDNVX-71518">
-     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68259&quot;)" Sym="XDNVX-71521">
-      <Branch Name="else" Sym="XDNVX-71522">
-       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71525"/>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68256&quot;)" Sym="XDNVX-71857">
+    <Branch Name="else" Sym="XDNVX-71858">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68257&quot;)" Sym="XDNVX-71861">
+      <Branch Name="else" Sym="XDNVX-71862">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71865"/>
       </Branch>
-      <Branch Name="null" Sym="XDNVX-71523">
-       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68259 \&quot;Tertiary Menu Items Area\&quot; could not add as child; parent symbol=XDNVX-68257 \&quot;SubMenuPanel\&quot;&quot;)" Sym="XDNVX-71524"/>
+      <Branch Name="null" Sym="XDNVX-71863">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68257 \&quot;Tertiary Menu Content Area\&quot; could not add as child; parent symbol=XDNVX-68256 \&quot;Tertiary Menu Items Area\&quot;&quot;)" Sym="XDNVX-71864"/>
       </Branch>
      </Conditional>
     </Branch>
-    <Branch Name="null" Sym="XDNVX-71519">
-     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68257 \&quot;Tertiary Menu Items Area\&quot; missing parent; could not add child with symbol=XDNVX-68259 \&quot;SubMenuPanel\&quot;&quot;)" Sym="XDNVX-71520"/>
+    <Branch Name="null" Sym="XDNVX-71859">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68256 \&quot;Tertiary Menu Content Area\&quot; missing parent; could not add child with symbol=XDNVX-68257 \&quot;Tertiary Menu Items Area\&quot;&quot;)" Sym="XDNVX-71860"/>
     </Branch>
    </Conditional>
-   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68257&quot;)" Sym="XDNVX-71526">
-    <Branch Name="else" Sym="XDNVX-71527">
-     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;OPUS4A-126166&quot;)" Sym="XDNVX-71530">
-      <Branch Name="else" Sym="XDNVX-71531">
-       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71534"/>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68257&quot;)" Sym="XDNVX-71866">
+    <Branch Name="else" Sym="XDNVX-71867">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68259&quot;)" Sym="XDNVX-71870">
+      <Branch Name="else" Sym="XDNVX-71871">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71874"/>
       </Branch>
-      <Branch Name="null" Sym="XDNVX-71532">
-       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=OPUS4A-126166 \&quot;Tertiary Menu Items Area\&quot; could not add as child; parent symbol=XDNVX-68257 \&quot;TertiaryMenuItemAreaTheme\&quot;&quot;)" Sym="XDNVX-71533"/>
+      <Branch Name="null" Sym="XDNVX-71872">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68259 \&quot;Tertiary Menu Items Area\&quot; could not add as child; parent symbol=XDNVX-68257 \&quot;SubMenuPanel\&quot;&quot;)" Sym="XDNVX-71873"/>
       </Branch>
      </Conditional>
     </Branch>
-    <Branch Name="null" Sym="XDNVX-71528">
-     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68257 \&quot;Tertiary Menu Items Area\&quot; missing parent; could not add child with symbol=OPUS4A-126166 \&quot;TertiaryMenuItemAreaTheme\&quot;&quot;)" Sym="XDNVX-71529"/>
+    <Branch Name="null" Sym="XDNVX-71868">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68257 \&quot;Tertiary Menu Items Area\&quot; missing parent; could not add child with symbol=XDNVX-68259 \&quot;SubMenuPanel\&quot;&quot;)" Sym="XDNVX-71869"/>
     </Branch>
    </Conditional>
-   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68257&quot;)" Sym="XDNVX-71535">
-    <Branch Name="else" Sym="XDNVX-71536">
-     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68260&quot;)" Sym="XDNVX-71539">
-      <Branch Name="else" Sym="XDNVX-71540">
-       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71543"/>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68257&quot;)" Sym="XDNVX-71875">
+    <Branch Name="else" Sym="XDNVX-71876">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;OPUS4A-126166&quot;)" Sym="XDNVX-71879">
+      <Branch Name="else" Sym="XDNVX-71880">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71883"/>
       </Branch>
-      <Branch Name="null" Sym="XDNVX-71541">
-       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68260 \&quot;Tertiary Menu Items Area\&quot; could not add as child; parent symbol=XDNVX-68257 \&quot;View By Movie\&quot;&quot;)" Sym="XDNVX-71542"/>
+      <Branch Name="null" Sym="XDNVX-71881">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=OPUS4A-126166 \&quot;Tertiary Menu Items Area\&quot; could not add as child; parent symbol=XDNVX-68257 \&quot;TertiaryMenuItemAreaTheme\&quot;&quot;)" Sym="XDNVX-71882"/>
       </Branch>
      </Conditional>
     </Branch>
-    <Branch Name="null" Sym="XDNVX-71537">
-     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68257 \&quot;Tertiary Menu Items Area\&quot; missing parent; could not add child with symbol=XDNVX-68260 \&quot;View By Movie\&quot;&quot;)" Sym="XDNVX-71538"/>
+    <Branch Name="null" Sym="XDNVX-71877">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68257 \&quot;Tertiary Menu Items Area\&quot; missing parent; could not add child with symbol=OPUS4A-126166 \&quot;TertiaryMenuItemAreaTheme\&quot;&quot;)" Sym="XDNVX-71878"/>
     </Branch>
    </Conditional>
-   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68257&quot;)" Sym="XDNVX-71544">
-    <Branch Name="else" Sym="XDNVX-71545">
-     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68261&quot;)" Sym="XDNVX-71548">
-      <Branch Name="else" Sym="XDNVX-71549">
-       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71552"/>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68257&quot;)" Sym="XDNVX-71884">
+    <Branch Name="else" Sym="XDNVX-71885">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68260&quot;)" Sym="XDNVX-71888">
+      <Branch Name="else" Sym="XDNVX-71889">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71892"/>
       </Branch>
-      <Branch Name="null" Sym="XDNVX-71550">
-       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68261 \&quot;Tertiary Menu Items Area\&quot; could not add as child; parent symbol=XDNVX-68257 \&quot;\&quot;&quot;)" Sym="XDNVX-71551"/>
+      <Branch Name="null" Sym="XDNVX-71890">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68260 \&quot;Tertiary Menu Items Area\&quot; could not add as child; parent symbol=XDNVX-68257 \&quot;View By Movie\&quot;&quot;)" Sym="XDNVX-71891"/>
       </Branch>
      </Conditional>
     </Branch>
-    <Branch Name="null" Sym="XDNVX-71546">
-     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68257 \&quot;Tertiary Menu Items Area\&quot; missing parent; could not add child with symbol=XDNVX-68261 \&quot;\&quot;&quot;)" Sym="XDNVX-71547"/>
+    <Branch Name="null" Sym="XDNVX-71886">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68257 \&quot;Tertiary Menu Items Area\&quot; missing parent; could not add child with symbol=XDNVX-68260 \&quot;View By Movie\&quot;&quot;)" Sym="XDNVX-71887"/>
     </Branch>
    </Conditional>
-   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68257&quot;)" Sym="XDNVX-71553">
-    <Branch Name="else" Sym="XDNVX-71554">
-     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68262&quot;)" Sym="XDNVX-71557">
-      <Branch Name="else" Sym="XDNVX-71558">
-       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71561"/>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68257&quot;)" Sym="XDNVX-71893">
+    <Branch Name="else" Sym="XDNVX-71894">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68261&quot;)" Sym="XDNVX-71897">
+      <Branch Name="else" Sym="XDNVX-71898">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71901"/>
       </Branch>
-      <Branch Name="null" Sym="XDNVX-71559">
-       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68262 \&quot;Tertiary Menu Items Area\&quot; could not add as child; parent symbol=XDNVX-68257 \&quot;Set Zipcode\&quot;&quot;)" Sym="XDNVX-71560"/>
+      <Branch Name="null" Sym="XDNVX-71899">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68261 \&quot;Tertiary Menu Items Area\&quot; could not add as child; parent symbol=XDNVX-68257 \&quot;View By Theater\&quot;&quot;)" Sym="XDNVX-71900"/>
       </Branch>
      </Conditional>
     </Branch>
-    <Branch Name="null" Sym="XDNVX-71555">
-     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68257 \&quot;Tertiary Menu Items Area\&quot; missing parent; could not add child with symbol=XDNVX-68262 \&quot;Set Zipcode\&quot;&quot;)" Sym="XDNVX-71556"/>
+    <Branch Name="null" Sym="XDNVX-71895">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68257 \&quot;Tertiary Menu Items Area\&quot; missing parent; could not add child with symbol=XDNVX-68261 \&quot;View By Theater\&quot;&quot;)" Sym="XDNVX-71896"/>
     </Branch>
    </Conditional>
-   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-71248&quot;)" Sym="XDNVX-71562">
-    <Branch Name="else" Sym="XDNVX-71563">
-     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;BASE-51823&quot;)" Sym="XDNVX-71566">
-      <Branch Name="else" Sym="XDNVX-71567">
-       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71570"/>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68257&quot;)" Sym="XDNVX-71902">
+    <Branch Name="else" Sym="XDNVX-71903">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-71581&quot;)" Sym="XDNVX-71906">
+      <Branch Name="else" Sym="XDNVX-71907">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71910"/>
       </Branch>
-      <Branch Name="null" Sym="XDNVX-71568">
-       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=BASE-51823 \&quot;AddStaticContext(\&quot;NewResultsIndex\&quot;,0)\&quot; could not add as child; parent symbol=XDNVX-71248 \&quot;\&quot;REM If the Online Videos properties files are not loaded, load them. Force reload if ForceReload is true.\&quot;\&quot;&quot;)" Sym="XDNVX-71569"/>
+      <Branch Name="null" Sym="XDNVX-71908">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-71581 \&quot;Tertiary Menu Items Area\&quot; could not add as child; parent symbol=XDNVX-68257 \&quot;Opening This Weekend\&quot;&quot;)" Sym="XDNVX-71909"/>
       </Branch>
      </Conditional>
     </Branch>
-    <Branch Name="null" Sym="XDNVX-71564">
-     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-71248 \&quot;AddStaticContext(\&quot;NewResultsIndex\&quot;,0)\&quot; missing parent; could not add child with symbol=BASE-51823 \&quot;\&quot;REM If the Online Videos properties files are not loaded, load them. Force reload if ForceReload is true.\&quot;\&quot;&quot;)" Sym="XDNVX-71565"/>
+    <Branch Name="null" Sym="XDNVX-71904">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68257 \&quot;Tertiary Menu Items Area\&quot; missing parent; could not add child with symbol=XDNVX-71581 \&quot;Opening This Weekend\&quot;&quot;)" Sym="XDNVX-71905"/>
     </Branch>
    </Conditional>
-   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-71248&quot;)" Sym="XDNVX-71571">
-    <Branch Name="else" Sym="XDNVX-71572">
-     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;OPUS4A-168105&quot;)" Sym="XDNVX-71575">
-      <Branch Name="else" Sym="XDNVX-71576">
-       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71579"/>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68257&quot;)" Sym="XDNVX-71911">
+    <Branch Name="else" Sym="XDNVX-71912">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-71585&quot;)" Sym="XDNVX-71915">
+      <Branch Name="else" Sym="XDNVX-71916">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71919"/>
       </Branch>
-      <Branch Name="null" Sym="XDNVX-71577">
-       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=OPUS4A-168105 \&quot;AddStaticContext(\&quot;NewResultsIndex\&quot;,0)\&quot; could not add as child; parent symbol=XDNVX-71248 \&quot;\&quot;REM Download the RSS feed for the SearchURL.\&quot;\&quot;&quot;)" Sym="XDNVX-71578"/>
+      <Branch Name="null" Sym="XDNVX-71917">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-71585 \&quot;Tertiary Menu Items Area\&quot; could not add as child; parent symbol=XDNVX-68257 \&quot;Coming Soon\&quot;&quot;)" Sym="XDNVX-71918"/>
       </Branch>
      </Conditional>
     </Branch>
-    <Branch Name="null" Sym="XDNVX-71573">
-     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-71248 \&quot;AddStaticContext(\&quot;NewResultsIndex\&quot;,0)\&quot; missing parent; could not add child with symbol=OPUS4A-168105 \&quot;\&quot;REM Download the RSS feed for the SearchURL.\&quot;\&quot;&quot;)" Sym="XDNVX-71574"/>
+    <Branch Name="null" Sym="XDNVX-71913">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68257 \&quot;Tertiary Menu Items Area\&quot; missing parent; could not add child with symbol=XDNVX-71585 \&quot;Coming Soon\&quot;&quot;)" Sym="XDNVX-71914"/>
+    </Branch>
+   </Conditional>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-68257&quot;)" Sym="XDNVX-71920">
+    <Branch Name="else" Sym="XDNVX-71921">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68262&quot;)" Sym="XDNVX-71924">
+      <Branch Name="else" Sym="XDNVX-71925">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71928"/>
+      </Branch>
+      <Branch Name="null" Sym="XDNVX-71926">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68262 \&quot;Tertiary Menu Items Area\&quot; could not add as child; parent symbol=XDNVX-68257 \&quot;Settings\&quot;&quot;)" Sym="XDNVX-71927"/>
+      </Branch>
+     </Conditional>
+    </Branch>
+    <Branch Name="null" Sym="XDNVX-71922">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68257 \&quot;Tertiary Menu Items Area\&quot; missing parent; could not add child with symbol=XDNVX-68262 \&quot;Settings\&quot;&quot;)" Sym="XDNVX-71923"/>
+    </Branch>
+   </Conditional>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-71581&quot;)" Sym="XDNVX-71929">
+    <Branch Name="else" Sym="XDNVX-71930">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-71582&quot;)" Sym="XDNVX-71933">
+      <Branch Name="else" Sym="XDNVX-71934">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71937"/>
+      </Branch>
+      <Branch Name="null" Sym="XDNVX-71935">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-71582 \&quot;Opening This Weekend\&quot; could not add as child; parent symbol=XDNVX-71581 \&quot;ButtonText\&quot;&quot;)" Sym="XDNVX-71936"/>
+      </Branch>
+     </Conditional>
+    </Branch>
+    <Branch Name="null" Sym="XDNVX-71931">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-71581 \&quot;Opening This Weekend\&quot; missing parent; could not add child with symbol=XDNVX-71582 \&quot;ButtonText\&quot;&quot;)" Sym="XDNVX-71932"/>
+    </Branch>
+   </Conditional>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-71581&quot;)" Sym="XDNVX-71938">
+    <Branch Name="else" Sym="XDNVX-71939">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-71583&quot;)" Sym="XDNVX-71942">
+      <Branch Name="else" Sym="XDNVX-71943">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71946"/>
+      </Branch>
+      <Branch Name="null" Sym="XDNVX-71944">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-71583 \&quot;Opening This Weekend\&quot; could not add as child; parent symbol=XDNVX-71581 \&quot;ThisItem\&quot;&quot;)" Sym="XDNVX-71945"/>
+      </Branch>
+     </Conditional>
+    </Branch>
+    <Branch Name="null" Sym="XDNVX-71940">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-71581 \&quot;Opening This Weekend\&quot; missing parent; could not add child with symbol=XDNVX-71583 \&quot;ThisItem\&quot;&quot;)" Sym="XDNVX-71941"/>
+    </Branch>
+   </Conditional>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-71581&quot;)" Sym="XDNVX-71947">
+    <Branch Name="else" Sym="XDNVX-71948">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-71584&quot;)" Sym="XDNVX-71951">
+      <Branch Name="else" Sym="XDNVX-71952">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71955"/>
+      </Branch>
+      <Branch Name="null" Sym="XDNVX-71953">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-71584 \&quot;Opening This Weekend\&quot; could not add as child; parent symbol=XDNVX-71581 \&quot;UPnPBrowserString = \&quot;/openingThisWeekend\&quot;\&quot;&quot;)" Sym="XDNVX-71954"/>
+      </Branch>
+     </Conditional>
+    </Branch>
+    <Branch Name="null" Sym="XDNVX-71949">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-71581 \&quot;Opening This Weekend\&quot; missing parent; could not add child with symbol=XDNVX-71584 \&quot;UPnPBrowserString = \&quot;/openingThisWeekend\&quot;\&quot;&quot;)" Sym="XDNVX-71950"/>
+    </Branch>
+   </Conditional>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-71584&quot;)" Sym="XDNVX-71956">
+    <Branch Name="else" Sym="XDNVX-71957">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68251&quot;)" Sym="XDNVX-71960">
+      <Branch Name="else" Sym="XDNVX-71961">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71964"/>
+      </Branch>
+      <Branch Name="null" Sym="XDNVX-71962">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68251 \&quot;UPnPBrowserString = \&quot;/openingThisWeekend\&quot;\&quot; could not add as child; parent symbol=XDNVX-71584 \&quot;SearchURL = \&quot;external,\&quot; + java_lang_System_getProperty(\&quot;user.dir\&quot;) + \&quot;\\\\SageOnlineServicesEXEs\\\\MovieTimes\&quot; + If(IsLinuxOS(),\&quot;.out\&quot;,\&quot;.exe\&quot;) + \&quot;,\&quot; + UPnPBrowserString\&quot;&quot;)" Sym="XDNVX-71963"/>
+      </Branch>
+     </Conditional>
+    </Branch>
+    <Branch Name="null" Sym="XDNVX-71958">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-71584 \&quot;UPnPBrowserString = \&quot;/openingThisWeekend\&quot;\&quot; missing parent; could not add child with symbol=XDNVX-68251 \&quot;SearchURL = \&quot;external,\&quot; + java_lang_System_getProperty(\&quot;user.dir\&quot;) + \&quot;\\\\SageOnlineServicesEXEs\\\\MovieTimes\&quot; + If(IsLinuxOS(),\&quot;.out\&quot;,\&quot;.exe\&quot;) + \&quot;,\&quot; + UPnPBrowserString\&quot;&quot;)" Sym="XDNVX-71959"/>
+    </Branch>
+   </Conditional>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-71585&quot;)" Sym="XDNVX-71965">
+    <Branch Name="else" Sym="XDNVX-71966">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-71586&quot;)" Sym="XDNVX-71969">
+      <Branch Name="else" Sym="XDNVX-71970">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71973"/>
+      </Branch>
+      <Branch Name="null" Sym="XDNVX-71971">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-71586 \&quot;Coming Soon\&quot; could not add as child; parent symbol=XDNVX-71585 \&quot;ButtonText\&quot;&quot;)" Sym="XDNVX-71972"/>
+      </Branch>
+     </Conditional>
+    </Branch>
+    <Branch Name="null" Sym="XDNVX-71967">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-71585 \&quot;Coming Soon\&quot; missing parent; could not add child with symbol=XDNVX-71586 \&quot;ButtonText\&quot;&quot;)" Sym="XDNVX-71968"/>
+    </Branch>
+   </Conditional>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-71585&quot;)" Sym="XDNVX-71974">
+    <Branch Name="else" Sym="XDNVX-71975">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-71587&quot;)" Sym="XDNVX-71978">
+      <Branch Name="else" Sym="XDNVX-71979">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71982"/>
+      </Branch>
+      <Branch Name="null" Sym="XDNVX-71980">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-71587 \&quot;Coming Soon\&quot; could not add as child; parent symbol=XDNVX-71585 \&quot;ThisItem\&quot;&quot;)" Sym="XDNVX-71981"/>
+      </Branch>
+     </Conditional>
+    </Branch>
+    <Branch Name="null" Sym="XDNVX-71976">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-71585 \&quot;Coming Soon\&quot; missing parent; could not add child with symbol=XDNVX-71587 \&quot;ThisItem\&quot;&quot;)" Sym="XDNVX-71977"/>
+    </Branch>
+   </Conditional>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-71585&quot;)" Sym="XDNVX-71983">
+    <Branch Name="else" Sym="XDNVX-71984">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-71588&quot;)" Sym="XDNVX-71987">
+      <Branch Name="else" Sym="XDNVX-71988">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-71991"/>
+      </Branch>
+      <Branch Name="null" Sym="XDNVX-71989">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-71588 \&quot;Coming Soon\&quot; could not add as child; parent symbol=XDNVX-71585 \&quot;UPnPBrowserString = \&quot;/comingSoon\&quot;\&quot;&quot;)" Sym="XDNVX-71990"/>
+      </Branch>
+     </Conditional>
+    </Branch>
+    <Branch Name="null" Sym="XDNVX-71985">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-71585 \&quot;Coming Soon\&quot; missing parent; could not add child with symbol=XDNVX-71588 \&quot;UPnPBrowserString = \&quot;/comingSoon\&quot;\&quot;&quot;)" Sym="XDNVX-71986"/>
+    </Branch>
+   </Conditional>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;XDNVX-71588&quot;)" Sym="XDNVX-71992">
+    <Branch Name="else" Sym="XDNVX-71993">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;XDNVX-68251&quot;)" Sym="XDNVX-71996">
+      <Branch Name="else" Sym="XDNVX-71997">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="XDNVX-72000"/>
+      </Branch>
+      <Branch Name="null" Sym="XDNVX-71998">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-68251 \&quot;UPnPBrowserString = \&quot;/comingSoon\&quot;\&quot; could not add as child; parent symbol=XDNVX-71588 \&quot;SearchURL = \&quot;external,\&quot; + java_lang_System_getProperty(\&quot;user.dir\&quot;) + \&quot;\\\\SageOnlineServicesEXEs\\\\MovieTimes\&quot; + If(IsLinuxOS(),\&quot;.out\&quot;,\&quot;.exe\&quot;) + \&quot;,\&quot; + UPnPBrowserString\&quot;&quot;)" Sym="XDNVX-71999"/>
+      </Branch>
+     </Conditional>
+    </Branch>
+    <Branch Name="null" Sym="XDNVX-71994">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=XDNVX-71588 \&quot;UPnPBrowserString = \&quot;/comingSoon\&quot;\&quot; missing parent; could not add child with symbol=XDNVX-68251 \&quot;SearchURL = \&quot;external,\&quot; + java_lang_System_getProperty(\&quot;user.dir\&quot;) + \&quot;\\\\SageOnlineServicesEXEs\\\\MovieTimes\&quot; + If(IsLinuxOS(),\&quot;.out\&quot;,\&quot;.exe\&quot;) + \&quot;,\&quot; + UPnPBrowserString\&quot;&quot;)" Sym="XDNVX-71995"/>
     </Branch>
    </Conditional>
   </Action>
-  <Action Name="&quot;REM Repositioning of child Widgets&quot;" Sym="XDNVX-71255"/>
-  <Action Name="ReturnValue = &quot;AutoCleanupSTVImportedHook&quot;" Sym="XDNVX-71580"/>
+  <Action Name="&quot;REM Repositioning of child Widgets&quot;" Sym="XDNVX-71595"/>
+  <Action Name="ReturnValue = &quot;AutoCleanupSTVImportedHook&quot;" Sym="XDNVX-72001"/>
  </Hook>
  <Action Name="&quot;REM Movie Times&quot;" Sym="XDNVX-68244"/>
  <Action Name="UPnPBrowserString = &quot;&quot;" Sym="XDNVX-68250"/>
@@ -557,13 +692,17 @@
  <Action Name="AddStaticContext(&quot;OnlineVideoType&quot;,&quot;xPodcast&quot;)" Sym="XDNVX-68253"/>
  <Action Name="UPnPBrowserString = &quot;&quot;" Sym="XDNVX-68266"/>
  <Action Name="UPnPBrowserString = &quot;/listTheaters&quot;" Sym="XDNVX-68270"/>
- <Action Name="UPnPBrowserString = &quot;/setZipcode||%%getuserinput=Set Location%%&quot;" Sym="XDNVX-68274"/>
+ <Action Name="UPnPBrowserString = &quot;/settings&quot;" Sym="XDNVX-68274"/>
  <Action Name="AddStaticContext(&quot;NewResultsIndex&quot;,0)" Sym="XDNVX-71248"/>
+ <Action Name="UPnPBrowserString = &quot;/openingThisWeekend&quot;" Sym="XDNVX-71584"/>
+ <Action Name="UPnPBrowserString = &quot;/comingSoon&quot;" Sym="XDNVX-71588"/>
  <Branch Name="&quot;xSubmenuMovieTimes&quot;" Sym="XDNVX-68255"/>
  <Item Name="Movie Times" Sym="XDNVX-68245"/>
  <Item Name="View By Movie" Sym="XDNVX-68260"/>
- <Item Name="" Sym="XDNVX-68261"/>
- <Item Name="Set Zipcode" Sym="XDNVX-68262"/>
+ <Item Name="View By Theater" Sym="XDNVX-68261"/>
+ <Item Name="Settings" Sym="XDNVX-68262"/>
+ <Item Name="Opening This Weekend" Sym="XDNVX-71581"/>
+ <Item Name="Coming Soon" Sym="XDNVX-71585"/>
  <Attribute Name="ButtonText" Sym="XDNVX-68246">
   <Value>"Movie Times"</Value>
  </Attribute>
@@ -595,13 +734,22 @@
   <Value>"xItemMovieTimesViewByTheater"</Value>
  </Attribute>
  <Attribute Name="ButtonText" Sym="XDNVX-68271">
-  <Value>"Set Location"</Value>
+  <Value>"Settings"</Value>
  </Attribute>
  <Attribute Name="ThisItem" Sym="XDNVX-68272">
-  <Value>"xItemMovieTimesViewByMovie"</Value>
+  <Value>"xItemMovieTimesSettings"</Value>
  </Attribute>
- <Attribute Name="ThisItem" Sym="XDNVX-68273">
-  <Value>"xItemMovieTimesSetZipcode"</Value>
+ <Attribute Name="ButtonText" Sym="XDNVX-71582">
+  <Value>"Opening this Weekend"</Value>
+ </Attribute>
+ <Attribute Name="ThisItem" Sym="XDNVX-71583">
+  <Value>"xItemMovieTimesOpeningThisWeekend"</Value>
+ </Attribute>
+ <Attribute Name="ButtonText" Sym="XDNVX-71586">
+  <Value>"Coming Soon"</Value>
+ </Attribute>
+ <Attribute Name="ThisItem" Sym="XDNVX-71587">
+  <Value>"xItemMovieTimesComingSon"</Value>
  </Attribute>
  <Panel Name="Tertiary Menu Content Area" Sym="XDNVX-68256">
   <WrapHNav>false</WrapHNav>
