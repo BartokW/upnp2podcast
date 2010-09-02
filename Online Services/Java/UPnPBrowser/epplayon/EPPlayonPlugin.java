@@ -36,7 +36,7 @@ public class EPPlayonPlugin extends AbstractPlugin
     public EPPlayonPlugin(SageTVPluginRegistry registry) 
     {
         super(registry);
-        addProperty(SageTVPlugin.CONFIG_BOOL,Prop_AutoUpdate, "false", "PlayOn AutoUpdate", "Enable PlayOn Queue Importer to automatically import content from your Hulu/Netflix queue into SageTV").setPersistence(ssp);
+        addProperty(SageTVPlugin.CONFIG_BOOL,Prop_AutoUpdate, "true", "PlayOn AutoUpdate", "Enable PlayOn Queue Importer to automatically import content from your Hulu/Netflix queue into SageTV").setPersistence(ssp);
         addProperty(SageTVPlugin.CONFIG_INTEGER,Prop_NightlyScanTime, "1", "Nightly Time To Run Import", "Time in hours (24hrs) you want to run PlayOn Queue Importer").setPersistence(ssp);
         addProperty(SageTVPlugin.CONFIG_BOOL,Prop_MyMoviesMode, "false", "MyMovies Mode", "Set to true to put dummy videos in their own folder so MyMovies can collect metadata. False if you don't use MyMovies.").setPersistence(ssp);
         addProperty(SageTVPlugin.CONFIG_BUTTON,Prop_UpdateNow, "", "Update Videos Now", "Press to run PlayOn Queue Importer now").setPersistence(spbutton);
