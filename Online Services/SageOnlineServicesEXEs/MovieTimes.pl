@@ -49,7 +49,7 @@
   $dateXMLString = sprintf("%04d-%02d-%02d",$year,$month,$dayOfMonth);
 
   # Code version
-  my $codeVersion = "$executableEXE v1.1 (SNIP:BUILT)".($debug ? "(debug)" : "");
+  my $codeVersion = "$executableEXE v1.1.1 (SNIP:BUILT)".($debug ? "(debug)" : "");
   
   my $invalidMsg .= "\n$codeVersion\n";
   $invalidMsg .= "\tUSAGE:";
@@ -202,24 +202,13 @@
                         thumbnail   => " "});
       
       foreach $settingsHashRef (@settings)
-      {
-          $newItem = $feed_item;
-          $video             = toXML($settingsHashRef->{command});
-          $title             = $settingsHashRef->{title};
-          $description       = $settingsHashRef->{description};
-          $thumbnail         = toXML($settingsHashRef->{thumbnail});
-          $type              = 'sagetv/subcategory';
-          
-          $newItem =~ s/%%ITEM_TITLE%%/$title/g;
-          $newItem =~ s/%%ITEM_DATE%%/$dateXMLString/g;
-          $newItem =~ s/%%ITEM_DESCRIPTION%%/$description/g;
-          $newItem =~ s/%%ITEM_URL%%/$video/g;
-          $newItem =~ s/%%ITEM_DUR%%/1/g;
-          $newItem =~ s/%%ITEM_SIZE%%/1/g;
-          $newItem =~ s/%%ITEM_TYPE%%/$type/g;
-          $newItem =~ s/%%ITEM_PICTURE%%/$thumbnail/g;
-          $newItem =~ s/%%ITEM_DUR_SEC%%/1/g; 
-          push(@items,$newItem);  
+      {      
+          push(@items,
+              genPodcastItem({video       => $settingsHashRef->{command},
+                              title       => $settingsHashRef->{title},
+                              type        => 'sagetv/subcategory',
+                              description => $settingsHashRef->{description},
+                              thumbnail   => $settingsHashRef->{thumbnail}}));  
       }
       return @items;
   }
@@ -263,24 +252,12 @@
               echoPrint("      + Found Trailer: (".$trailerHash{$trailer}{name}.")(".$trailerHash{$trailer}{res}.")(".$trailerHash{$trailer}{source}.")(".$trailer.")\n");    
           }
           
-          $trailerItem       = $feed_item;
-          $video             = toXML('external,"'.$executable.'",/movie||'.$trailerName.'||/getTrailers');
-          $title             = $trailerName;
-          $description       = $trailerHash{synopsis};
-          $thumbnail         = toXML($trailerHash{poster});
-          $type              = "sagetv/subcategory";
-          $date              = " ";
-          
-          $trailerItem =~ s/%%ITEM_TITLE%%/$title/g;
-          $trailerItem =~ s/%%ITEM_DATE%%/$date/g;
-          $trailerItem =~ s/%%ITEM_DESCRIPTION%%/$description/g;
-          $trailerItem =~ s/%%ITEM_URL%%/$video/g;
-          $trailerItem =~ s/%%ITEM_DUR%%/1/g;
-          $trailerItem =~ s/%%ITEM_SIZE%%/1/g;
-          $trailerItem =~ s/%%ITEM_TYPE%%/$type/g;
-          $trailerItem =~ s/%%ITEM_PICTURE%%/$thumbnail/g;
-          $trailerItem =~ s/%%ITEM_DUR_SEC%%/1/g;
-          push(@items,$trailerItem);   
+          push( @items,
+                genPodcastItem({video       => 'external,"'.$executable.'",/movie||'.$trailerName.'||/getTrailers',
+                                title       => $trailerName,
+                                type        => 'sagetv/subcategory',
+                                description => $trailerHash{synopsis},
+                                thumbnail   => $trailerHash{poster}}));  
           
 
           $content =~ s/\Q$trailerBlock\E//gsm;
@@ -427,51 +404,26 @@
               echoPrint("      ! Skipping : (".$trailerHash{$trailer}{name}.")(".$trailerHash{$trailer}{source}.")(".$trailerHash{$trailer}{res}.")($trailerRes)($trailer)\n");
               next;
           }
-
-          $trailerItem       = $feed_item;
-          $video             = toXML($trailer);
-          $title             = $trailerHash{$trailer}{name};
-          $description       = " ";
-          $thumbnail         = $trailerHash{poster};
-          $type              = "video/flv";
-          $date              = $trailerHash{$trailer}{source};
-
-          echoPrint("    - Adding Trailer: ($title)(".$trailerHash{$trailer}{res}.")($date)($video)\n");    
           
-          $trailerItem =~ s/%%ITEM_TITLE%%/$title/g;
-          $trailerItem =~ s/%%ITEM_DATE%%/$date/g;
-          $trailerItem =~ s/%%ITEM_DESCRIPTION%%/$description/g;
-          $trailerItem =~ s/%%ITEM_URL%%/$video/g;
-          $trailerItem =~ s/%%ITEM_DUR%%/1/g;
-          $trailerItem =~ s/%%ITEM_SIZE%%/1/g;
-          $trailerItem =~ s/%%ITEM_TYPE%%/$type/g;
-          $trailerItem =~ s/%%ITEM_PICTURE%%/$thumbnail/g;
-          $trailerItem =~ s/%%ITEM_DUR_SEC%%/1/g;
-          push(@items,$trailerItem);
+          push( @items,
+                genPodcastItem({video       => $trailer,
+                                title       => $trailerHash{$trailer}{name},
+                                type        => 'video/flv',
+                                date        => $trailerHash{$trailer}{source},
+                                thumbnail   => $trailerHash{poster}})); 
+          echoPrint("    - Adding Trailer: ($title)(".$trailerHash{$trailer}{res}.")($date)($video)\n");    
       }
       
       if (exists $movieHash->{youtube})
       {
-          $trailerItem       = $feed_item;
-          $video             = toXML($movieHash->{youtube});
-          $title             = "Official Trailer";
-          $description       = " ";
-          $thumbnail         = toXML($trailerHash{poster});
-          $type              = "video/flv";
-          $date              = "Youtube";
- 
-          echoPrint("    - Adding Trailer: ($title)(N/A)($date)(".$video.")\n");    
-          
-          $trailerItem =~ s/%%ITEM_TITLE%%/$title/g;
-          $trailerItem =~ s/%%ITEM_DATE%%/$date/g;
-          $trailerItem =~ s/%%ITEM_DESCRIPTION%%/$description/g;
-          $trailerItem =~ s/%%ITEM_URL%%/$video/g;
-          $trailerItem =~ s/%%ITEM_DUR%%/1/g;
-          $trailerItem =~ s/%%ITEM_SIZE%%/1/g;
-          $trailerItem =~ s/%%ITEM_TYPE%%/$type/g;
-          $trailerItem =~ s/%%ITEM_PICTURE%%/$thumbnail/g;
-          $trailerItem =~ s/%%ITEM_DUR_SEC%%/1/g;
-          unshift(@items,$trailerItem);
+          unshift( @items,
+                genPodcastItem({video       => $movieHash->{youtube},
+                                title       => "Official Trailer",
+                                type        => 'video/flv',
+                                date        => "Youtube",
+                                thumbnail   => $trailerHash{poster}})); 
+
+          echoPrint("    - Adding Trailer: (Official Trailer)(N/A)(Youtube)(".$movieHash->{youtube}.")\n");    
       }
       
       return @items;               
@@ -526,7 +478,7 @@
           }
           echoPrint("    - Theater : $theater (".@{$theaterHash->{$theater}{movies}}.")(".$theaterHash->{$theater}{screens}.")\n");
           $movieList =  "";
-          $feedLink = toXML('external,"'.$executable.'",/theater||'.$theater);
+          $feedLink  = 'external,"'.$executable.'",/theater||'.$theater;
           my $foundMovie = 0;
           foreach $movie (@{$theaterHash->{$theater}{movies}})
           {              
@@ -542,29 +494,17 @@
                       echoPrint("        - $key\t: ".$movie->{$key}."\n");
                   }
                   
-                  $feedLink = toXML('external,"'.$executable.'",/theater||'.$theater);
-                  $movieList = $movie->{movieTimes};
-                  $feedType  = 'image/jpeg';
+                  $feedLink   = 'external,"'.$executable.'",/theater||'.$theater;
+                  $movieList  = $movie->{movieTimes};
+                  $feedType   = 'image/jpeg';
                   $foundMovie = 1;
                   
                   # Make subcat for trailer
-                  $trailerItem       = $feed_item;
-                  $video             = toXML('external,"'.$executable.'",/movie||'.$movie->{movieName}.'||/getTrailers');
-                  $title             = 'Check for trailers...';
-                  $description       = "Search the internet for available trailers.";
-                  $thumbnail         = toXML($movie->{moviePoster});
-                  $type              = "sagetv/subcategory";
-                  
-                  $trailerItem =~ s/%%ITEM_TITLE%%/$title/g;
-                  $trailerItem =~ s/%%ITEM_DATE%%/ /g;
-                  $trailerItem =~ s/%%ITEM_DESCRIPTION%%/$description/g;
-                  $trailerItem =~ s/%%ITEM_URL%%/$video/g;
-                  $trailerItem =~ s/%%ITEM_DUR%%/1/g;
-                  $trailerItem =~ s/%%ITEM_SIZE%%/1/g;
-                  $trailerItem =~ s/%%ITEM_TYPE%%/$type/g;
-                  $trailerItem =~ s/%%ITEM_PICTURE%%/$thumbnail/g;
-                  $trailerItem =~ s/%%ITEM_DUR_SEC%%/1/g;                   
-
+                  $trailerItem = genPodcastItem({ video       => 'external,"'.$executable.'",/movie||'.$movie->{movieName}.'||/getTrailers',
+                                                  title       => 'Check for trailers...',
+                                                  type        => 'sagetv/subcategory',
+                                                  thumbnail   => $movie->{moviePoster},
+                                                  description => 'Search the internet for available trailers.'});                 
                   last; 
               }
               elsif (!(defined $movieFilter))
@@ -593,28 +533,18 @@
               
               if (defined $movieFilter)
               {
-                  $feedLink  = toXML($mapFull);
+                  $feedLink  = $mapFull;
               }
               
-              $movieList =~ s/, $//g;          
-    
-              $newItem           = $feed_item;
-              $video             = $feedLink;
-              $title             = $theater;
-              $description       = $movieList;
-              $thumbnail         = toXML($mapThumb);
-              $type              = $feedType;
-              
-              $newItem =~ s/%%ITEM_TITLE%%/$title/g;
-              $newItem =~ s/%%ITEM_DATE%%/$theaterHash->{$theater}{phone}/g;
-              $newItem =~ s/%%ITEM_DESCRIPTION%%/$description/g;
-              $newItem =~ s/%%ITEM_URL%%/$video/g;
-              $newItem =~ s/%%ITEM_DUR%%/1/g;
-              $newItem =~ s/%%ITEM_SIZE%%/1/g;
-              $newItem =~ s/%%ITEM_TYPE%%/$type/g;
-              $newItem =~ s/%%ITEM_PICTURE%%/$thumbnail/g;
-              $newItem =~ s/%%ITEM_DUR_SEC%%/1/g; 
-              push(@items,$newItem);
+              $movieList =~ s/, $//g;
+        
+              push( @items,
+                  genPodcastItem({video       => $feedLink,
+                                  title       => $theater,
+                                  type        => $feedType,
+                                  date        => $dateXMLString,
+                                  thumbnail   => $mapThumb,
+                                  description => $movieList}));           
           }
  
       }
@@ -661,24 +591,13 @@
               if (!exists $movieList{$movie->{movieName}})
               {
                   $movieList{$movie->{movieName}} = 1;
-                  $newItem = $feed_item;
-                  $video             = toXML('external,"'.$executable.'",/movie||'.$movie->{movieName}.'||/listTheaters');
-                  $title             = $movie->{movieName};
-                  $description       = (defined $theaterFilter ? $movie->{movieTimes} : $movie->{synopsis});
-                  $thumbnail         = $movie->{moviePoster};
-                  $type              = 'sagetv/subcategory';
-                  $info              = $movie->{info};
-                  
-                  $newItem =~ s/%%ITEM_TITLE%%/$title/g;
-                  $newItem =~ s/%%ITEM_DATE%%/$info/g;
-                  $newItem =~ s/%%ITEM_DESCRIPTION%%/$description/g;
-                  $newItem =~ s/%%ITEM_URL%%/$video/g;
-                  $newItem =~ s/%%ITEM_DUR%%/1/g;
-                  $newItem =~ s/%%ITEM_SIZE%%/1/g;
-                  $newItem =~ s/%%ITEM_TYPE%%/$type/g;
-                  $newItem =~ s/%%ITEM_PICTURE%%/$thumbnail/g;
-                  $newItem =~ s/%%ITEM_DUR_SEC%%/1/g; 
-                  push(@items,$newItem);    
+                  push( @items,
+                        genPodcastItem({video       => 'external,"'.$executable.'",/movie||'.$movie->{movieName}.'||/listTheaters',
+                                        title       => $movie->{movieName},
+                                        type        => 'sagetv/subcategory',
+                                        date        => $movie->{info},
+                                        thumbnail   => $movie->{moviePoster},
+                                        description => (defined $theaterFilter ? $movie->{movieTimes} : $movie->{synopsis})}));  
               }
           }
       }      
@@ -1244,8 +1163,8 @@ sub getFullFile
     
     sub genPodcastItem
     {
-        my $itemHashRef = shift @_;
-        my $newItem    = $feed_item;
+        my $itemHashRef       = shift @_;
+        my $newItem           = $feed_item;
         my $video             =   toXML($itemHashRef->{video});
         my $title             =         $itemHashRef->{title};
         my $type              =         $itemHashRef->{type};
@@ -1279,7 +1198,7 @@ sub getFullFile
         $newItem =~ s/%%ITEM_SIZE%%/$size/g;
         $newItem =~ s/%%ITEM_TYPE%%/$type/g;
         $newItem =~ s/%%ITEM_PICTURE%%/$thumbnail/g;
-        $newItem =~ s/%%ITEM_DUR_SEC%%/$durSec/g; 
+        $newItem =~ s/%%ITEM_DUR_SEC%%/$durDispaly/g; 
         
         return $newItem;
     }  
