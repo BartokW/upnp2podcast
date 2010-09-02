@@ -36,12 +36,11 @@ public class EPPlayonPlugin extends AbstractPlugin
     public EPPlayonPlugin(SageTVPluginRegistry registry) 
     {
         super(registry);
-    
-        addProperty(SageTVPlugin.CONFIG_INTEGER,Prop_NightlyScanTime, "1", "NightlyTimeToRunImport", "Time in hours (24hrs) you want to run the automatic update.").setPersistence(ssp);
+        addProperty(SageTVPlugin.CONFIG_BOOL,Prop_AutoUpdate, "false", "PlayOn AutoUpdate", "Enable PlayOn Queue Importer to automatically import content from your Hulu/Netflix queue into SageTV").setPersistence(ssp);
+        addProperty(SageTVPlugin.CONFIG_INTEGER,Prop_NightlyScanTime, "1", "Nightly Time To Run Import", "Time in hours (24hrs) you want to run PlayOn Queue Importer").setPersistence(ssp);
         addProperty(SageTVPlugin.CONFIG_BOOL,Prop_MyMoviesMode, "false", "MyMovies Mode", "Set to true to put dummy videos in their own folder so MyMovies can collect metadata. False if you don't use MyMovies.").setPersistence(ssp);
-        addProperty(SageTVPlugin.CONFIG_BOOL,Prop_AutoUpdate, "true", "PlayOn AutoUpdate", "Set to true to have Playon auto update/download videos at set time. False to not auto update.").setPersistence(ssp);
-        addProperty(SageTVPlugin.CONFIG_BUTTON,Prop_UpdateNow, "", "Update PlayonVideos", "Press to Update Playon Videos now.").setPersistence(spbutton);
-        addProperty(SageTVPlugin.CONFIG_CHOICE,Prop_ImportDirectory, sagex.api.Configuration.GetServerProperty(Prop_ImportDirectory,""),"PlayOn Import Path", "Press select to change Playon Import path directories. It will cycled through all available sage import paths",  GetImportPaths()).setPersistence(ssp);
+        addProperty(SageTVPlugin.CONFIG_BUTTON,Prop_UpdateNow, "", "Update Videos Now", "Press to run PlayOn Queue Importer now").setPersistence(spbutton);
+        addProperty(SageTVPlugin.CONFIG_CHOICE,Prop_ImportDirectory, sagex.api.Configuration.GetServerProperty(Prop_ImportDirectory,""),"PlayOn Video Import Path", "Press select to change Playon Queue Import path directories. It will cycled through all available sage import paths",  GetImportPaths()).setPersistence(ssp);
     }
 
     public void start()
@@ -53,7 +52,6 @@ public class EPPlayonPlugin extends AbstractPlugin
         if(Boolean.parseBoolean(sagex.api.Configuration.GetServerProperty(Prop_AutoUpdate,"true")))
         {
             StartTimerTask();
-            System.out.println("PLAYON: Timer finished setting task.");
             System.out.println("PLAYON: Running Timer at startup");
             RunUpdateProcess();
         }
