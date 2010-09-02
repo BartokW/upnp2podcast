@@ -53,8 +53,13 @@
   open(LOGFILE,">$executablePath/$executableEXE.log");
 
   # Get Start Time
-  my ( $startSecond, $startMinute, $startHour) = localtime();
-  my @startTime = ( $startSecond, $startMinute, $startHour);
+  my ( $startSecond, $startMinute, $startHour, $dayOfMonth, $month, $yearOffset, $dayOfWeek, $dayOfYear, $daylightSavings ) = localtime();
+  my @startTime = ( $startSecond, $startMinute, $startHour);  # Get Start Time
+  
+  my $year = 1900 + $yearOffset;
+  $month++;
+  my $dateString = sprintf("%04d%02d%02d",$year,$month,$dayOfMonth);
+  $dateXMLString = sprintf("%04d-%02d-%02d",$year,$month,$dayOfMonth);
 
   # Code version
   my $codeVersion = "$executableEXE v1.1 (SNIP:BUILT)";
@@ -128,6 +133,7 @@
   my @inputFiles = ();
   my @emptyArray = ();
   my %emptyHash  = ();
+  my $feedTitle  = "UPnP Browser";
   
   %playOnFileHash = ();
   %existingFilesHash = ();
@@ -321,8 +327,8 @@
       my (@items, $opening, $newItem, $video, $title, $description, $type, $thumbnail);
   
       $opening = $feed_begin;
-      $opening =~ s/%%FEED_TITLE%%/UPnP Browser/g;
-      $opening =~ s/%%FEED_DESCRIPTION%%/UPnP Browser/g;
+      $opening =~ s/%%FEED_TITLE%%/$feedTitle/g;
+      $opening =~ s/%%FEED_DESCRIPTION%%/$feedTitle/g;
       
       foreach (@dev_list)
       {
@@ -338,14 +344,14 @@
           $type              = 'sagetv/subcategory';
           
           $newItem =~ s/%%ITEM_TITLE%%/$title/g;
-          $newItem =~ s/%%ITEM_DATE%%//g;
+          $newItem =~ s/%%ITEM_DATE%%/$dateXMLString/g;
           $newItem =~ s/%%ITEM_DESCRIPTION%%/$description/g;
           $newItem =~ s/%%ITEM_URL%%/$video/g;
-          $newItem =~ s/%%ITEM_DUR%%//g;
-          $newItem =~ s/%%ITEM_SIZE%%//g;
+          $newItem =~ s/%%ITEM_DUR%%/1/g;
+          $newItem =~ s/%%ITEM_SIZE%%/1/g;
           $newItem =~ s/%%ITEM_TYPE%%/$type/g;
           $newItem =~ s/%%ITEM_PICTURE%%/$thumbnail/g;
-          $newItem =~ s/%%ITEM_DUR_SEC%%//g; 
+          $newItem =~ s/%%ITEM_DUR_SEC%%/1/g; 
           push(@items,$newItem);            
       }
       
@@ -358,14 +364,14 @@
       $type              = 'sagetv/subcategory';
       
       $newItem =~ s/%%ITEM_TITLE%%/$title/g;
-      $newItem =~ s/%%ITEM_DATE%%//g;
+      $newItem =~ s/%%ITEM_DATE%%/$dateXMLString/g;
       $newItem =~ s/%%ITEM_DESCRIPTION%%/$description/g;
       $newItem =~ s/%%ITEM_URL%%/$video/g;
-      $newItem =~ s/%%ITEM_DUR%%//g;
-      $newItem =~ s/%%ITEM_SIZE%%//g;
+      $newItem =~ s/%%ITEM_DUR%%/1/g;
+      $newItem =~ s/%%ITEM_SIZE%%/1/g;
       $newItem =~ s/%%ITEM_TYPE%%/$type/g;
       $newItem =~ s/%%ITEM_PICTURE%%/$thumbnail/g;
-      $newItem =~ s/%%ITEM_DUR_SEC%%//g; 
+      $newItem =~ s/%%ITEM_DUR_SEC%%/1/g; 
       push(@items,$newItem);
       
       my $execTime = executionTime(@startTime);      
@@ -460,6 +466,7 @@
           my @items = ();
           my ($newItem, $video, $title, $description, $type, $thumbnail);
       
+      
           $opening = $feed_begin;
           $opening =~ s/%%FEED_TITLE%%/UPnP Browser (Error!)/g;
           $opening =~ s/%%FEED_DESCRIPTION%%/UPnP Browser (Error!)/g;
@@ -472,14 +479,14 @@
           $type              = 'sagetv/textonly';
           
           $newItem =~ s/%%ITEM_TITLE%%/$title/g;
-          $newItem =~ s/%%ITEM_DATE%%//g;
+          $newItem =~ s/%%ITEM_DATE%%/$dateXMLString/g;
           $newItem =~ s/%%ITEM_DESCRIPTION%%/$description/g;
           $newItem =~ s/%%ITEM_URL%%/$video/g;
-          $newItem =~ s/%%ITEM_DUR%%//g;
-          $newItem =~ s/%%ITEM_SIZE%%//g;
+          $newItem =~ s/%%ITEM_DUR%%/1/g;
+          $newItem =~ s/%%ITEM_SIZE%%/1/g;
           $newItem =~ s/%%ITEM_TYPE%%/$type/g;
           $newItem =~ s/%%ITEM_PICTURE%%/$thumbnail/g;
-          $newItem =~ s/%%ITEM_DUR_SEC%%//g; 
+          $newItem =~ s/%%ITEM_DUR_SEC%%/1/g; 
           push(@items,$newItem);        
 
           my $execTime = executionTime(@startTime);      
@@ -512,6 +519,7 @@
       foreach $playONPath (@PlayONPaths)
       {
           echoPrint("LOOPING: $playONPath\n");
+          $feedTitle = $playONPath;
 
           if (!($playONPath eq "") && $foundDevice == 1 && !(exists $optionsHash{lc("uid")}))
           {  # if all we get is a path, serach the tree for the uid
@@ -613,7 +621,7 @@
       else
       {
           my $opening = $feed_begin;
-          $opening =~ s/%%FEED_TITLE%%/UPnP Browser ($lookingFor)/g;
+          $opening =~ s/%%FEED_TITLE%%/$feedTitle/g;
           $opening =~ s/%%FEED_DESCRIPTION%%/UPnP Browser ($lookingFor)/g;   
           print encode('UTF-8', $opening);
           foreach (@items)
@@ -889,14 +897,14 @@ FEED_END
                     }
                     
                     $newItem =~ s/%%ITEM_TITLE%%/$title/g;
-                    $newItem =~ s/%%ITEM_DATE%%//g;
+                    $newItem =~ s/%%ITEM_DATE%%/$dateXMLString/g;
                     $newItem =~ s/%%ITEM_DESCRIPTION%%/$description/g;
                     $newItem =~ s/%%ITEM_URL%%/$video/g;
-                    $newItem =~ s/%%ITEM_DUR%%//g;
-                    $newItem =~ s/%%ITEM_SIZE%%//g;
+                    $newItem =~ s/%%ITEM_DUR%%/1/g;
+                    $newItem =~ s/%%ITEM_SIZE%%/1/g;
                     $newItem =~ s/%%ITEM_TYPE%%/$type/g;
                     $newItem =~ s/%%ITEM_PICTURE%%/$thumbnail/g;
-                    $newItem =~ s/%%ITEM_DUR_SEC%%//g; 
+                    $newItem =~ s/%%ITEM_DUR_SEC%%/1/g; 
     
                     push(@items,$newItem);
                 }                   
@@ -949,6 +957,7 @@ FEED_END
                     }
                     
                     $dur    =~ /([0-9]+):([0-9]+):([0-9]+).([0-9]+)/;
+                    $durForDate = sprintf("%02d:%02d:%02d", $1, $2, $3);
                     my $durTotalSec = $1*60*60 + $2*60 + $3;
                     my $durTotalMin = $durTotalSec/60;
                                         
@@ -982,7 +991,7 @@ FEED_END
                     $date  = $1;                    
                     
                     $newItem =~ s/%%ITEM_TITLE%%/$title/g;
-                    $newItem =~ s/%%ITEM_DATE%%/$date/g;
+                    $newItem =~ s/%%ITEM_DATE%%/$durForDate ($date)/g;
                     $newItem =~ s/%%ITEM_DESCRIPTION%%/$description/g;
                     $newItem =~ s/%%ITEM_URL%%/$video/g;
                     $newItem =~ s/%%ITEM_DUR%%/$durDisplay/g;
