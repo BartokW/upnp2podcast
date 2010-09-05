@@ -579,22 +579,45 @@
           # Find existing PlayON Files
           @existingFiles = scanDir($workPath,"playon");
           %playOnFileHashCopy = %playOnFileHash;
+          echoPrint("  + Running in scrape mode, adding/removing content\n");
           foreach $exitingFile (sort(keys %existingFilesHash))
           {
-              echoPrint("  + Missing : (".getFile($exitingFile)." (".(-s getFullFile($exitingFile)).")\n"); 
+              echoPrint("    - Missing : (".getFile($exitingFile)." (".(-s getFullFile($exitingFile)).")\n"); 
               if (-e "$exitingFile" && $exitingFile =~ /\.playon$/ && (-s getFullFile($exitingFile)) < 60000)
               {   # never delete anything over 60 mb                 
-                  $rmString = "del \"$exitingFile\"";
+                  $rmString = "del /Q \"$exitingFile\"";
                   #echoPrint("    - rm : ($rmString)\n");
                   `$rmString`;
-                  $rmString = "del \"".getFullFile($exitingFile)."\"";
+                  $rmString = "del /Q \"".getFullFile($exitingFile)."\"";
                   #echoPrint("    - rm : ($rmString)\n");
                   `$rmString`;
+                  
+                  #Check to see if folder is empty
+                  my $checkFolder = getPath($exitingFile);
+                  opendir(SCANDIR,"$checkFolder");
+                  my @filesInDir = readdir(SCANDIR);
+                  #echoPrint("      - Checking if folder is empty : ($checkFolder)\n");
+                  $depthProtection = 0;
+                  while(@filesInDir == 2 && $depthProtection < 4)
+                  {
+                      $rmString = "rmdir /Q \"$checkFolder\"";
+                      echoPrint("      + Folder empty, deleting : ($rmString)\n");
+                      `$rmString`;
+                      
+                      close(SCANDIR);
+                      $checkFolder = getPath($checkFolder);
+                      opendir(SCANDIR,"$checkFolder");
+                      @filesInDir = readdir(SCANDIR);
+                      #echoPrint("      + Checking if folder is empty : ($checkFolder)\n");
+                      $depthProtection++;                          
+                  }
+                  close(SCANDIR);
+                  
               }        
           }
           foreach $newFile (sort(keys %playOnFileHashCopy))
           {
-              echoPrint("  + Added : (".getFile($newFile)."\n");
+              echoPrint("    - Added : (".getFile($newFile)."\n");
               
               my $tempNewFile =  $newFile;
               my @pathsToMake = ();
@@ -606,7 +629,7 @@
               foreach $path (@pathsToMake)
               {           
                   $mkdirString = "mkdir \"$path\"";
-                  echoPrint("    - mkdir : ($mkdirString)\n");
+                  echoPrint("      + mkdir : ($mkdirString)\n");
                   `$mkdirString`; 
               }
               
@@ -1067,14 +1090,21 @@ FEED_END
     sub getPath
     {   # (G:\videos\)filename.avi
         my ( $fileName ) = @_;
-        $fileName .= ".txt";  # Always append an extention
         my $rv = "";
+        #echoPrint("  + GetPath IN : ($fileName)\n");
+        if ($fileName =~ m#[\\/]$#)
+        {   # If it ends in \ chop it off
+            $fileName = "$`";
+        }
+        
+        $fileName .= ".txt";  # Always append an extention
         if ($fileName =~ m#([^\\/]*)$#)
         {
             $rv = $`;
         }
       
         $rv =~ s#(\\|/)$##;
+        #echoPrint("  + GetPath OUT: ($rv)\n");
         return $rv;
     }
     
