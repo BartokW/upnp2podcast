@@ -550,16 +550,12 @@
                   if ($found == 0)
                   {
                       echoPrint("    ! Couldn't find : ".$lookingFor."\n");
-                      echoPrint("    + Execution time: ".executionTime(@startTime)."\n");  
-                      exit 0; 
                   }
               }
           }
           
           if (exists $optionsHash{lc("uid")} && $foundDevice == 1)
-          {
-                                 
-              
+          {              
               @items    = (@items, addItems($mediaServer, 
                                             $optionsHash{lc("uid")}, 
                                             $optionsHash{lc("path")}, 
@@ -600,10 +596,17 @@
           {
               echoPrint("  + Added : (".getFile($newFile)."\n");
               
-              if (!(-d getPath($newFile)))
+              my $tempNewFile =  $newFile;
+              my @pathsToMake = ();
+              while(!(-d getPath($tempNewFile)))
+              {
+                  unshift(@pathsToMake,getPath($tempNewFile));
+                  $tempNewFile = getPath($tempNewFile);
+              }
+              foreach $path (@pathsToMake)
               {           
-                  $mkdirString = "mkdir \"".getPath($newFile)."\"";
-                  #echoPrint("    - mkdir : ($mkdirString)\n");
+                  $mkdirString = "mkdir \"$path\"";
+                  echoPrint("    - mkdir : ($mkdirString)\n");
                   `$mkdirString`; 
               }
               
@@ -1252,12 +1255,27 @@ FEED_END
         my $path           = "/outputPath||/search||\"$playONPath\\$playONRegEx\\+1\"";
         $path              =~ s/:/./gi;
         $path              =~ s/\\/:/gi;
+        
+        $showTitle =~ s/\&amp;/&/g;
+        $showTitle =~ s/\&quot;/"/g; #"
+        $showTitle =~ s/\&lt;/</g;
+        $showTitle =~ s/\&gt;/>/g;
+        $showTitle =~ s/\&apos;/'/g;  #'
+        $showTitle =~ s/ & / and /g;
+        
+        $episodeTitle =~ s/\&amp;/&/g;
+        $episodeTitle =~ s/\&quot;/"/g; #"
+        $episodeTitle =~ s/\&lt;/</g;
+        $episodeTitle =~ s/\&gt;/>/g;
+        $episodeTitle =~ s/\&apos;/'/g;  #'
+        $episodeTitle =~ s/ & / and /g;  
 
         my $fileName       = $showTitle; 
         my $propertiesFile = "MediaType=$mediaType\n";
         $propertiesFile   .= "MediaTitle=$showTitle\n";
         $propertiesFile   .= "ReleaseDate=$airdate\n";
-        $propertiesFile   .= "Description=$description\n";
+        $propertiesFile   .= "Description=$description\n";  
+  
         if ($mediaType eq "TV")
         {
             $folder = "TV".$FS."".toWin32($showTitle);
@@ -1287,13 +1305,6 @@ FEED_END
             
         }
         $propertiesFile   .= "PlayOnPath=$path\n";
-         
-        $fileName =~ s/\&amp;/&/g;
-        $fileName =~ s/\&quot;/"/g; #"
-        $fileName =~ s/\&lt;/</g;
-        $fileName =~ s/\&gt;/>/g;
-        $fileName =~ s/\&apos;/'/g;  #'
-        $fileName =~ s/ & / and /g;
         
         $fileName = toWin32($fileName);
         #echoPrint("  + Generating : ($workPath".$FS."$folder".$FS."$fileName.mkv)\n");
