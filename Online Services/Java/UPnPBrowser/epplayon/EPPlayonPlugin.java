@@ -138,7 +138,7 @@ public class EPPlayonPlugin extends AbstractPlugin
 
             calendar.set(Calendar.DATE,calendar.get(Calendar.DATE) + 1);
             calendar.set(Calendar.HOUR_OF_DAY,java.lang.Integer.parseInt(sagex.api.Configuration.GetServerProperty(Prop_NightlyScanTime,"1")));
-            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.MINUTE, 7);
             calendar.set(Calendar.SECOND, 0);
             Date time = calendar.getTime();
    
@@ -152,14 +152,13 @@ public class EPPlayonPlugin extends AbstractPlugin
     {
         PassValues.clear();
         System.out.println("PLAYON: SettingPass Values");
-        PassValues.add("/scrapeMode ");
-        PassValues.add("/outputDir ");
-
+        PassValues.add("/scrapeMode ");        
         if(Boolean.parseBoolean( Prop_MyMoviesMode))
         {
             System.out.println("PLAYON: My Movies Mode enabled set switch");
             PassValues.add("/myMovies");
         }
+        PassValues.add("/outputDir ");
         PassValues.add(ImportDirectory);
         System.out.println("PLAYON: Pass Values set = (" + PassValues.toString() + ")");
     }
@@ -194,7 +193,7 @@ public class EPPlayonPlugin extends AbstractPlugin
             Calendar calendar = Calendar.getInstance();
             calendar.set(Calendar.DATE,calendar.get(Calendar.DATE) + 1);
             calendar.set(Calendar.HOUR_OF_DAY,java.lang.Integer.parseInt(sagex.api.Configuration.GetServerProperty(Prop_NightlyScanTime,"1")));
-            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.MINUTE, 7);
             calendar.set(Calendar.SECOND, 0);
             Date time = calendar.getTime();
             
