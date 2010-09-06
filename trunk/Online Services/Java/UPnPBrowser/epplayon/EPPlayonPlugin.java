@@ -153,7 +153,7 @@ public class EPPlayonPlugin extends AbstractPlugin
         PassValues.clear();
         System.out.println("PLAYON: SettingPass Values");
         PassValues.add("/scrapeMode ");        
-        if(Boolean.parseBoolean( Prop_MyMoviesMode))
+        if(Boolean.parseBoolean(sagex.api.Configuration.GetServerProperty(Prop_MyMoviesMode,"false")))
         {
             System.out.println("PLAYON: My Movies Mode enabled set switch");
             PassValues.add("/myMovies");
