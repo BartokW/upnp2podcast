@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Module xmlns="urn:tv.sage/stv" Name="default" PersistentPrimaryRefs="true">
+ <Hook Name="STVImported" Sym="UBCBJ-10">
+  <Action Name="&quot;REM Deletion of Widgets&quot;" Sym="UBCBJ-11"/>
+  <Action Name="&quot;REM Renaming of Widgets&quot;" Sym="UBCBJ-12"/>
+  <Action Name="&quot;REM Resetting of Widget properties&quot;" Sym="UBCBJ-13"/>
+  <Action Name="&quot;REM Removal of Widget children relationships&quot;" Sym="UBCBJ-14">
+   <Action Name="RemoveWidgetChild(FindWidgetBySymbol(&quot;OPUS4A-176389&quot;), FindWidgetBySymbol(&quot;OPUS4A-176399&quot;))" Sym="UBCBJ-35"/>
+  </Action>
+  <Action Name="&quot;REM Adding of Widget children relationships&quot;" Sym="UBCBJ-15">
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;BASE-86598&quot;)" Sym="UBCBJ-17">
+    <Branch Name="else" Sym="UBCBJ-18">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;UBCBJ-1&quot;)" Sym="UBCBJ-21">
+      <Branch Name="else" Sym="UBCBJ-22">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="UBCBJ-25"/>
+      </Branch>
+      <Branch Name="null" Sym="UBCBJ-23">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=UBCBJ-1 \&quot;CellTitle\&quot; could not add as child; parent symbol=BASE-86598 \&quot;ShowOriginalAirdate\&quot;&quot;)" Sym="UBCBJ-24"/>
+      </Branch>
+     </Conditional>
+    </Branch>
+    <Branch Name="null" Sym="UBCBJ-19">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=BASE-86598 \&quot;CellTitle\&quot; missing parent; could not add child with symbol=UBCBJ-1 \&quot;ShowOriginalAirdate\&quot;&quot;)" Sym="UBCBJ-20"/>
+    </Branch>
+   </Conditional>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;BASE-86598&quot;)" Sym="UBCBJ-26">
+    <Branch Name="else" Sym="UBCBJ-27">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;OPUS4A-176389&quot;)" Sym="UBCBJ-30">
+      <Branch Name="else" Sym="UBCBJ-31">
+       <Action Name="InsertWidgetChild(Widg1, Widg2, 2)" Sym="UBCBJ-34"/>
+      </Branch>
+      <Branch Name="null" Sym="UBCBJ-32">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=OPUS4A-176389 \&quot;CellTitle\&quot; could not move child; parent symbol=BASE-86598 \&quot;\&quot;REM Display markers or time + channel, depending on display mode.\&quot;\&quot;&quot;)" Sym="UBCBJ-33"/>
+      </Branch>
+     </Conditional>
+    </Branch>
+    <Branch Name="null" Sym="UBCBJ-28">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=BASE-86598 \&quot;CellTitle\&quot; missing parent; could not move child with symbol=OPUS4A-176389 \&quot;\&quot;REM Display markers or time + channel, depending on display mode.\&quot;\&quot;&quot;)" Sym="UBCBJ-29"/>
+    </Branch>
+   </Conditional>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;OPUS4A-176389&quot;)" Sym="UBCBJ-36">
+    <Branch Name="else" Sym="UBCBJ-37">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;UBCBJ-9&quot;)" Sym="UBCBJ-40">
+      <Branch Name="else" Sym="UBCBJ-41">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="UBCBJ-44"/>
+      </Branch>
+      <Branch Name="null" Sym="UBCBJ-42">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=UBCBJ-9 \&quot;\&quot;REM Display markers or time + channel, depending on display mode.\&quot;\&quot; could not add as child; parent symbol=OPUS4A-176389 \&quot;\&quot;&quot;)" Sym="UBCBJ-43"/>
+      </Branch>
+     </Conditional>
+    </Branch>
+    <Branch Name="null" Sym="UBCBJ-38">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=OPUS4A-176389 \&quot;\&quot;REM Display markers or time + channel, depending on display mode.\&quot;\&quot; missing parent; could not add child with symbol=UBCBJ-9 \&quot;\&quot;&quot;)" Sym="UBCBJ-39"/>
+    </Branch>
+   </Conditional>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;UBCBJ-1&quot;)" Sym="UBCBJ-45">
+    <Branch Name="else" Sym="UBCBJ-46">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;UBCBJ-3&quot;)" Sym="UBCBJ-49">
+      <Branch Name="else" Sym="UBCBJ-50">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="UBCBJ-53"/>
+      </Branch>
+      <Branch Name="null" Sym="UBCBJ-51">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=UBCBJ-3 \&quot;ShowOriginalAirdate\&quot; could not add as child; parent symbol=UBCBJ-1 \&quot;If(GetOriginalAiringDate(Airing) != 0, DateFormat(\&quot;M/d/y \&quot;, GetOriginalAiringDate(Airing)), \&quot;\&quot;)\&quot;&quot;)" Sym="UBCBJ-52"/>
+      </Branch>
+     </Conditional>
+    </Branch>
+    <Branch Name="null" Sym="UBCBJ-47">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=UBCBJ-1 \&quot;ShowOriginalAirdate\&quot; missing parent; could not add child with symbol=UBCBJ-3 \&quot;If(GetOriginalAiringDate(Airing) != 0, DateFormat(\&quot;M/d/y \&quot;, GetOriginalAiringDate(Airing)), \&quot;\&quot;)\&quot;&quot;)" Sym="UBCBJ-48"/>
+    </Branch>
+   </Conditional>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;UBCBJ-3&quot;)" Sym="UBCBJ-54">
+    <Branch Name="else" Sym="UBCBJ-55">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;UBCBJ-4&quot;)" Sym="UBCBJ-58">
+      <Branch Name="else" Sym="UBCBJ-59">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="UBCBJ-62"/>
+      </Branch>
+      <Branch Name="null" Sym="UBCBJ-60">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=UBCBJ-4 \&quot;If(GetOriginalAiringDate(Airing) != 0, DateFormat(\&quot;M/d/y \&quot;, GetOriginalAiringDate(Airing)), \&quot;\&quot;)\&quot; could not add as child; parent symbol=UBCBJ-3 \&quot;\&quot;&quot;)" Sym="UBCBJ-61"/>
+      </Branch>
+     </Conditional>
+    </Branch>
+    <Branch Name="null" Sym="UBCBJ-56">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=UBCBJ-3 \&quot;If(GetOriginalAiringDate(Airing) != 0, DateFormat(\&quot;M/d/y \&quot;, GetOriginalAiringDate(Airing)), \&quot;\&quot;)\&quot; missing parent; could not add child with symbol=UBCBJ-4 \&quot;\&quot;&quot;)" Sym="UBCBJ-57"/>
+    </Branch>
+   </Conditional>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;UBCBJ-4&quot;)" Sym="UBCBJ-63">
+    <Branch Name="else" Sym="UBCBJ-64">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;OPUS4A-176288&quot;)" Sym="UBCBJ-67">
+      <Branch Name="else" Sym="UBCBJ-68">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="UBCBJ-71"/>
+      </Branch>
+      <Branch Name="null" Sym="UBCBJ-69">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=OPUS4A-176288 \&quot;\&quot; could not add as child; parent symbol=UBCBJ-4 \&quot;DetailedInfoSectionHeaderText\&quot;&quot;)" Sym="UBCBJ-70"/>
+      </Branch>
+     </Conditional>
+    </Branch>
+    <Branch Name="null" Sym="UBCBJ-65">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=UBCBJ-4 \&quot;\&quot; missing parent; could not add child with symbol=OPUS4A-176288 \&quot;DetailedInfoSectionHeaderText\&quot;&quot;)" Sym="UBCBJ-66"/>
+    </Branch>
+   </Conditional>
+   <Conditional Name="Widg1 = FindWidgetBySymbol(&quot;UBCBJ-9&quot;)" Sym="UBCBJ-72">
+    <Branch Name="else" Sym="UBCBJ-73">
+     <Conditional Name="Widg2 = FindWidgetBySymbol(&quot;OPUS4A-176399&quot;)" Sym="UBCBJ-76">
+      <Branch Name="else" Sym="UBCBJ-77">
+       <Action Name="AddWidgetChild(Widg1, Widg2)" Sym="UBCBJ-80"/>
+      </Branch>
+      <Branch Name="null" Sym="UBCBJ-78">
+       <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=OPUS4A-176399 \&quot;\&quot; could not add as child; parent symbol=UBCBJ-9 \&quot;AiringListMode\&quot;&quot;)" Sym="UBCBJ-79"/>
+      </Branch>
+     </Conditional>
+    </Branch>
+    <Branch Name="null" Sym="UBCBJ-74">
+     <Action Name="DebugLog(&quot;PATCH ERROR Missing Widget - Symbol=UBCBJ-9 \&quot;\&quot; missing parent; could not add child with symbol=OPUS4A-176399 \&quot;AiringListMode\&quot;&quot;)" Sym="UBCBJ-75"/>
+    </Branch>
+   </Conditional>
+  </Action>
+  <Action Name="&quot;REM Repositioning of child Widgets&quot;" Sym="UBCBJ-16"/>
+  <Action Name="ReturnValue = &quot;AutoCleanupSTVImportedHook&quot;" Sym="UBCBJ-81"/>
+ </Hook>
+ <Action Name="If(GetOriginalAiringDate(Airing) != 0, DateFormat(&quot;M/d/y &quot;, GetOriginalAiringDate(Airing)), &quot;&quot;)" Sym="UBCBJ-3"/>
+ <Text Name="" Sym="UBCBJ-4"/>
+ <Panel Name="ShowOriginalAirdate" Sym="UBCBJ-1">
+  <Layout>Vertical</Layout>
+  <AnchorX>1.0</AnchorX>
+  <FixedWidth>.25</FixedWidth>
+  <FixedHeight>.5</FixedHeight>
+  <WrapHNav>false</WrapHNav>
+  <WrapVNav>false</WrapVNav>
+  <IgnoreThemeProps>false</IgnoreThemeProps>
+  <BackgroundComponent>false</BackgroundComponent>
+  <MouseTransparency>false</MouseTransparency>
+ </Panel>
+ <Panel Name="" Sym="UBCBJ-9">
+  <AnchorX>1.0</AnchorX>
+  <AnchorY>1.0</AnchorY>
+  <FixedWidth>1.0</FixedWidth>
+  <FixedHeight>.5</FixedHeight>
+  <WrapHNav>false</WrapHNav>
+  <WrapVNav>false</WrapVNav>
+  <IgnoreThemeProps>false</IgnoreThemeProps>
+  <BackgroundComponent>false</BackgroundComponent>
+  <MouseTransparency>false</MouseTransparency>
+ </Panel>
+</Module>
