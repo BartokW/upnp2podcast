@@ -46,6 +46,12 @@
 
   # Get Start Time
   my ( $startSecond, $startMinute, $startHour, $dayOfMonth, $month, $yearOffset, $dayOfWeek, $dayOfYear, $daylightSavings ) = localtime();
+  my @startTime = ( $startSecond, $startMinute, $startHour);  # Get Start Time
+  
+  my $year = 1900 + $yearOffset;
+  $month++;
+  my $dateString = sprintf("%04d%02d%02d",$year,$month,$dayOfMonth);
+  $dateXMLString = sprintf("%04d-%02d-%02d",$year,$month,$dayOfMonth);
 
   # Code version
   my $codeVersion = "$executableEXE v1.0 (SNIP:BUILT)".($debug ? "(debug)" : "");
@@ -67,6 +73,21 @@
   my @inputFiles;
   my @emptyArray = ();
   my %emptyHash  = ();
+  my $feedTitle  = "Tool Assisted Speedruns";
+  
+  my %urlToFeedTitle = (   'http://tasvideos.org/Movies-RatingY-Rec.html'   => 'Recommended Videos',
+                           'http://tasvideos.org/Movies-NES-FDS.html'   => 'Nintendo',
+                           'http://tasvideos.org/Movies-SNES.html'   => 'Super Nintendo',
+                           'http://tasvideos.org/Movies-N64.html'   => 'Nintendo 64',
+                           'http://tasvideos.org/Movies-GBA.html'   => 'Nintendo Gameboy',
+                           'http://tasvideos.org/Movies-DS.html'   => 'Nintendo DS',
+                           'http://tasvideos.org/Movies-Genesis-32X-SegaCD.html'   => 'Sega Genesis',
+                           'http://tasvideos.org/Movies-Saturn.html'   => 'Sega Saturn',
+                           'http://tasvideos.org/Movies-PSX.html'   => 'Sony Playstation',
+                           'http://tasvideos.org/Movies-Arcade.html'   => 'Arcade Games',
+                           'http://tasvideos.org/Movies-Hacks.html'   => 'Special Runs',);
+              
+    
   
   # Setting cli options
   foreach (@parameters)
@@ -85,6 +106,8 @@
   
   if (exists $optionsHash{lc("url")})
   {
+      $feedTitle = $urlToFeedTitle{$optionsHash{lc("url")}};
+  
       $content = decode('UTF-8', get $optionsHash{lc("url")});
       $content =~ s/&amp;/&/g;
       $content =~ s/&quot;/&/g;
@@ -145,7 +168,7 @@
       
       #my ($feed_begin, $feed_item, $feed_end, $textOnlyDescription) = populateFeedStrings();
       $opening = $feed_begin;
-      $opening =~ s/%%FEED_TITLE%%/Online Services Test/g;
+      $opening =~ s/%%FEED_TITLE%%/$feedTitle/g;
       $opening =~ s/%%FEED_DESCRIPTION%%/$codeVersion @ARGV/g;
       print encode('UTF-8', $opening);
       foreach (@items)
@@ -269,7 +292,7 @@
           my $thumnailXML    = toXML($thumbnail);
           
           $newItem =~ s/%%ITEM_TITLE%%/$titleXML/g;
-          $newItem =~ s/%%ITEM_DATE%%//g;
+          $newItem =~ s/%%ITEM_DATE%%/$dateXMLString/g;
           $newItem =~ s/%%ITEM_DESCRIPTION%%/$descriptionXML/g;
           $newItem =~ s/%%ITEM_URL%%/$videoXML/g;
           $newItem =~ s/%%ITEM_DUR%%//g;
@@ -311,7 +334,7 @@
     sub youtube
     {
         my ($url) = @_;
-        #return ($url,'video/mp4');   # to disbable youtube decoding
+        return ($url,'video/mp4');   # to disbable youtube decoding
         #echoPrint("    + Decoding Youtube ($url)\n");
         $semaphoreYoutube->down();
         my $content = decode('UTF-8', get $url);
@@ -585,7 +608,6 @@ FEED_BEGIN
     <item> 
       <title><![CDATA[%%ITEM_TITLE%%]]></title> 
       <description><![CDATA[%%ITEM_DESCRIPTION%%]]></description> 
-      <pubDate>1981-09-15</pubDate> 
       <itunes:subtitle><![CDATA[%%ITEM_DESCRIPTION%%]]></itunes:subtitle>
       <itunes:duration>%%ITEM_DUR%%</itunes:duration>
       <enclosure url="%%ITEM_URL%%" length="%%ITEM_SIZE%%" type="%%ITEM_TYPE%%" /> 
@@ -627,24 +649,56 @@ FEED_END
                 thumbnail =>'http://docs.google.com/uc?id=0B_sMJcYiGvN4MDE1MjFlYmUtZWMwMS00OWJlLTg0ZjctNDRmMDQ5NjU2MDI5&export=download&hl=en'},
                 
                {url   => 'http://tasvideos.org/Movies-NES-FDS.html',
-                title => 'NES Vidoes',
+                title => 'NES',
                 desc  => 'Tool assisted speedrun videos for NES',
                 thumbnail =>'http://docs.google.com/uc?id=0B_sMJcYiGvN4NjMyMWVmMTAtMTM5Ny00ZTM3LTg2YjctNWI2YTQ4NWUzNmQy&export=download&hl=en'},
                 
                {url   => 'http://tasvideos.org/Movies-SNES.html',
-                title => 'SNES Videos',
+                title => 'SNES',
                 desc  => 'Tool assisted speedrun videos for SNES',
-                thumbnail =>'http://docs.google.com/uc?id=0B_sMJcYiGvN4ZGE0MjIxY2UtMTc0NS00NDI3LWEzODYtOGIwNGUzMGNhNjQ5&export=download&hl=en'},
-                               
+                thumbnail =>'http://docs.google.com/uc?id=0B_sMJcYiGvN4ZGE0MjIxY2UtMTc0NS00NDI3LWEzODYtOGIwNGUzMGNhNjQ5&export=download&hl=en'},                              
+                
+               {url   => 'http://tasvideos.org/Movies-N64.html',
+                title => 'N64',
+                desc  => 'Tool assisted speedrun videos for N64',
+                thumbnail =>'http://docs.google.com/uc?id=0B_sMJcYiGvN4MjFkYmRkZWUtMzJiMy00MzE3LTlmODgtYWYzY2EzYjk1MmIw&export=download&hl=en'},
+              
                {url   => 'http://tasvideos.org/Movies-GBA.html',
-                title => 'Gameboy Videos',
+                title => 'Gameboy',
                 desc  => 'Tool assisted speedrun videos for Gameboy',
                 thumbnail =>'http://docs.google.com/uc?id=0B_sMJcYiGvN4OWY1YmJkZjctNzE2My00NDVmLTliYTctNzg4MTRlMGVkNDA3&export=download&hl=en'},
                
                {url   => 'http://tasvideos.org/Movies-DS.html',
-                title => 'DS Videos',
+                title => 'DS',
                 desc  => 'Tool assisted speedrun videos for DS',
-                thumbnail =>'http://docs.google.com/uc?id=0B_sMJcYiGvN4NTMxYjllZmUtZDQ1Ny00NzdmLTljY2UtMTVjNDZlYjQ1NjQx&export=download&hl=en'}
+                thumbnail =>'http://docs.google.com/uc?id=0B_sMJcYiGvN4NTMxYjllZmUtZDQ1Ny00NzdmLTljY2UtMTVjNDZlYjQ1NjQx&export=download&hl=en'},
+                
+              {url   => 'http://tasvideos.org/Movies-Genesis-32X-SegaCD.html',
+                title => 'Sega',
+                desc  => 'Tool assisted speedrun videos for Sega',
+                thumbnail =>'http://docs.google.com/uc?id=0B_sMJcYiGvN4MDFlMWU0MzctYzU5ZS00MWM2LTg5OTUtMzgwMDgxZDJiMjA1&export=download&hl=en'},
+          
+              {url   => 'http://tasvideos.org/Movies-Saturn.html',
+                title => 'Saturn',
+                desc  => 'Tool assisted speedrun videos for Saturn',
+                thumbnail =>'http://docs.google.com/uc?id=0B_sMJcYiGvN4NTkwMDg5NTktMTNjOC00MzkxLTlhZjktMzU4ZjBhOGM2MGM2&export=download&hl=en'},
+                
+              {url   => 'http://tasvideos.org/Movies-PSX.html',
+                title => 'Playstation',
+                desc  => 'Tool assisted speedrun videos for Playstation',
+                thumbnail =>'http://docs.google.com/uc?id=0B_sMJcYiGvN4MDI4ZTFjYjAtOTIzYy00NDZjLThlZDItNWRiYjUxMWFiYjdi&export=download&hl=en'},
+                
+              {url   => 'http://tasvideos.org/Movies-Arcade.html',
+                title => 'Arcade',
+                desc  => 'Tool assisted speedrun videos for Arcade',
+                thumbnail =>'http://docs.google.com/uc?id=0B_sMJcYiGvN4MTkxM2VmYjQtNTc5YS00MzRlLWFkZGEtYTgxYzgxZDJjMTA1&export=download&hl=en'},
+                
+              {url   => 'http://tasvideos.org/Movies-Hacks.html',
+                title => 'Special Runs',
+                desc  => 'Tool assisted speedrun videos for Special Runs',
+                thumbnail =>'http://docs.google.com/uc?id=0B_sMJcYiGvN4MDM2ZjJiZmItZjNjNS00MmQwLWFjOWQtOWQ4M2ZmNGI5NTZi&export=download&hl=en'}
+                
+
               );
       
       $opening = $feed_begin;
@@ -661,14 +715,14 @@ FEED_END
           $type              = 'sagetv/subcategory';
           
           $newItem =~ s/%%ITEM_TITLE%%/$title/g;
-          $newItem =~ s/%%ITEM_DATE%%//g;
+          $newItem =~ s/%%ITEM_DATE%%/$dateXMLString/g;
           $newItem =~ s/%%ITEM_DESCRIPTION%%/$description/g;
           $newItem =~ s/%%ITEM_URL%%/$video/g;
-          $newItem =~ s/%%ITEM_DUR%%//g;
-          $newItem =~ s/%%ITEM_SIZE%%//g;
+          $newItem =~ s/%%ITEM_DUR%%/1/g;
+          $newItem =~ s/%%ITEM_SIZE%%/1/g;
           $newItem =~ s/%%ITEM_TYPE%%/$type/g;
           $newItem =~ s/%%ITEM_PICTURE%%/$thumbnail/g;
-          $newItem =~ s/%%ITEM_DUR_SEC%%//g; 
+          $newItem =~ s/%%ITEM_DUR_SEC%%/1/g; 
           push(@items,$newItem);            
       }
             
