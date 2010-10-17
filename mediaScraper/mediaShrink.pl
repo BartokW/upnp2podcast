@@ -41,13 +41,13 @@
             print BATFILE "\n";
             print BATFILE ":LOOP\n";
             print BATFILE "IF (%1)==() GOTO NEXT\n";
-            print BATFILE "set COMMAND=%COMMAND% \"%~f1\"\n";
+            print BATFILE "set COMMAND=%COMMAND% \"%1\"\n";
             print BATFILE "shift\n";
             print BATFILE "GOTO LOOP\n";
             print BATFILE "\n";
             print BATFILE ":NEXT\n";
-            print BATFILE "cd /D \"$executablePath\"\n";
-            print BATFILE "start /I /B /LOW /WAIT $executableEXE.exe %COMMAND%\n";
+            #print BATFILE "cd /D \"$executablePath\"\n";
+            print BATFILE "start \"MediaShrink\" /D \"$executablePath\" /B /LOW /WAIT $executableEXE.exe %COMMAND%\n";
             print BATFILE "GOTO EOF\n";
             close(BATFILE);
       }
