@@ -7,16 +7,16 @@
 #
 
     Profile           =Cut Commercials
-    Encode CLI #1     =?>EXISTS:C:\Program Files\VideoReDoPlus\VideoReDo.exe<:>/VideoRedoPath "C:\Program Files\VideoReDoPlus\"<=>EXISTS:C:\Program Files\VideoReDoTVSuite\VideoReDo3.exe<:>/VideoRedoPath "C:\Program Files\VideoReDoTVSuite\"<?
+    Encode CLI #1     =?>EXISTS:C:\Program Files\VideoReDoPlus\VideoReDo.exe<:>/VideoRedoPath "C:\Program Files\VideoReDoPlus\"<=>EXISTS:C:\Program Files\VideoReDoTVSuite\VideoReDo3.exe<:>/VideoRedoPath "C:\Program Files\VideoReDoTVSuite\"<=>EXISTS:C:\Program Files\VideoReDoTVSuite4\VideoReDo4.exe<:>/VideoRedoPath "C:\Program Files\VideoReDoTVSuite4\"<?
     Encoder #1        =/setOptions
-    Encode CLI #1     =?>inputMain:videoCodec=~mpeg2video&&VideoRedoPath&&!forceMencoderCutComm<:>?>(>EXT:VPrj&&onlyWhenVprj<)||!onlyWhenVprj<:>VRD_CutCommercials<?<=>EXT:EDL&&!onlyWhenVprj<:>mencoder_CutCommercials<?
+    Encode CLI #1     =?>inputMain:videoCodec=~mpeg2video&&VideoRedoPath&&!forceMencoderCutComm<:>?>(>EXT:VPrj&&onlyWhenVprj<)||!onlyWhenVprj<:>VRD_CutCommercials<?<?
     Encoder #1        =/insertFunction
     Encode CLI #3     =?>profile=eq=Cut Commercials||profile=eq=CutCommercials<:>outputModes<?
     Encoder #3        =/insertFunction
 
 # Function: mencoder_CutCommercials
 #
-# Attempts to cut commercials from video
+# Attempts to cut commercials from video.  Currently disabled, works very poorly
 #
 # Input = %%inputMain%%
 # Ouput = %%OUTPUT_MAIN%%.%%inputMain_EXT%%
@@ -47,8 +47,10 @@
     Encoder #1        =/insertFunction
     Encode CLI #1     =?>EXT:EDL&&!EXT:VPRJ<:>#edl2vprj#"%%ORIGINAL_FULLFILE%%.edl" "%%OUTPUT_VPRJ%%.VPrj"<?
     Encoder #1        =/exe edl2vprj.exe
-    Encode CLI #1     =?>EXT:VPrj||EXISTS:%%inputVprj%%<:>#VRD_CUT#//nologo "%%VideoRedoPath%%\vp.vbs" "?>EXT:VPrj<:>%%ORIGINAL_FULLFILE%%.VPrj<=>%%inputVPRJ%%<?" "%%OUTPUT_MAIN%%.mpg" /t1 /q /e<?
-    Encoder #1        =/exe cscript 
+    Encode CLI #1     =!#vrd_cutCommercials#?>EXT:VPrj||EXISTS:%%inputVprj%%<:>#VRD_CUT#//nologo "%%VideoRedoPath%%\vp.vbs" "?>EXT:VPrj<:>%%ORIGINAL_FULLFILE%%.VPrj<=>%%inputVPRJ%%<?" "%%OUTPUT_MAIN%%.mpg" /t1 /q /e<?
+    Encoder #1        =/exe cscript
+    Encode CLI #1     =?>!(>prevExeLog=~Output complete to<)<:>/ERROR "Commercial Cutting failed"<?
+    Encoder #1        =/setOptions  
     Encode CLI #3     =?>EXT:VPrj||EXISTS:%%inputVprj%%<:>/cutCommComplete<?
     Encoder #3        =/setOptions
     Encode CLI #3     =?>EXT:VPrj||EXISTS:%%inputVprj%%<:>/cutCommFile "%%inputMain%%"<?
