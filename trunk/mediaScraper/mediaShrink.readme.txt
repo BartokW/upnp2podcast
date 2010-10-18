@@ -47,15 +47,21 @@ CLI Syntax  : mediaShrink.exe [options] <File|Folder> <File|Folder>
                              - HQ       : Slow and pretty
                              - MQ       : A nice mix of speed and quality (default)
                              - LQ       : Fast enough for slow machines
-                             - portable : For playback on portable devices
                              - custom   : Uses custom parameters from /x264opts
                              
     /handbrakeProfile <profile>  Use one of handbrakes preset profiles.
                            Note that you still need to specify /container mp4
                            for portable device profiles.
+			   
+			   Example: /handbrakeProfile "Universal" /container mp4
+			   
+    /handbrakeFullCommand <full CLI command>
+    		           Used to specify a complete handbrake CLI and overide all of 
+			   Mediashrinks settings.  NOTE: You still need to specify /container
+			   
 
    /x264opts <options>     Sets custom x264 options
-                             - ex: ref=2:bframes=2:subme=6:mixed-refs=0
+                             - ex: /x264opts "ref=2:bframes=2:subme=6:mixed-refs=0"
                              
    /onePass                Performs a one-pass encode (default)
    /twoPass                Performs a two-pass encode                         
@@ -97,7 +103,10 @@ CLI Syntax  : mediaShrink.exe [options] <File|Folder> <File|Folder>
 
     Note: atrack, abitrate, acodec can take comma separated values to force multiple tracks
     
-    /allAudio              Force mediaSrhink to encode all audio tracks      
+    /allAudio              Force mediaSrhink to encode all audio tracks    
+    
+    /preferDTS             By defrault mediashrink will prefer AC3 5.1 tracks, but settings
+    			   this it'll force it to choose a DTS track over an AC3 one.  
 
 ### DVD Options ------------------------------------------------------------
 
