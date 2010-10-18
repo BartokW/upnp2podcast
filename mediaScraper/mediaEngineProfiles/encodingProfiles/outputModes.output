@@ -30,7 +30,7 @@
 # TODO: FIX
 
     Profile           =outputIsDVD
-    Encode CLI #1     =/finalOutputName "%%ORIGINAL%%_compress\%%ORIGINAL_PATH_FILE%%.title_%%dvdTitle%%.%%inputMain_EXT%%"
+    Encode CLI #1     =/finalOutputName "%%ORIGINAL%%_compress\%%ORIGINAL_FILE%%.title_%%dvdTitle%%.%%inputMain_EXT%%"
     Encoder #1        =/setOptions
     Encode CLI #1     =?>!DIRECTORY:?>outputDirectory<:>%%outputDirectory%%<=>%%ORIGINAL%%_compress<??>hardwareDevice<:>\%%hardwareDevice%%<?<:>"%%check%%"<?
     Encoder #1        =/exe mkdir
