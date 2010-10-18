@@ -12,6 +12,8 @@
     Encoder #4        =/insertFunction
     Encode CLI #1     =!#handbrake_1#-v -i "%%inputMain_REVSLASHES%%" -o "%%OUTPUT_MAIN_REVSLASHES%%.%%container%%" %%SNIP:Handbrake DVD%% ?>handbrakeProfile<:>--preset="%%handbrakeProfile%%"<=>%%SNIP:Handbrake Subtitles%% %%SNIP:Handbrake Video%% %%SNIP:Handbrake Audio%% %%SNIP:Handbrake Video Filters%%<?
     Encoder #1        =/exe HandBrakeCLI.exe
+    Encode CLI #1     =?>!(>prevExeLog=~Rip done<)<:>/ERROR "Handbrake encode didn't finish properly"<?
+    Encoder #1        =/setOptions  
     Encode CLI #2     =?>inputMain:videoContainer=~matroska<:>mkvAttachExtras<?
     Encoder #2        =/insertFunction
     Encode CLI #3     =outputModes
