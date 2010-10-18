@@ -35,7 +35,7 @@
     $executableEXE  = $3; 
 
     # Code version
-    $codeVersion = "mediaEngine v3.0.2 (SNIP:BUILT)";
+    $codeVersion = "mediaEngine v3.0.3 (SNIP:BUILT)";
 
     $usage  = "$codeVersion\n\n";
     $usage .= "Usage: mediaEngine.exe should not be called directly.\n";
@@ -3130,6 +3130,15 @@ sub dvdScanForTitles
     my $titleString = "";    
     my $subLang = "eng";
     
+    my $primary51        = "";
+    my $primary51Bitrate = 0;
+    my $prefered51Audio  = "AC3";
+    if (exists $perRunOptionsHash->{lc("preferDTS")})
+    {
+        $prefered51Audio = "DTS";
+    }
+    echoPrint("    + Prefered 5.1 Audio Codec: ($prefered51Audio)\n");
+    
     if (exists $perRunOptionsHash->{lc("subLang")})
     {
         $subLang = $perRunOptionsHash->{lc("subLang")};
@@ -3182,13 +3191,20 @@ sub dvdScanForTitles
         
         if ($totalDur > 5)
         {
-            if ($line =~ /([0-9]), English \(AC3\).*,\s*[0-9]+Hz,\s*([0-9]+)bps/ && $currentTitle != 0)
+
+            if ($line =~ /([0-9]), English \((AC3|DTS)\).*,\s*[0-9]+Hz,\s*([0-9]+)bps/ && $currentTitle != 0)
             {
                     $titleString .= "      - Audio : $line\n";
-                    if ($2 > 300000)
-                    {
-                        #echoPrint("          + Audio is 5.1\n");
-                        push(@{$soundHash51{$currentTitle}},$1);
+                    if ($3 > 300000)
+                    {   # Set primary 5.1 Track
+                        if ($primary51Bitrate == 0 || 
+                            ($2 eq $prefered51Audio &&
+                             !($primary51 eq $prefered51Audio)))
+                        {
+                            $primary51Bitrate = $3;
+                            $primary51        = $2; 
+                            @{$soundHash51{$currentTitle}} = ($1);
+                        }
                     }
                     else
                     {
