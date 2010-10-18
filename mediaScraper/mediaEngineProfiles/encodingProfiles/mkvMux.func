@@ -24,7 +24,7 @@
 #
 
     Profile           =mkvAttachExtras
-    Encode CLI #5     =?>EXT:edl||EXT:xml||EXISTS:%%ORIGINAL%%.properties||EXT:srt<:>#add_extras_mkv#-o "%%OUTPUT_MAIN%%.mkv" "%%inputMain%%" ?>!(>inputMain:subtitleInfo&&noSubtitles<)<:>?>EXT:srt<:>"%%ORIGINAL_FULLFILE%%.srt"<?<? ?>EXT:edl<:>--attachment-mime-type text/plain --attachment-name "Comskip EDL" --attach-file "%%ORIGINAL_FULLFILE%%.edl"<? ?>EXT:xml&&embedProperties<:>--global-tags "%%ORIGINAL_FULLFILE%%.xml"<? ?>EXISTS:%%ORIGINAL%%.properties<:>--attachment-mime-type text/plain --attachment-name "SageTV .properties metadata file" --attach-file "%%ORIGINAL%%.properties"<?<?
+    Encode CLI #5     =?>EXT:edl||EXT:xml||NOTEMPTY:%%ORIGINAL%%.properties||EXT:srt<:>#add_extras_mkv#-o "%%OUTPUT_MAIN%%.mkv" "%%inputMain%%" ?>!(>inputMain:subtitleInfo&&noSubtitles<)<:>?>EXT:srt<:>"%%ORIGINAL_FULLFILE%%.srt"<?<? ?>EXT:edl<:>--attachment-mime-type text/plain --attachment-name "Comskip EDL" --attach-file "%%ORIGINAL_FULLFILE%%.edl"<? ?>EXT:xml&&embedProperties<:>--global-tags "%%ORIGINAL_FULLFILE%%.xml"<? ?>NOTEMPTY:%%ORIGINAL%%.properties<:>--attachment-mime-type text/plain --attachment-name "SageTV .properties metadata file" --attach-file "%%ORIGINAL%%.properties"<?<?
     Encoder #5        =/exe mkvmerge.exe
 
 
