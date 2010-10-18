@@ -19,11 +19,6 @@
 #! /user/bin/perl
 #
 ##### Import libraries
-    use Encode qw(encode decode);
-    use utf8;
-    use Win32::Process;
-    use Win32;
-
     # Get the directory the script is being called from
     $executable = $0;
     $executable =~ m#(\\|\/)(([^\\/]*)\.([a-zA-Z0-9]{2,}))$#;;
@@ -37,8 +32,8 @@
     {
         if (open(BATFILE,">$executablePath\\$executableEXE.bat"))
         {
-            print BATFILE "\@ECHO OFF\n";
-            print BATFILE "\n";
+            print BATFILE "\@ECHO OFF\n\n";
+            print BATFILE "set COMMAND=\n";
             print BATFILE ":LOOP\n";
             print BATFILE "IF (%1)==() GOTO NEXT\n";
             print BATFILE "set COMMAND=%COMMAND% \"%1\"\n";
@@ -48,7 +43,7 @@
             print BATFILE ":NEXT\n";
             #print BATFILE "cd /D \"$executablePath\"\n";
             print BATFILE "start \"MediaShrink\" /D \"$executablePath\" /B /LOW /WAIT $executableEXE.exe %COMMAND%\n";
-            print BATFILE "GOTO EOF\n";
+            print BATFILE "echo Exit Code = %ERRORLEVEL%\n";
             close(BATFILE);
       }
     }
@@ -129,30 +124,16 @@
     }
 
     print " Executing command: \"$mediaEngine\" $optionsForEngine\n";
-    if($useAltLaunch)
+    system("\"$mediaEngine\" $optionsForEngine");
+    $exitcode = 1;
+    if (open(EXITCODE,"$executablePath\\mediaEngine.exit"))
     {
-        $mediaEngine = "$executablePath\\mediaEngine.exe";   
-        Win32::Process::Create($ProcessObj, 
-                "$mediaEngine",
-                getFile($mediaEngine)." $optionsForEngine",
-                0,
-                IDLE_PRIORITY_CLASS,
-                ".");
-        $ProcessObj->Wait(1000 * 60 * 60 * 24);
-        $ProcessObj->GetExitCode($exitcode);   
+        $exitcode = <EXITCODE>;    
     }
-    else
-    {
-        system("\"$mediaEngine\" $optionsForEngine");
-        $exitcode = 1;
-        if (open(EXITCODE,"$executablePath\\mediaEngine.exit"))
-        {
-            $exitcode = <EXITCODE>;    
-        }
-        close(EXITCODE); 
-        $delString = "del \"$executablePath\\mediaEngine.exit\"";
-        `$delString`;
-    }
+    close(EXITCODE); 
+    $delString = "del \"$executablePath\\mediaEngine.exit\"";
+    `$delString`;
+
 
     print "Exiting Code: ($exitcode)\n";
     print "Exiting in 5 seconds...\n";
