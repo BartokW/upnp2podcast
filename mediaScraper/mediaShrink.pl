@@ -36,7 +36,7 @@
             print BATFILE "set COMMAND=\n";
             print BATFILE ":LOOP\n";
             print BATFILE "IF (%1)==() GOTO NEXT\n";
-            print BATFILE "set COMMAND=%COMMAND% \"%1\"\n";
+            print BATFILE "set COMMAND=%COMMAND% %1\n";
             print BATFILE "shift\n";
             print BATFILE "GOTO LOOP\n";
             print BATFILE "\n";
