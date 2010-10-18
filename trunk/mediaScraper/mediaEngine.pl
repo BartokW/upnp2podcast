@@ -27,8 +27,6 @@
     use Data::Dumper;
     use IMDB::Film;
     use Date::Calc qw(:all);
-    #use Win32::Process;
-    #use Win32;
 
     # Get the directory the script is being called from
     $executable = $0;
@@ -55,7 +53,6 @@
     %fileHandles = ();
     my $mainLogFileName = "$executablePath\\$executableEXE.log";
     open($mainLogFile,">$mainLogFileName");
-    print $mainLogFile $ourStorySoFar;
     select($mainLogFile);
     $fileHandles{$mainLogFileName} = $mainLogFile;    
     
@@ -81,7 +78,6 @@
     }
 
 ##### Initilizing Variables 
-    
     # Start at -1, elevate to 0 if nessisary
     $verboseLevel = -1;     
     $errorLevel = 0;   
@@ -117,9 +113,6 @@
     echoPrint(" Staring Proccesing at $startTime $startDate\n\n");
     echoPrint("  + Executable   : $executable\n");
     echoPrint("  + EXE path     : $executablePath\n");
-
-
-
     
     # Setting cli options
     foreach (@parameters)
@@ -1758,7 +1751,7 @@
         if ($teeOutput && exists $perRunOptionsHash->{lc("tee")})
         {
             $captureLogTee = "\"".$binFiles->{lc("mtee.exe")}."\" \"$logFile.log\"";
-            $runCommand = encode('ISO-8859-1',"$startRunCommand 2>\"$logFile.err.log\" \| $captureLogTee");
+            $runCommand = encode('ISO-8859-1',"$startRunCommand 2>&1 \| $captureLogTee");
             echoPrint("        - Executing command: $startRunCommand\n");
             select(STDOUT);
             echoPrint("\n################# ".$currentCommand->{lc("exe")}." Output $comment ###############\n");
@@ -1780,35 +1773,36 @@
         
             $runCommand = encode('ISO-8859-1',"$runCommand > \"$logFile.log\" 2>&1");
             echoPrint("        - Executing command: $runCommand\n");
-            `$runCommand`;
-            if (-s "$logFile.log")
-            {
-                my $linesToSave = 30;
-                my $linesRead   = 0;
-                my @lines = ();
-                open(ENCODELOG,"$logFile.log");
-                while(<ENCODELOG>)
-                {
-                    my $line = $_;
-                    if ($line =~ /\r([^\r]*)\r$/)
-                    {
-                        $line = $1;
-                    }
-                    push(@lines,$_);
-                    if (@lines > $linesToSave)
-                    {
-                        shift(@lines);
-                    }
-                }
-                close(ENCODELOG);
-                $currentCommand->{lc("encodeLog")}  = "@lines";
-                unshift(@lines,"------ Last $linesToSave lines of log -------\n");
-                my $fullText = "@lines";
-                $fullText =~ s/\r/\n/g;
-                echoPrint(padLines("          + ",$linesToSave,split(/\n/,$fullText)),100);                   
-            }
-            
+            `$runCommand`;  
         } 
+        
+        if (-s "$logFile.log")
+        {
+            my $linesToSave = 30;
+            my $linesRead   = 0;
+            my @lines = ();
+            open(ENCODELOG,"$logFile.log"); 
+            while(<ENCODELOG>)
+            {
+                my $line = $_;
+                if ($line =~ /\r([^\r]*)\r$/)
+                {
+                    $line = $1;
+                }
+                push(@lines,$_);
+                if (@lines > $linesToSave)
+                {
+                    shift(@lines);
+                }
+            }
+            close(ENCODELOG);
+            my $fullText = "@lines";
+            $fullText =~ s/\r/\n/g;
+            $currentCommand->{lc("encodeLog")}      = $fullText;
+            $perRunOptionsHash->{lc("prevExeLog")}  = $fullText;
+            $fullText = "------ Last $linesToSave lines of log -------\n" . $fullText;  
+            echoPrint(padLines("          + ",$linesToSave,split(/\n/,$fullText)),100);
+         }   
     }
     
     sub padLines
