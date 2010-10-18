@@ -10,7 +10,7 @@
     Encoder #1        =/insertFunction
     Encode CLI #4     =?>ORIGINAL:embeddedCCCount>10&&!handbrakeSubtitleTracks&&!noSubtitles<:>extractSubtitles<?
     Encoder #4        =/insertFunction
-    Encode CLI #1     =!#handbrake_1#-v -i "%%inputMain_REVSLASHES%%" -o "%%OUTPUT_MAIN_REVSLASHES%%.%%container%%" %%SNIP:Handbrake DVD%% ?>handbrakeProfile<:>--preset="%%handbrakeProfile%%"<=>%%SNIP:Handbrake Subtitles%% %%SNIP:Handbrake Video%% %%SNIP:Handbrake Audio%% %%SNIP:Handbrake Video Filters%%<?
+    Encode CLI #1     =!#handbrake_1#-v -i "%%inputMain_REVSLASHES%%" -o "%%OUTPUT_MAIN_REVSLASHES%%.%%container%%" %%SNIP:Handbrake DVD%% ?>handbrakeFullCommand<:>%%handbrakeFullCommand%%<=>handbrakeProfile<:>--preset="%%handbrakeProfile%%"<=>%%SNIP:Handbrake Subtitles%% %%SNIP:Handbrake Video%% %%SNIP:Handbrake Audio%% %%SNIP:Handbrake Video Filters%%<?
     Encoder #1        =/exe HandBrakeCLI.exe
     Encode CLI #1     =?>!(>prevExeLog=~Rip done<)<:>/ERROR "Handbrake encode didn't finish properly"<?
     Encoder #1        =/setOptions  
