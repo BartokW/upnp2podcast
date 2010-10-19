@@ -43,7 +43,15 @@
             print BATFILE "cd /D \"$executablePath\"\n";
             print BATFILE "start \"MediaShrink\" /B /LOW /WAIT $executableEXE.exe %COMMAND%\n";
             print BATFILE "echo Exit Code = %ERRORLEVEL%\n";
-            print BATFILE "exit\n";            
+            print BATFILE "exit\n\n"; 
+            print BATFILE "REM\nREM\n";
+            print BATFILE "REM Some useful command lines I use, you can just copy/rename this file and replace the the above encode command with these for some handy drag and drop encoding\nREM\n";
+            print BATFILE "REM Manually select DVD titles to encode\nREM     start \"MediaShrink\" /B /LOW /WAIT $executableEXE.exe %COMMAND% /vbitrate 2000 /twopass /manualTitles /tee\nREM\n";               
+            print BATFILE "REM Encode for iPhone\nREM     start \"MediaShrink\" /B /LOW /WAIT $executableEXE.exe %COMMAND% /container mp4 /tee /handbrakeProfile \"iPhone & iPod Touch\" /outputSubFolder \"iPhone\"\nREM\n";   
+            print BATFILE "REM Encode for Hardware Player\nREM     start \"MediaShrink\" /B /LOW /WAIT $executableEXE.exe %COMMAND% /container mp4 /tee /handbrakeProfile \"Universal\" /outputSubFolder \"Xbox\"\nREM\n";
+            print BATFILE "REM Encode for High Quality Encode\nREM     start \"MediaShrink\" /B /LOW /WAIT $executableEXE.exe %COMMAND% /vbitrate 2500 /vprofile HQ /tee\nREM\n";      
+            print BATFILE "REM Encode for Medium Quality Encode\nREM     start \"MediaShrink\" /B /LOW /WAIT $executableEXE.exe %COMMAND% /vbitrate 2500 /tee\nREM\n"; 
+            print BATFILE "REM Encode for Low Quality Encode\nREM     start \"MediaShrink\" /B /LOW /WAIT $executableEXE.exe %COMMAND% /vbitrate 2000 /tee\nREM\n";           
             close(BATFILE);
       }
     }
