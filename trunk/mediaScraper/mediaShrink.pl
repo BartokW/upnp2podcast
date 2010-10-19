@@ -38,12 +38,12 @@
             print BATFILE "IF (%1)==() GOTO NEXT\n";
             print BATFILE "set COMMAND=%COMMAND% %1\n";
             print BATFILE "shift\n";
-            print BATFILE "GOTO LOOP\n";
-            print BATFILE "\n";
+            print BATFILE "GOTO LOOP\n\n";
             print BATFILE ":NEXT\n";
-            #print BATFILE "cd /D \"$executablePath\"\n";
-            print BATFILE "start \"MediaShrink\" /D \"$executablePath\" /B /LOW /WAIT $executableEXE.exe %COMMAND%\n";
+            print BATFILE "cd /D \"$executablePath\"\n";
+            print BATFILE "start \"MediaShrink\" /B /LOW /WAIT $executableEXE.exe %COMMAND%\n";
             print BATFILE "echo Exit Code = %ERRORLEVEL%\n";
+            print BATFILE "exit\n";            
             close(BATFILE);
       }
     }
