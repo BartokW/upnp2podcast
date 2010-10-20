@@ -123,6 +123,12 @@ CLI Syntax  : mediaShrink.exe [options] <File|Folder> <File|Folder>
                             the DVD title numbers you want to encode sepeated by
                             commas.
                             
+    /minDVDTitleLength <#>  Theshold for the minimum title time in minutes to 
+                            inspect. Makes log much cleaner for commercial DVDs
+                            which can have hundreds of short titles, but if you
+                            have a home video DVD with a short title you may need
+                            to customize this value.  (Default 5)
+                            
 ### Commercial Cutting Options ------------------------------------------------------------
     REQUIRES VIDEOREDO TO BE INSTALLED
     
