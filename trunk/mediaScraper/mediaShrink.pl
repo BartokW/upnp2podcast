@@ -26,7 +26,7 @@
     $executableEXE  = $3; 
     $exitCode = 0;
     
-    $codeVersion = "$executableEXE v3.0 (SNIP:BUILT)";
+    $codeVersion = "$executableEXE v3.0.3 (SNIP:BUILT)";
     
     if (!(-e "$executablePath\\$executableEXE.bat"))
     {
@@ -71,7 +71,7 @@
     {
         print "ERROR: No Parameters\n\n";
         print $usage;
-        print "Exiting in 5 seconds...\n";
+        print "\n\nExiting in 5 seconds...\n";
         sleep(5);
         exit 1;
     }
