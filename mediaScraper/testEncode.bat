@@ -9,8 +9,9 @@ GOTO LOOP
 
 :NEXT
 cd /D "D:\SageTVDev\mediaScraper"
-start "MediaShrink" /B /LOW /WAIT mediaShrink.exe %COMMAND% /vcodec ffmpeg /tee
+start "MediaShrink" /B /LOW /WAIT mediaShrink.pl %COMMAND% /vcodec ffmpeg /tee
 echo Exit Code = %ERRORLEVEL%
+pause
 exit
 
 REM
