@@ -982,7 +982,7 @@
             {
                 $perRunOptionsHash->{lc("handbrakeSubtitleTracks")}   = $handbrakeSubtitleTracks;
             } 
-        }          
+        }    
     }
 
 ##### Parse Profile Files
@@ -1751,7 +1751,7 @@
         if ($teeOutput && exists $perRunOptionsHash->{lc("tee")})
         {
             $captureLogTee = "\"".$binFiles->{lc("mtee.exe")}."\" \"$logFile.log\"";
-            $runCommand = encode('ISO-8859-1',"$startRunCommand 2>&1 \| $captureLogTee");
+            $runCommand = encode('ISO-8859-1',"$startRunCommand 2> \"$logFile.error.log\" \| $captureLogTee");
             echoPrint("        - Executing command: $startRunCommand\n");
             select(STDOUT);
             echoPrint("\n################# ".$currentCommand->{lc("exe")}." Output $comment ###############\n");
@@ -1796,11 +1796,31 @@
                 }
             }
             close(ENCODELOG);
+            
+            if (-s "$logFile.error.log")
+            {
+                open(ENCODELOG,"$logFile.error.log"); 
+                while(<ENCODELOG>)
+                {
+                    my $line = $_;
+                    if ($line =~ /\r([^\r]*)\r$/)
+                    {
+                        $line = $1;
+                    }
+                    push(@lines,$_);
+                    if (@lines > $linesToSave)
+                    {
+                        shift(@lines);
+                    }
+                }
+                close(ENCODELOG);
+            }
+            
             my $fullText = "@lines";
             $fullText =~ s/\r/\n/g;
             $currentCommand->{lc("encodeLog")}      = $fullText;
             $perRunOptionsHash->{lc("prevExeLog")}  = $fullText;
-            $fullText = "------ Last $linesToSave lines of log -------\n" . $fullText;  
+            echoPrint("          + ------ Last $linesToSave lines of log -------\n");
             echoPrint(padLines("          + ",$linesToSave,split(/\n/,$fullText)),100);
          }   
     }
@@ -2504,12 +2524,20 @@
     {   # (G:\videos\)filename.avi
         my ( $fileName ) = @_;
         my $rv = "";
+        #echoPrint("  + GetPath IN : ($fileName)\n");
+        if ($fileName =~ m#[\\/]$#)
+        {   # If it ends in \ chop it off
+            $fileName = "$`";
+        }
+        
+        $fileName .= ".txt";  # Always append an extention
         if ($fileName =~ m#([^\\/]*)$#)
         {
             $rv = $`;
         }
       
         $rv =~ s#(\\|/)$##;
+        #echoPrint("  + GetPath OUT: ($rv)\n");
         return $rv;
     }
 
@@ -3109,6 +3137,7 @@ sub dvdScanForTitles
     my %srtHash   = ();
     my %commentaryHash = ();
     my %soundHash51    = ();
+    my %soundHashDTS    = ();
     my %soundHash      = ();
     my @newPerRunOptions = ();
     my $videoInfoArray = \%{$perRunOptionsHash->{videoInfo}{lc($video)}};
@@ -3117,6 +3146,12 @@ sub dvdScanForTitles
     my $foundTitle = -1;
     my $longest    = 0;
     my $sum        = 0;
+    my $minTitleLength = 5;
+    
+    if (exists $perRunOptionsHash->{lc("minDVDTitleLength")})
+    {
+        $minTitleLength = $perRunOptionsHash->{lc("minDVDTitleLength")};    
+    }
     
     $handBrakeString = encode('UTF-8',"\"".$binFiles->{lc("HandBrakeCLI.exe")}."\" -i \"".reverseSlashes($video)."\" -t 0 2>&1");
     echoPrint("  + Getting DVD info: $handBrakeString ($defailtProfileString)\n");
@@ -3164,7 +3199,7 @@ sub dvdScanForTitles
         if ( $line =~ /\+ duration: (\d{2}):(\d{2}):(\d{2})/ && $currentTitle != $foundTitle)
         {
             $totalDur = ($1*60) + $2;
-            if ($totalDur > 5)
+            if ($totalDur > $minTitleLength)
             {
                 $titleString = "    + Title ($1:$2:$3)   : $currentTitle\n";
             }
@@ -3189,37 +3224,63 @@ sub dvdScanForTitles
             $foundTitle = $currentTitle;
         }
         
-        if ($totalDur > 5)
+        if ($totalDur > $minTitleLength)
         {
-
-            if ($line =~ /([0-9]), English \((AC3|DTS)\).*,\s*[0-9]+Hz,\s*([0-9]+)bps/ && $currentTitle != 0)
+            if ($line =~ /\+ audio tracks:/i)
             {
-                    $titleString .= "      - Audio : $line\n";
-                    if ($3 > 300000)
-                    {   # Set primary 5.1 Track
-                        if ($primary51Bitrate == 0 || 
-                            ($2 eq $prefered51Audio &&
-                             !($primary51 eq $prefered51Audio)))
-                        {
-                            $primary51Bitrate = $3;
-                            $primary51        = $2; 
-                            @{$soundHash51{$currentTitle}} = ($1);
-                        }
-                    }
-                    else
-                    {
-                        push(@{$soundHash{$currentTitle}},$1);                    
-                    }
+                $mode = "AUDIO";
             }
-            elsif ($line =~ /([0-9]),.*$subLang\) \((Bitmap|Text)\)/ && $currentTitle != 0)
+            
+            if ($line =~ /\+ subtitle tracks:/i)
             {
-                $titleString .= "      - Subs  : $line\n";
-                push(@{$srtHash{$currentTitle}},$1);
-                #echoPrint("          + SRT: $1 $line\n");
+                $mode = "SUBS";
             }
-            elsif ($line =~ /size:/)
+            
+            if ($line =~ /size:/)
             {
                 $titleString .= "      - Video : $line\n";
+            }
+            
+            
+            if ($line =~ /\+ ([0-9]+),/ && $currentTitle != 0)
+            {
+                if ($mode eq "AUDIO")
+                {
+                    if ($line =~ /([0-9]), English \((AC3|DTS)\).*,\s*[0-9]+Hz,\s*([0-9]+)bps/i)
+                    {
+                        my $track = $1;
+                        my $codec = $2;
+                        my $bps   = $3;
+                        $titleString .= "      - Audio : $line\n";
+                        if ($bps > 300000)
+                        {
+                            if (!(exists $soundHash51{$currentTitle})  || 
+                                $codec =~ /DTS/i && exists $perRunOptionsHash->{lc("preferDTS")})
+                            {
+                                $soundHash51{$currentTitle}      = $track;
+                                $soundHash51Codec{$currentTitle} = $codec;
+                                if ($codec =~ /DTS/i)
+                                {
+                                    $titleString .= "        + Added DTS Track!\n";
+                                }                           
+                            }
+                        }
+                        else
+                        {
+                            #$titleString .= "        + Added non-5.1 Track!\n";
+                            push(@{$soundHash{$currentTitle}},$1);                    
+                        }                        
+                    }
+                }
+                elsif ($mode eq "SUBS")
+                {
+                    if ($line =~ /([0-9]),.*$subLang\) \((Bitmap|Text)\)/)
+                    {
+                        $titleString .= "      - Subs  : $line\n";
+                        push(@{$srtHash{$currentTitle}},$1);
+                        #echoPrint("          + SRT: $1 $line\n");
+                    }
+                }
             }
         }
     }
@@ -3293,12 +3354,12 @@ sub dvdScanForTitles
               exists $forcedTitles{$checkingTitle})
         {
                 $addTitle = $checkingTitle;   
-                echoPrint("      - ".(exists $forcedTitles{$checkingTitle} ? "Forcing" : "Adding")." Title $checkingTitle (5.1:@{$soundHash51{$checkingTitle}}) (Stereo/Mono:@{$soundHash{$checkingTitle}})(Subtitles:@{$srtHash{$checkingTitle}})\n");
+                echoPrint("      - ".(exists $forcedTitles{$checkingTitle} ? "Forcing" : "Adding")." Title $checkingTitle (5.1:$soundHash51{$checkingTitle}) (Stereo/Mono:@{$soundHash{$checkingTitle}})(Subtitles:@{$srtHash{$checkingTitle}})\n");
             
-                foreach (@{$soundHash51{$checkingTitle}})
-                {   # Add 5.1 tracks first
-                    $handbrakeAudioTracks   .= "$_,";
-                    $handbrakeAudioEncoders .= "ac3,";
+                if (exists $soundHash51{$checkingTitle})
+                {   # Add AC3 tracks first
+                    $handbrakeAudioTracks   .= $soundHash51{$checkingTitle}.",";
+                    $handbrakeAudioEncoders .= lc($soundHash51Codec{$checkingTitle}).",";
                     $handbrakeAudioBitrate  .= "auto,";
                 }
                 
