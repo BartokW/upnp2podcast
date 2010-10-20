@@ -8,7 +8,7 @@
     Profile           =outputModes
     Encode CLI #1     =?>(>!inputMain:videoContainer&&!%%hardwareDevice%%=~videoOnly<)||(>!inputMain:videoInfo&&!%%hardwareDevice%%=~audioOnly<)<:>/ERROR "No Audio or Video"<?
     Encoder #1        =/setOptions
-    Encode CLI #1     =?>!DIRECTORY:%ORIGINAL%%<:>Match Timestamps<?
+    Encode CLI #1     =?>!DIRECTORY:%%ORIGINAL%%<:>Match Timestamps<?
     Encoder #1        =/insertFunction
     Encode CLI #1     =?>%%outputMode%%=eq=inPlace<:>/inPlace<?
     Encoder #1        =/setOptions
@@ -30,7 +30,7 @@
 # TODO: FIX
 
     Profile           =outputIsDVD
-    Encode CLI #1     =/finalOutputName "%%ORIGINAL%%_compress\%%ORIGINAL_FILE%%.title_%%dvdTitle%%.%%inputMain_EXT%%"
+    Encode CLI #1     =/finalOutputName "%%ORIGINAL%%_compress\%%ORIGINAL_NAME%%.title_%%dvdTitle%%.%%inputMain_EXT%%"
     Encoder #1        =/setOptions
     Encode CLI #1     =?>!DIRECTORY:?>outputDirectory<:>%%outputDirectory%%<=>%%ORIGINAL%%_compress<??>hardwareDevice<:>\%%hardwareDevice%%<?<:>"%%check%%"<?
     Encoder #1        =/exe mkdir
@@ -76,7 +76,7 @@
 #
 
     Profile           =defaultOutputName
-    Encode CLI #1     =?>isDVD<:>%%ORIGINAL_PATH_NAME%%<=>%%ORIGINAL_NAME%%<?.%%profile%%
+    Encode CLI #1     =%%ORIGINAL_NAME%%.%%profile%%
     Encoder #1        =
 
 # Function: Touch - Matches the new file to the original files timestamps
