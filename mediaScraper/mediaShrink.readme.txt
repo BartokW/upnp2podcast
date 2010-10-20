@@ -1,4 +1,4 @@
-mediaShrink v3.0 -
+mediaShrink Readme -
 
 Simple Usage: Drag and drop videos on MediaShrink.exe or MediaShink.bat 
 CLI Syntax  : mediaShrink.exe [options] <File|Folder> <File|Folder>
