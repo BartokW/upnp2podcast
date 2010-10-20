@@ -1,1 +1,0 @@
-/profile scrapeFavorites /centralFanartPath "H:\Videos\Fanart" /genPropertyFile /downloadAllFanArt /baseFolder "TV" /updateInfo /defaultProfile inputFile /findFileRegEx "avi|mpg|mkv|mp4|mpeg|VIDEO_TS|ts|ogm|divx|mpts|dvr-ms"
