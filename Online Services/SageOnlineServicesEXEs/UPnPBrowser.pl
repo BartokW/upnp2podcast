@@ -62,14 +62,14 @@
   $dateXMLString = sprintf("%04d-%02d-%02d",$year,$month,$dayOfMonth);
 
   # Code version
-  my $codeVersion = "$executableEXE v1.1 (SNIP:BUILT)";
+  my $codeVersion = "$executableEXE v1.2 (SNIP:BUILT)";
   
   my $invalidMsg .= "\n$codeVersion\n";
   $invalidMsg .= "\tUSAGE:";
   $invalidMsg .= "\t$executableEXE.exe /profile <Profile name>\n\n";
 
   my ($feed_begin, $feed_item, $feed_end) = populateFeedStrings();
-
+  
   echoPrint("Welcome to $codeVersion! (".localtime()."\n");
   echoPrint("  + Path: $executablePath\n");
   
@@ -214,6 +214,22 @@
   if (exists $optionsHash{lc("myMovies")})
   {
       $myMovies = 1;    
+  }
+  
+  if (exists $optionsHash{lc("cleanScrapeMode")})
+  {
+      if (exists $optionsHash{lc("outputDir")}   && 
+          !($optionsHash{lc("outputDir")} eq "") &&
+          -d $optionsHash{lc("outputDir")})
+      {   # Add in presets
+          $workPath = $optionsHash{lc("outputDir")};
+          cleanWorkPath($workPath);
+      }
+      else
+      {
+          echoPrint("  ! /cleanScrapeMode but /outputDir (".$optionsHash{lc("outputDir")}.") isn't valid, exiting!\n");
+          exit 1;
+      }  
   }
   
   if (exists $optionsHash{lc("scrapeMode")})
@@ -520,6 +536,7 @@
       {
           echoPrint("LOOPING: $playONPath\n");
           $feedTitle = $playONPath;
+          $skipping = 0;
 
           if (!($playONPath eq "") && $foundDevice == 1 && !(exists $optionsHash{lc("uid")}))
           {  # if all we get is a path, serach the tree for the uid
@@ -546,15 +563,18 @@
                           $found = 1;
                           #last;    
                       }    
-                  }              
+                  }
+                                
                   if ($found == 0)
                   {
-                      echoPrint("    ! Couldn't find : ".$lookingFor."\n");
+                      echoPrint("    ! Couldn't find : ".$lookingFor."!\n");
+                      $skipping = 1;
+                      last;
                   }
-              }
+              }              
           }
           
-          if (exists $optionsHash{lc("uid")} && $foundDevice == 1)
+          if (exists $optionsHash{lc("uid")} && $foundDevice == 1 && $skipping != 1)
           {              
               @items    = (@items, addItems($mediaServer, 
                                             $optionsHash{lc("uid")}, 
@@ -615,6 +635,7 @@
                   
               }        
           }
+          
           foreach $newFile (sort(keys %playOnFileHashCopy))
           {
               echoPrint("    - Added : (".getFile($newFile)."\n");
@@ -637,11 +658,18 @@
               { # Write .playon file
                 print PROPERTIES $playOnFileHashCopy{$newFile};
                 close PROPERTIES;
+                
+                my $baseVideo = "playon_hulu.m4v";
+                
+                if ($playOnFileHashCopy{$newFile} =~ /netflix/i)
+                {
+                    $baseVideo = "playon_netflix.m4v";
+                }
             
-                $copyString = ($linux == 1 ? "cp" : "copy")." \"$executablePath".$FS."$executableEXE".$FS."base.mkv\" \"".getFullFile($newFile)."\"";
+                $copyString = ($linux == 1 ? "cp" : "copy")." \"$executablePath".$FS."$executableEXE".$FS."$baseVideo\" \"".getFullFile($newFile)."\"";
                 #echoPrint("    - copying : ($copyString)\n");
-                `$copyString`; 
-              }    
+                `$copyString`;
+              } 
           }                  
       }
       else
@@ -1195,6 +1223,51 @@ FEED_END
         }      
     }
     
+    sub cleanWorkPath
+    {
+        my ($workPath) = @_;
+        my %existingFilesHash = scanDir($workPath,"playon");
+        
+        foreach $exitingFile (sort(keys %existingFilesHash))
+        {
+            echoPrint("    - Cleaning : (".getFile($exitingFile)." (".(-s getFullFile($exitingFile)).")\n"); 
+            if (-e "$exitingFile" && $exitingFile =~ /\.playon$/ && (-s getFullFile($exitingFile)) < 60000)
+            {   # never delete anything over 60 mb                 
+                $rmString = "del /Q \"$exitingFile\"";
+                #echoPrint("    - rm : ($rmString)\n");
+                `$rmString`;
+                $rmString = "del /Q \"".getFullFile($exitingFile)."\"";
+                #echoPrint("    - rm : ($rmString)\n");
+                `$rmString`;
+                
+                #Check to see if folder is empty
+                my $checkFolder = getPath($exitingFile);
+                opendir(SCANDIR,"$checkFolder");
+                my @filesInDir = readdir(SCANDIR);
+                #echoPrint("      - Checking if folder is empty : ($checkFolder)\n");
+                $depthProtection = 0;
+                while(@filesInDir == 2 && $depthProtection < 4)
+                {
+                    $rmString = "rmdir /Q \"$checkFolder\"";
+                    echoPrint("      + Folder empty, deleting : ($rmString)\n");
+                    `$rmString`;
+                    
+                    close(SCANDIR);
+                    $checkFolder = getPath($checkFolder);
+                    opendir(SCANDIR,"$checkFolder");
+                    @filesInDir = readdir(SCANDIR);
+                    #echoPrint("      + Checking if folder is empty : ($checkFolder)\n");
+                    $depthProtection++;                          
+                }
+                close(SCANDIR);       
+            }        
+        }
+        echoPrint("    - Folders Cleaned!\n");
+        exit 1;
+        
+    }    
+    
+    
     sub scrapePlayON
     {
         my ($playONPath,$playONDescription,$playONTitle,$playONAirdate) = @_;
@@ -1322,7 +1395,6 @@ FEED_END
             $propertiesFile   .= "EpisodeTitle=$episodeTitle\n";
             $propertiesFile   .= "SeasonNumber=$season\n";
             $propertiesFile   .= "EpisodeNumber=$episode\n";
-            $fold
         }
         else
         {
@@ -1337,12 +1409,12 @@ FEED_END
         $propertiesFile   .= "PlayOnPath=$path\n";
         
         $fileName = toWin32($fileName);
-        #echoPrint("  + Generating : ($workPath".$FS."$folder".$FS."$fileName.mkv)\n");
+        #echoPrint("  + Generating : ($workPath".$FS."$folder".$FS."$fileName.m4v)\n");
         #echoPrint($propertiesFile);
         $fileName =~ s/mythbusters/MythBusters/gi;
         $folder   =~ s/mythbusters/MythBusters/gi;
                 
-        $fullFileName = "$workPath".$FS."$folder".$FS."$fileName.mkv.playon";
+        $fullFileName = "$workPath".$FS."$folder".$FS."$fileName.m4v.playon";
         
         if (!(-e $fullFileName))
         {
@@ -1360,12 +1432,12 @@ FEED_END
         #    `$mkdirString`; 
         #} 
               
-        #if (open(PROPERTIES,">$workPath".$FS."$folder".$FS."$fileName.mkv.playon"))
+        #if (open(PROPERTIES,">$workPath".$FS."$folder".$FS."$fileName.m4v.playon"))
         #{
         #    print PROPERTIES $path;
         #    close PROPERTIES;
         #    
-        #    $copyString = ($linux == 1 ? "cp" : "copy")." \"$executablePath".$FS."$executableEXE".$FS."base.mkv\" \"$workPath".$FS."$folder".$FS."$fileName.mkv\"";
+        #    $copyString = ($linux == 1 ? "cp" : "copy")." \"$executablePath".$FS."$executableEXE".$FS."base.m4v\" \"$workPath".$FS."$folder".$FS."$fileName.m4v\"";
         #    echoPrint("    - copying : ($copyString)\n");
         #    `$copyString`; 
         #}       
