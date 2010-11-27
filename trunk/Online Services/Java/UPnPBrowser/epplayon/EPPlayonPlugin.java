@@ -15,41 +15,48 @@ import sagex.plugin.IPropertyPersistence;
 
 public class EPPlayonPlugin extends AbstractPlugin 
 {
-     private IPropertyPersistence ssp = new EPPersistance();
-     private IPropertyPersistence spbutton= new EPButtonPersistance();
+	 private IPropertyPersistence ssp 			= new EPPersistance();
+	 private IPropertyPersistence spbutton		= new EPButtonPersistance();
+	 private IPropertyPersistence cleanButton	= new EPButtonPersistance();
+	 
      Timer timer;
-     private final long twentyFourHours = 86400000;
-     private final String Prop_NightlyScanTime= "PlayOnPlayback/ScanTime";
-     private final String Prop_MyMoviesMode= "PlayonPlayback/MyMoviesMode";
-     private final String Prop_ImportDirectory="PlayonPlayback/ImportDirectory";
-     private final String Prop_AutoUpdate="PlayonPlayback/AutoUpdate";
-     private final String Prop_UpdateNow="";
-     private  List<String> PassValues = new ArrayList<String>();
-     private  String ImportDirectory = sagex.api.Configuration.GetServerProperty(Prop_ImportDirectory,"");
+	 private final String PlayONJarVersion 		= "PlayON Importer Jar v1.2 - 11/26/10 (a)";
+     private final long twentyFourHours 		= 86400000;
+     private final String Prop_NightlyScanTime	= "PlayOnPlayback/ScanTime";
+     private final String Prop_MyMoviesMode		= "PlayonPlayback/MyMoviesMode";
+     private final String Prop_ImportDirectory	= "PlayonPlayback/ImportDirectory";
+     private final String Prop_AutoUpdate		= "PlayonPlayback/AutoUpdate";
+     private final String Prop_UpdateNow		= "";
+     private final String Prop_CleanNow			= "";
+     private  List<String> PassValues 			= new ArrayList<String>();
+     private  List<String> CleanPassValues 		= new ArrayList<String>();
+     private  String ImportDirectory 			= sagex.api.Configuration.GetServerProperty(Prop_ImportDirectory,"");
 
-     private final String WorkingDirectory = java.lang.System.getProperty("user.dir");
-     private final String ExecPath =java.io.File.separator+"SageOnlineServicesEXEs"+java.io.File.separator+"UPnPBrowser.exe";
-     private final String DefaultPath=java.io.File.separator+"SageOnlineServicesEXEs"+java.io.File.separator+"UPnPBrowser"+java.io.File.separator+"PlayOn";
-     private final String PlayonUpdateInProcess="PlayonPlayback/UpdateInProcess";
+     private final String WorkingDirectory 		= java.lang.System.getProperty("user.dir");
+     private final String ExecPath 				= java.io.File.separator+"SageOnlineServicesEXEs"+java.io.File.separator+"UPnPBrowser.exe";
+     private final String DefaultPath			= java.io.File.separator+"SageOnlineServicesEXEs"+java.io.File.separator+"UPnPBrowser"+java.io.File.separator+"PlayOn";
+     private final String PlayonUpdateInProcess	= "PlayonPlayback/UpdateInProcess";
 
 
     public EPPlayonPlugin(SageTVPluginRegistry registry) 
     {
         super(registry);
-        addProperty(SageTVPlugin.CONFIG_BOOL,Prop_AutoUpdate, "true", "PlayOn AutoUpdate", "Enable PlayOn Queue Importer to automatically import content from your Hulu/Netflix queue into SageTV").setPersistence(ssp);
-        addProperty(SageTVPlugin.CONFIG_INTEGER,Prop_NightlyScanTime, "1", "Nightly Time To Run Import", "Time in hours (24hrs) you want to run PlayOn Queue Importer").setPersistence(ssp);
-        addProperty(SageTVPlugin.CONFIG_BOOL,Prop_MyMoviesMode, "false", "MyMovies Mode", "Set to true to put dummy videos in their own folder so MyMovies can collect metadata. False if you don't use MyMovies.").setPersistence(ssp);
-        addProperty(SageTVPlugin.CONFIG_BUTTON,Prop_UpdateNow, "", "Update Videos Now", "Press to run PlayOn Queue Importer now").setPersistence(spbutton);
-        addProperty(SageTVPlugin.CONFIG_CHOICE,Prop_ImportDirectory, sagex.api.Configuration.GetServerProperty(Prop_ImportDirectory,""),"PlayOn Video Import Path", "Press select to change Playon Queue Import path directories. It will cycled through all available sage import paths",  GetImportPaths()).setPersistence(ssp);
+        addProperty(SageTVPlugin.CONFIG_BOOL,Prop_AutoUpdate		, "false", "PlayOn AutoUpdate", "Enable PlayOn Queue Importer to automatically import content from your Hulu/Netflix queue into SageTV").setPersistence(ssp);
+        addProperty(SageTVPlugin.CONFIG_INTEGER,Prop_NightlyScanTime, "1"	 , "Nightly Time To Run Import", "Time in hours (24hrs) you want to run PlayOn Queue Importer").setPersistence(ssp);
+        addProperty(SageTVPlugin.CONFIG_BOOL,Prop_MyMoviesMode		, "false", "MyMovies Mode", "Set to true to put dummy videos in their own folder so MyMovies can collect metadata. False if you don't use MyMovies.").setPersistence(ssp);
+        addProperty(SageTVPlugin.CONFIG_BUTTON,Prop_UpdateNow		, ""	 , "Manually Update PlayOn Videos", "Press to run PlayOn Queue Importer now").setPersistence(spbutton);
+        addProperty(SageTVPlugin.CONFIG_BUTTON,Prop_CleanNow		, ""	 , "Erase PlayON Videos", "Press to manually erase PlayOn Videos now").setPersistence(cleanButton);
+        addProperty(SageTVPlugin.CONFIG_CHOICE,Prop_ImportDirectory	, sagex.api.Configuration.GetServerProperty(Prop_ImportDirectory,""),"PlayOn Video Import Path", "Press select to change Playon Queue Import path directories. It will cycled through all available sage import paths",  GetImportPaths()).setPersistence(ssp);
     }
 
     public void start()
     {
         super.start();
+        System.out.println("PLAYON: " + PlayONJarVersion);
         System.out.println("PLAYON: Timer Starting.");
         System.out.println("PLAYON: Checking For Import Path Property");
         CheckForDefaultImportPath();
-        if(Boolean.parseBoolean(sagex.api.Configuration.GetServerProperty(Prop_AutoUpdate,"true")))
+        if(Boolean.parseBoolean(sagex.api.Configuration.GetServerProperty(Prop_AutoUpdate,"false")))
         {
             StartTimerTask();
             System.out.println("PLAYON: Running Timer at startup");
@@ -94,8 +101,6 @@ public class EPPlayonPlugin extends AbstractPlugin
         StartTimerTask();
     }
 
-
-
     @ButtonClickHandler(Prop_UpdateNow)
     public void onProp_UpdateNow_click(String setting, String value) 
     {
@@ -103,6 +108,13 @@ public class EPPlayonPlugin extends AbstractPlugin
         RunUpdateProcess();
     }
 
+    @ButtonClickHandler(Prop_CleanNow)
+    public void onProp_CleanNow_click(String setting, String value) 
+    {
+        System.out.println("PLAYON: Clean Up Now Pressed");
+        RunCleanProcess();
+    }
+    
     @ConfigValueChangeHandler(Prop_MyMoviesMode)
     public void onPROP_MyMoviesModeChanged(String setting) 
     {
@@ -114,7 +126,7 @@ public class EPPlayonPlugin extends AbstractPlugin
     private java.util.TimerTask task = null;
     private void StartTimerTask()
     {
-        if(!(Boolean.parseBoolean(sagex.api.Configuration.GetServerProperty(Prop_AutoUpdate,"true"))))
+        if(!(Boolean.parseBoolean(sagex.api.Configuration.GetServerProperty(Prop_AutoUpdate,"false"))))
         {
             System.out.println("PLAYON: Not starting timer since AutoUpdate is set to false");
             return;
@@ -179,6 +191,29 @@ public class EPPlayonPlugin extends AbstractPlugin
           timer = null;
         }
     }
+    
+    private void RunCleanProcess()
+    {   	
+        CleanPassValues.clear();
+        System.out.println("PLAYON: Setting Clean Pass Values");
+        CleanPassValues.add("/cleanScrapeMode ");        
+        CleanPassValues.add("/outputDir ");
+        CleanPassValues.add(ImportDirectory);
+        System.out.println("PLAYON: Clean Pass Values set = (" + CleanPassValues.toString() + ")");
+        
+        if(!Boolean.parseBoolean(sagex.api.Configuration.GetServerProperty(PlayonUpdateInProcess,"false")))
+        {
+            sagex.api.Configuration.SetServerProperty(PlayonUpdateInProcess,"true");
+            System.out.println("PLAYON: Getting ready to run clean up event = (" + WorkingDirectory+ExecPath+PassValues.toString() + ")");
+            sagex.api.Utility.ExecuteProcess(WorkingDirectory+ExecPath,CleanPassValues, null,true);
+            sagex.api.Configuration.SetServerProperty(PlayonUpdateInProcess,"false");
+            System.out.println("PLAYON: Clean Up Finished Running");
+        }
+        else
+        {
+            System.out.println("PLAYON: Update already in process this one will not run");
+        }
+    }
 
     private void RunUpdateProcess()
     {
@@ -233,7 +268,6 @@ public class EPPlayonPlugin extends AbstractPlugin
     }
     
     
-
     private void CheckForDefaultImportPath()
     {
         if(ImportDirectory.equals(""))
