@@ -23,9 +23,9 @@ public class EPButtonPersistance implements IPropertyPersistence  {
 	public String get(String string, String string1) {
 
           if(Boolean.parseBoolean(sagex.api.Configuration.GetServerProperty("PlayonPlayback/UpdateInProcess","false"))){
-            return "Currently Updating";}
+            return "Wait...";}
           else{
-           return "Update Now";
+           return "Start";
           }
 	}
 
