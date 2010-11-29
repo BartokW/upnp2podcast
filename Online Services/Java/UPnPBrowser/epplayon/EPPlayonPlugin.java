@@ -120,10 +120,10 @@ public class EPPlayonPlugin extends AbstractPlugin
         addProperty(SageTVPlugin.CONFIG_BOOL,Prop_EnableAmazon		, "false" , "Menu: Enable Amazon VOD", "Show Amazon VOD in the main menu").setPersistence(ssp);
         addProperty(SageTVPlugin.CONFIG_BOOL,Prop_EnablePremium		, "false" , "Menu: Enable PlayOn Premium", "Show PlayOn Premium channles in the main menu").setPersistence(ssp);
         
-        addProperty(SageTVPlugin.CONFIG_BOOL,Prop_EnableMLB			, "false" , "Menu: Enable MLB", "Show MLB in the main menu").setPersistence(ssp);
+        addProperty(SageTVPlugin.CONFIG_BOOL,Prop_EnableMLB			, "false" , "Menu: Enable MLB"	, "Show MLB in the main menu").setPersistence(ssp);
         addProperty(SageTVPlugin.CONFIG_BOOL,Prop_EnableESPN3		, "false" , "Menu: Enable ESPN3", "Show ESPN3 in the main menu").setPersistence(ssp);
-        addProperty(SageTVPlugin.CONFIG_BOOL,Prop_EnableNHL			, "false" , "Menu: Enable NHL", "Show NHL in the main menu").setPersistence(ssp);
-        addProperty(SageTVPlugin.CONFIG_BOOL,Prop_EnableNFL			, "false" , "Menu: Enable NFL", "Show NFL in the main menu").setPersistence(ssp);     
+        addProperty(SageTVPlugin.CONFIG_BOOL,Prop_EnableNHL			, "false" , "Menu: Enable NHL"	, "Show NHL in the main menu").setPersistence(ssp);
+        addProperty(SageTVPlugin.CONFIG_BOOL,Prop_EnableNFL			, "false" , "Menu: Enable NFL"	, "Show NFL in the main menu").setPersistence(ssp);     
     }
 
     public void start()
