@@ -19,15 +19,19 @@ public class EPPlayonPlugin extends AbstractPlugin
 	 private IPropertyPersistence spbutton		= new EPButtonPersistance();
 	 
      Timer timer;
-	 private final String PlayONJarVersion 		= "PlayON Importer Jar v1.5 - 11/26/10";
+	 private final String PlayONJarVersion 		= "PlayON Importer JAR v1.5 - 12/07/10";
      private final long twentyFourHours 		= 86400000;
      
      // PlayOn Standard
      private final String Prop_EnableNetflix	= "PlayOnPlayback/EnableNetflix";
      private final String Prop_EnableHuluQueue	= "PlayOnPlayback/EnableHuluQueue";
-     private final String Prop_EnablPandora		= "PlayOnPlayback/EnablePandora";
+     private final String Prop_EnablePandora	= "PlayOnPlayback/EnablePandora";
      private final String Prop_EnableAmazon		= "PlayOnPlayback/EnableAmazon";
- 
+
+     private final String Prop_EnableSports		= "PlayOnPlayback/EnableSports";
+     private final String Prop_EnableNews		= "PlayOnPlayback/EnableNews";
+     private final String Prop_EnableKids		= "PlayOnPlayback/EnableKids";
+     
      // PlayOn Premium
      private final String Prop_EnablePremium	= "PlayOnPlayback/EnablePremium";
      private final String Prop_EnableNFL		= "PlayOnPlayback/EnableNFL";
@@ -35,12 +39,14 @@ public class EPPlayonPlugin extends AbstractPlugin
      private final String Prop_EnableMLB		= "PlayOnPlayback/EnableMLB";
      private final String Prop_EnableESPN3		= "PlayOnPlayback/EnableESPN3";
      
+     // General Properties
      private final String Prop_NightlyScanTime	= "PlayOnPlayback/ScanTime";
      private final String Prop_MyMoviesMode		= "PlayonPlayback/MyMoviesMode";
      private final String Prop_ImportDirectory	= "PlayonPlayback/ImportDirectory";
      private final String Prop_AutoUpdate		= "PlayonPlayback/AutoUpdate";
      private final String Prop_UpdateNow		= "PlayonPlayback/UpdateNow";
      private final String Prop_CleanNow			= "PlayonPlayback/CleanNow";
+     
      private  List<String> PassValues 			= new ArrayList<String>();
      private  List<String> CleanPassValues 		= new ArrayList<String>();
      private  String ImportDirectory 			= sagex.api.Configuration.GetServerProperty(Prop_ImportDirectory,"");
@@ -50,8 +56,26 @@ public class EPPlayonPlugin extends AbstractPlugin
      private final String DefaultPath			= java.io.File.separator+"SageOnlineServicesEXEs"+java.io.File.separator+"UPnPBrowser"+java.io.File.separator+"PlayOn";
      private final String PlayonUpdateInProcess	= "PlayonPlayback/UpdateInProcess";
 
+     @ConfigValueChangeHandler(Prop_EnableSports)
+     public void onPROP_Prop_EnableSportsChanged(String setting) 
+     {
+         System.out.println("PLAYON: Prop_EnableSports changed to= (" + getConfigValue(setting) + ")");
+     }
+
+     @ConfigValueChangeHandler(Prop_EnableNews)
+     public void onPROP_Prop_EnableNewsChanged(String setting) 
+     {
+         System.out.println("PLAYON: Prop_EnableNews changed to= (" + getConfigValue(setting) + ")");
+     }
+     
+     @ConfigValueChangeHandler(Prop_EnableKids)
+     public void onPROP_Prop_EnableKidsChanged(String setting) 
+     {
+         System.out.println("PLAYON: Prop_EnableKids changed to= (" + getConfigValue(setting) + ")");
+     }
+     
      @ConfigValueChangeHandler(Prop_EnableNetflix)
-     public void onPROP_Auto_UpdateChanged(String setting) 
+     public void onPROP_Prop_EnableNetflixChanged(String setting) 
      {
          System.out.println("PLAYON: Prop_EnableNetflix changed to= (" + getConfigValue(setting) + ")");
      }
@@ -62,10 +86,10 @@ public class EPPlayonPlugin extends AbstractPlugin
          System.out.println("PLAYON: Prop_EnableHuluQueue changed to= (" + getConfigValue(setting) + ")");
      }
      
-     @ConfigValueChangeHandler(Prop_EnablPandora)
-     public void onPROP_Prop_EnablPandoraChanged(String setting) 
+     @ConfigValueChangeHandler(Prop_EnablePandora)
+     public void onPROP_Prop_EnablePandoraChanged(String setting) 
      {
-         System.out.println("PLAYON: Prop_EnablPandora changed to= (" + getConfigValue(setting) + ")");
+         System.out.println("PLAYON: Prop_EnablePandora changed to= (" + getConfigValue(setting) + ")");
      }
   
      @ConfigValueChangeHandler(Prop_EnableAmazon)
@@ -108,18 +132,22 @@ public class EPPlayonPlugin extends AbstractPlugin
     {
         super(registry);
         addProperty(SageTVPlugin.CONFIG_CHOICE,Prop_ImportDirectory	, sagex.api.Configuration.GetServerProperty(Prop_ImportDirectory,""),"PlayOn Video Import Path", "Press select to change Playon Queue Import path directories. It will cycled through all available sage import paths",  GetImportPaths()).setPersistence(ssp);
+        addProperty(SageTVPlugin.CONFIG_BUTTON,Prop_UpdateNow		, ""	 , "Manually Update PlayOn Videos", "Do a manual, one time, import of content from Hulu/Netflix queue into SageTV").setPersistence(spbutton);
         addProperty(SageTVPlugin.CONFIG_BOOL,Prop_AutoUpdate		, "false", "PlayOn AutoUpdate", "Enable PlayOn Queue Importer to automatically import content from your Hulu/Netflix queue into SageTV").setPersistence(ssp);
-        addProperty(SageTVPlugin.CONFIG_BUTTON,Prop_UpdateNow		, ""	 , "Manually Update PlayOn Videos", "Manually import content from Hulu/Netflix queue into SageTV").setPersistence(spbutton);
-        addProperty(SageTVPlugin.CONFIG_INTEGER,Prop_NightlyScanTime, "1"	 , "Nightly Time To Run Import", "Time in hours (24hrs) you want to run PlayOn Queue Importer").setPersistence(ssp);
+        addProperty(SageTVPlugin.CONFIG_INTEGER,Prop_NightlyScanTime, "1"	 , "Nightly Time To Run Import", "Time in hours (24hrs) you want to run PlayOn automatic queue importer").setPersistence(ssp);
         addProperty(SageTVPlugin.CONFIG_BOOL,Prop_MyMoviesMode		, "false", "MyMovies Mode", "Set to true to put dummy videos in their own folder so MyMovies can collect metadata. False if you don't use MyMovies.").setPersistence(ssp);
         addProperty(SageTVPlugin.CONFIG_BUTTON,Prop_CleanNow		, ""	 , "Erase PlayON Videos", "Manually erase PlayOn Videos now").setPersistence(spbutton);
-        
-        addProperty(SageTVPlugin.CONFIG_BOOL,Prop_EnableNetflix		, "false" , "Menu: Enable Netflix", "Show Netflix in the main menu").setPersistence(ssp);
-        addProperty(SageTVPlugin.CONFIG_BOOL,Prop_EnableHuluQueue 	, "false" , "Menu: Enable Hulu Queue", "Show Hulu Queue in the main menu").setPersistence(ssp);
-        addProperty(SageTVPlugin.CONFIG_BOOL,Prop_EnablPandora		, "false" , "Menu: Enable Pandora", "Show Pandora in the main menu").setPersistence(ssp);
-        addProperty(SageTVPlugin.CONFIG_BOOL,Prop_EnableAmazon		, "false" , "Menu: Enable Amazon VOD", "Show Amazon VOD in the main menu").setPersistence(ssp);
+    
         addProperty(SageTVPlugin.CONFIG_BOOL,Prop_EnablePremium		, "false" , "Menu: Enable PlayOn Premium", "Show PlayOn Premium channles in the main menu").setPersistence(ssp);
-        
+        addProperty(SageTVPlugin.CONFIG_BOOL,Prop_EnableNetflix		, "true" , "Menu: Enable Netflix", "Show Netflix in the main menu").setPersistence(ssp);
+        addProperty(SageTVPlugin.CONFIG_BOOL,Prop_EnableHuluQueue 	, "true" , "Menu: Enable Hulu Queue", "Show Hulu Queue in the main menu").setPersistence(ssp);
+        addProperty(SageTVPlugin.CONFIG_BOOL,Prop_EnablePandora		, "false" , "Menu: Enable Pandora", "Show Pandora in the main menu").setPersistence(ssp);
+        addProperty(SageTVPlugin.CONFIG_BOOL,Prop_EnableAmazon		, "false" , "Menu: Enable Amazon VOD", "Show Amazon VOD in the main menu").setPersistence(ssp);
+
+        addProperty(SageTVPlugin.CONFIG_BOOL,Prop_EnableSports		, "false" , "Menu: Enable Sports", "Show Sports in the main menu").setPersistence(ssp);
+        addProperty(SageTVPlugin.CONFIG_BOOL,Prop_EnableNews		, "false" , "Menu: Enable News", "Show News in the main menu").setPersistence(ssp);
+        addProperty(SageTVPlugin.CONFIG_BOOL,Prop_EnableKids		, "false" , "Menu: Enable Kids TV", "Show Kids TV in the main menu").setPersistence(ssp);
+   
         addProperty(SageTVPlugin.CONFIG_BOOL,Prop_EnableMLB			, "false" , "Menu: Enable MLB"	, "Show MLB in the main menu").setPersistence(ssp);
         addProperty(SageTVPlugin.CONFIG_BOOL,Prop_EnableESPN3		, "false" , "Menu: Enable ESPN3", "Show ESPN3 in the main menu").setPersistence(ssp);
         addProperty(SageTVPlugin.CONFIG_BOOL,Prop_EnableNHL			, "false" , "Menu: Enable NHL"	, "Show NHL in the main menu").setPersistence(ssp);
@@ -151,6 +179,12 @@ public class EPPlayonPlugin extends AbstractPlugin
         System.out.println("PLAYON: Timer Stopping.");
         StopTimerTask();
     }
+  
+    @ConfigValueChangeHandler(Prop_AutoUpdate)
+    public void onPROP_Prop_AutoUpdateChanged(String setting) 
+    {
+        System.out.println("PLAYON: Prop_AutoUpdate changed to= (" + getConfigValue(setting) + ")");
+    }
 
     @ConfigValueChangeHandler(Prop_NightlyScanTime)
     public void onPROP_AUTO_METADATAChanged(String setting) 
@@ -158,10 +192,7 @@ public class EPPlayonPlugin extends AbstractPlugin
         System.out.println("PLAYON: import Time Changed: (" + getConfigValue(setting) + ")");
         StopTimerTask();
         StartTimerTask();
-    }
-
-
-    
+    }   
     
     @ConfigValueChangeHandler(Prop_ImportDirectory)
     public void onProp_ImportDirectory_click(String setting) 
@@ -289,6 +320,7 @@ public class EPPlayonPlugin extends AbstractPlugin
 
     private void RunUpdateProcess()
     {
+    	SetPassValues();
         if(!Boolean.parseBoolean(sagex.api.Configuration.GetServerProperty(PlayonUpdateInProcess,"false")))
         {
             sagex.api.Configuration.SetServerProperty(PlayonUpdateInProcess,"true");
