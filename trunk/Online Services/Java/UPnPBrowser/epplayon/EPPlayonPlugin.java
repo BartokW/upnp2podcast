@@ -134,7 +134,7 @@ public class EPPlayonPlugin extends AbstractPlugin
         addProperty(SageTVPlugin.CONFIG_CHOICE,Prop_ImportDirectory	, sagex.api.Configuration.GetServerProperty(Prop_ImportDirectory,""),"PlayOn Video Import Path", "Press select to change Playon Queue Import path directories. It will cycled through all available sage import paths",  GetImportPaths()).setPersistence(ssp);
         addProperty(SageTVPlugin.CONFIG_BUTTON,Prop_UpdateNow		, ""	 , "Manually Update PlayOn Videos", "Import content from Hulu/Netflix queue into SageTV").setPersistence(spbutton);
         addProperty(SageTVPlugin.CONFIG_BUTTON,Prop_CleanNow		, ""	 , "Erase PlayON Videos", "Erase PlayOn Videos now").setPersistence(spbutton);
-        addProperty(SageTVPlugin.CONFIG_BOOL,Prop_AutoUpdate		, "false", "PlayOn AutoUpdate", "Enable PlayOn Queue Importer to automatically import content from your Hulu/Netflix queue into SageTV").setPersistence(ssp);
+        addProperty(SageTVPlugin.CONFIG_BOOL,Prop_AutoUpdate		, "false", "PlayOn AutoUpdate", "Enable PlayOn Queue Importer to automatically import content nightly from your Hulu/Netflix queue into SageTV").setPersistence(ssp);
         addProperty(SageTVPlugin.CONFIG_INTEGER,Prop_NightlyScanTime, "1"	 , "Nightly Time To Run Import", "Time in hours (24hrs) you want to run PlayOn automatic queue importer").setPersistence(ssp);
         addProperty(SageTVPlugin.CONFIG_BOOL,Prop_MyMoviesMode		, "false", "MyMovies Mode", "Set to true to put dummy videos in their own folder so MyMovies can collect metadata. False if you don't use MyMovies.").setPersistence(ssp);
    
