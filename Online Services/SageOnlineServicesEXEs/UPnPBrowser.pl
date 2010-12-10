@@ -1248,9 +1248,12 @@ FEED_END
                 $depthProtection = 0;
                 while(@filesInDir == 2 && $depthProtection < 4)
                 {
-                    $rmString = "rmdir /Q \"$checkFolder\"";
-                    echoPrint("      + Folder empty, deleting : ($rmString)\n");
-                    `$rmString`;
+                    if (!("$checkFolder" eq "$workPath"))
+                    {
+                        $rmString = "rmdir /Q \"$checkFolder\"";
+                        echoPrint("      + Folder empty, deleting : ($rmString)\n");
+                        `$rmString`;
+                    }
                     
                     close(SCANDIR);
                     $checkFolder = getPath($checkFolder);
