@@ -391,13 +391,13 @@
       push(@items,$newItem);
       
       my $execTime = executionTime(@startTime);      
-      print encode('UTF-8', $opening);
+      print encode('utf8', $opening);
       foreach (@items)
       {
           if (!($_ eq ""))
           {
               $_ =~ s/EXE_TIME/($execTime)/g;
-              print encode('UTF-8', $_);
+              print encode('utf8', $_);
           }
       }  
       print encode('UTF-8', $feed_end);
@@ -512,10 +512,10 @@
               if (!($_ eq ""))
               {
                   $_ =~ s/EXE_TIME/$execTime/g;
-                  print encode('UTF-8', $_);
+                  print encode('utf8', $_);
               }
           }  
-          print encode('UTF-8', $feed_end);
+          print encode('utf8', $feed_end);
           echoPrint($execTime);           
           exit 0;
       }
@@ -592,7 +592,7 @@
                
       if (exists $optionsHash{lc("outputPath")})
       {
-          print encode('UTF-8', $outputPathName);
+          print encode('utf8', $outputPathName);
       }
       elsif (exists $optionsHash{lc("scrapeMode")})
       {
@@ -600,40 +600,50 @@
           @existingFiles = scanDir($workPath,"playon");
           %playOnFileHashCopy = %playOnFileHash;
           echoPrint("  + Running in scrape mode, adding/removing content\n");
-          foreach $exitingFile (sort(keys %existingFilesHash))
-          {
-              echoPrint("    - Missing : (".getFile($exitingFile)." (".(-s getFullFile($exitingFile)).")\n"); 
-              if (-e "$exitingFile" && $exitingFile =~ /\.playon$/ && (-s getFullFile($exitingFile)) < 60000)
-              {   # never delete anything over 60 mb                 
-                  $rmString = "del /Q \"$exitingFile\"";
-                  #echoPrint("    - rm : ($rmString)\n");
-                  `$rmString`;
-                  $rmString = "del /Q \"".getFullFile($exitingFile)."\"";
-                  #echoPrint("    - rm : ($rmString)\n");
-                  `$rmString`;
-                  
-                  #Check to see if folder is empty
-                  my $checkFolder = getPath($exitingFile);
-                  opendir(SCANDIR,"$checkFolder");
-                  my @filesInDir = readdir(SCANDIR);
-                  #echoPrint("      - Checking if folder is empty : ($checkFolder)\n");
-                  $depthProtection = 0;
-                  while(@filesInDir == 2 && $depthProtection < 4)
-                  {
-                      $rmString = "rmdir /Q \"$checkFolder\"";
-                      echoPrint("      + Folder empty, deleting : ($rmString)\n");
+          if (!(exists $optionsHash{lc("addOnly")}))
+          {   # Only add videos
+              foreach $exitingFile (sort(keys %existingFilesHash))
+              {                                           
+                  echoPrint("    - Missing : (".getFile($exitingFile)." (".(-s getFullFile($exitingFile)).")\n"); 
+                  if (-e encode('ISO-8859-1', "$exitingFile") && $exitingFile =~ /\.playon$/ && (-s getFullFile(encode('ISO-8859-1', $exitingFile))) < 60000)
+                  {   # never delete anything over 60 mb                 
+                      $rmString = encode('ISO-8859-1', "del /Q \"$exitingFile\"");
+                      #echoPrint("    - rm : ($rmString)\n");
+                      `$rmString`;
+                      $rmString = encode('ISO-8859-1', "del /Q \"".getFullFile($exitingFile)."\"");
+                      #echoPrint("    - rm : ($rmString)\n");
                       `$rmString`;
                       
-                      close(SCANDIR);
-                      $checkFolder = getPath($checkFolder);
+                      if (-e getFullFile(encode('ISO-8859-1', $exitingFile)).".properties")
+                      {
+                          $rmString = encode('ISO-8859-1', "del /Q \"".getFullFile($exitingFile).".properties"."\"");
+                          #echoPrint("    - rm : ($rmString)\n");
+                          `$rmString`;
+                      }
+                      
+                      #Check to see if folder is empty
+                      my $checkFolder = getPath($exitingFile);
                       opendir(SCANDIR,"$checkFolder");
-                      @filesInDir = readdir(SCANDIR);
-                      #echoPrint("      + Checking if folder is empty : ($checkFolder)\n");
-                      $depthProtection++;                          
-                  }
-                  close(SCANDIR);
-                  
-              }        
+                      my @filesInDir = readdir(SCANDIR);
+                      #echoPrint("      - Checking if folder is empty : ($checkFolder)\n");
+                      $depthProtection = 0;
+                      while(@filesInDir == 2 && $depthProtection < 4)
+                      {
+                          $rmString = encode('ISO-8859-1', "rmdir /Q \"$checkFolder\"");
+                          echoPrint("      + Folder empty, deleting : ($rmString)\n");
+                          `$rmString`;
+                          
+                          close(SCANDIR);
+                          $checkFolder = getPath($checkFolder);
+                          opendir(SCANDIR,"$checkFolder");
+                          @filesInDir = readdir(SCANDIR);
+                          #echoPrint("      + Checking if folder is empty : ($checkFolder)\n");
+                          $depthProtection++;                          
+                      }
+                      close(SCANDIR);
+                      
+                  }        
+              }
           }
           
           foreach $newFile (sort(keys %playOnFileHashCopy))
@@ -654,7 +664,7 @@
                   `$mkdirString`; 
               }
               
-              if (open(PROPERTIES,">$newFile"))
+              if (open(PROPERTIES,encode('ISO-8859-1', ">$newFile")))
               { # Write .playon file
                 print PROPERTIES $playOnFileHashCopy{$newFile};
                 close PROPERTIES;
@@ -666,7 +676,7 @@
                     $baseVideo = "playon_netflix.m4v";
                 }
             
-                $copyString = ($linux == 1 ? "cp" : "copy")." \"$executablePath".$FS."$executableEXE".$FS."$baseVideo\" \"".getFullFile($newFile)."\"";
+                $copyString = encode('ISO-8859-1', ($linux == 1 ? "cp" : "copy")." \"$executablePath".$FS."$executableEXE".$FS."$baseVideo\" \"".getFullFile($newFile)."\"");
                 #echoPrint("    - copying : ($copyString)\n");
                 `$copyString`;
               } 
@@ -677,17 +687,18 @@
           my $opening = $feed_begin;
           $opening =~ s/%%FEED_TITLE%%/$feedTitle/g;
           $opening =~ s/%%FEED_DESCRIPTION%%/UPnP Browser ($lookingFor)/g;   
-          print encode('UTF-8', $opening);
+          print encode('utf8', $opening);
           foreach (@items)
           {
               if (!($_ eq ""))
               {
                   $_ =~ s/EXE_TIME/$execTime/g;
-                  print encode('UTF-8', $_);
+                  print encode('utf8', $_);
               }
           }  
-          print encode('UTF-8', $feed_end);
+          print encode('utf8', $feed_end);
       }
+      #Exposé
       my $execTime = executionTime(@startTime);   
       echoPrint($execTime);  
       exit 0;
@@ -697,9 +708,9 @@
     sub echoPrint
     {
         my ($stringToPrint) = @_;
-        $utf8String = encode('UTF-8', $stringToPrint);
-        print stderr $utf8String;
-        print LOGFILE $utf8String;
+        #$stringToPrint = encode('utf8', $stringToPrint);
+        print stderr $stringToPrint;
+        print LOGFILE $stringToPrint;
     }   
       
   ##### Populate an options Hash
@@ -969,7 +980,8 @@ FEED_END
                 {   # Check Filter
                     echoPrint("      + ".$_->gettitle()." (FILTERED)\n"); 
                     next;
-                }  
+                }                       
+
                 echoPrint("      + ".$_->gettitle()."\n"); 
                 my $newItem = $feed_item;
                 my $content = $_;
@@ -1231,14 +1243,21 @@ FEED_END
         foreach $exitingFile (sort(keys %existingFilesHash))
         {
             echoPrint("    - Cleaning : (".getFile($exitingFile)." (".(-s getFullFile($exitingFile)).")\n"); 
-            if (-e "$exitingFile" && $exitingFile =~ /\.playon$/ && (-s getFullFile($exitingFile)) < 60000)
+            if (-e encode('ISO-8859-1', "$exitingFile") && $exitingFile =~ /\.playon$/ && (-s getFullFile(encode('ISO-8859-1', $exitingFile))) < 60000)
             {   # never delete anything over 60 mb                 
-                $rmString = "del /Q \"$exitingFile\"";
+                $rmString = encode('ISO-8859-1', "del /Q \"$exitingFile\" 2>1");
                 #echoPrint("    - rm : ($rmString)\n");
                 `$rmString`;
-                $rmString = "del /Q \"".getFullFile($exitingFile)."\"";
+                $rmString = encode('ISO-8859-1', "del /Q \"".getFullFile($exitingFile)."\"");
                 #echoPrint("    - rm : ($rmString)\n");
                 `$rmString`;
+                
+                if (-e getFullFile(encode('ISO-8859-1', $exitingFile)).".properties")
+                {
+                    $rmString = encode('ISO-8859-1', "del /Q \"".getFullFile($exitingFile).".properties"."\"");
+                    #echoPrint("    - rm : ($rmString)\n");
+                    `$rmString`;
+                }
                 
                 #Check to see if folder is empty
                 my $checkFolder = getPath($exitingFile);
@@ -1250,7 +1269,7 @@ FEED_END
                 {
                     if (!("$checkFolder" eq "$workPath"))
                     {
-                        $rmString = "rmdir /Q \"$checkFolder\"";
+                        $rmString = encode('ISO-8859-1', "rmdir /Q \"$checkFolder\"");
                         echoPrint("      + Folder empty, deleting : ($rmString)\n");
                         `$rmString`;
                     }
@@ -1463,10 +1482,11 @@ FEED_END
         {
             foreach $file (@filesInDir)
             {
+                $file = decode('ISO-8859-1', $file);
                 #echoPrint("-> $file\n");
                 next if ($file =~ m/^\./);
-                next if !($file =~ m/($fileFilter)$/ || -d "$inputFile\\$file");       
-                if (-d "$inputFile\\$file" && !($file =~ m/VIDEO_TS$/)) { push(@dirs,"$inputFile\\$file"); }
+                next if !($file =~ m/($fileFilter)$/ || -d encode('ISO-8859-1', "$inputFile\\$file"));       
+                if (-d encode('ISO-8859-1', "$inputFile\\$file") && !($file =~ m/VIDEO_TS$/)) { push(@dirs,"$inputFile\\$file"); }
                 else { $files{"$inputFile\\$file"} = 1; } 
             }
             foreach $dir (@dirs)
