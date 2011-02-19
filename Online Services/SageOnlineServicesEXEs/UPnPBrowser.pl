@@ -20,7 +20,7 @@
 #
   #use strict;
 ##### Import libraries
-  use Encode;
+  use Encode qw(encode decode);
   use utf8;
   use Digest::MD5 qw(md5 md5_hex md5_base64);
   use LWP::UserAgent;
@@ -693,7 +693,7 @@
               if (!($_ eq ""))
               {
                   $_ =~ s/EXE_TIME/$execTime/g;
-                  print encode('utf8', $_);
+                  print decode('utf8', $_);
               }
           }  
           print encode('utf8', $feed_end);
