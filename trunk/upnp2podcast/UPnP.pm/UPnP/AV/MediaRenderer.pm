@@ -39,7 +39,6 @@ sub new {
 sub setdevice() {
 	my($this) = shift;
 	if (@_) {
-	  #print "!!!! $_[0]\n";
 		$this->{$Net::UPnP::AV::MediaRenderer::_DEVICE} = $_[0];
 	}
 }

@@ -81,7 +81,6 @@ SSDP_SEARCH_MSG
 	while( select($rout = $rin, undef, undef, ($args{mx} * 2)) ) {
 		recv(SSDP_SOCK, $ssdp_res_msg, 4096, 0);
 		
-		print "======================= ".localtime()."\n\n" if ($Net::UPnP::DEBUG);
 		print "$ssdp_res_msg" if ($Net::UPnP::DEBUG);
 		
 		unless ($ssdp_res_msg =~ m/LOCATION[ :]+(.*)\r/i) {

@@ -121,12 +121,6 @@ sub getargumentlist() {
 		$argument_list{$arg_name} = $arg_value;
 	}
 	
-	if (!(exists $argument_list{'Result'}))
-	{
-      print "Response Conent:\n $res_content\n&&&&&&&&&&&&&&&&&&&&\n";
-      print "Soap Content   :\n $soap_response\n&&&&&&&&&&&&&&&&&&&&\n";
-  }
-	
 	return \%argument_list;
  }
 
