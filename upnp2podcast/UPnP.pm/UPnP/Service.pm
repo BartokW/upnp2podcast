@@ -199,7 +199,7 @@ sub postaction() {
 	$ctrl_url = $this->getposturl($ctrl_url);
 	
 	unless ($ctrl_url =~ m/http:\/\/([0-9a-z.]+)[:]*([0-9]*)\/(.*)/i) {
-		print "Invalid URL : $ctrl_url\n";
+		#print "Invalid URL : $ctrl_url\n";
 		$post_res = Net::UPnP::HTTPResponse->new();
 		$action_res->sethttpresponse($post_res);
 		return $action_res;
