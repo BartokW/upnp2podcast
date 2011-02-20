@@ -188,6 +188,16 @@ sub getcontentlist {
 	}
 
   #print "*****\n$result\n******\n";
+    if (0)
+	{
+	    #open (UTF8OUT, ">utf8scrup.log");
+	    #print UTF8OUT "$result\n";
+	    #close (UTF8OUT);
+	    #open UTF8IN, "<:encoding(utf8)", "utf8scrup.log";
+	    #my @result = <UTF8IN>;
+	    #close(UTF8IN);
+	    #$result = "@result";
+  	}
 
 	while ($result =~ m/<item(.*?)<\/item>/sgi) {
 		$content = $1;
