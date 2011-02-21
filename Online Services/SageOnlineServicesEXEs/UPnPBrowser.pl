@@ -605,8 +605,8 @@
               foreach $exitingFile (sort(keys %existingFilesHash))
               {                                           
                   echoPrint("    - Missing : (".getFile($exitingFile)." (".(-s getFullFile($exitingFile)).")\n"); 
-                  if (-e encode('ISO-8859-1', "$exitingFile") && $exitingFile =~ /\.playon$/ && (-s getFullFile(encode('ISO-8859-1', $exitingFile))) < 60000)
-                  {   # never delete anything over 60 mb                 
+                  if (-e encode('ISO-8859-1', "$exitingFile") && $exitingFile =~ /\.playon$/ && (-s getFullFile(encode('ISO-8859-1', $exitingFile))) < 6000)
+                  {   # never delete anything over 6 mb                 
                       $rmString = encode('ISO-8859-1', "del /Q \"$exitingFile\"");
                       #echoPrint("    - rm : ($rmString)\n");
                       `$rmString`;
@@ -687,16 +687,17 @@
           my $opening = $feed_begin;
           $opening =~ s/%%FEED_TITLE%%/$feedTitle/g;
           $opening =~ s/%%FEED_DESCRIPTION%%/UPnP Browser ($lookingFor)/g;   
-          print encode('utf8', $opening);
+          print encode('ISO-8859-1', $opening);
           foreach (@items)
           {
               if (!($_ eq ""))
               {
                   $_ =~ s/EXE_TIME/$execTime/g;
-                  print decode('utf8', $_);
+                  utf8::downgrade($_);
+                  print encode('ISO-8859-1', $_);
               }
           }  
-          print encode('utf8', $feed_end);
+          print encode('ISO-8859-1', $feed_end);
       }
       #Exposé
       my $execTime = executionTime(@startTime);   
