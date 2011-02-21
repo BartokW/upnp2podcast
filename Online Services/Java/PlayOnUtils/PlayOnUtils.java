@@ -1,4 +1,4 @@
-package playonutils;
+package PlayOnForSageTV;
 
 public class PlayOnUtils 
 {
@@ -7,7 +7,7 @@ public class PlayOnUtils
     public static int HULU_TYPE = 1;
     public static int NETFLIX_TYPE = 2;
     
-    public static boolean isPlayOnFile(Object MediaObject) 
+    public static boolean IsPlayOnFile(Object MediaObject) 
     {
         String Type = sagex.api.MediaFileAPI.GetMediaFileFormatDescription(MediaObject);
         if (Type.equals(HuluFileFormat) || Type.equals(NetflixFileFormat)) 
@@ -17,7 +17,7 @@ public class PlayOnUtils
         return false;
     }
     
-    public static boolean isPlayOnNetflixFile(Object MediaObject) 
+    public static boolean IsPlayOnNetflixFile(Object MediaObject) 
     {
         String Type = sagex.api.MediaFileAPI.GetMediaFileFormatDescription(MediaObject);
         if (Type.equals(NetflixFileFormat)) 
@@ -27,7 +27,7 @@ public class PlayOnUtils
         return false;
     }
 
-    public static boolean isPlayOnHuluFile(Object MediaObject) 
+    public static boolean IsPlayOnHuluFile(Object MediaObject) 
     {
         String Type = sagex.api.MediaFileAPI.GetMediaFileFormatDescription(MediaObject);
         if (Type.equals(HuluFileFormat)) 
