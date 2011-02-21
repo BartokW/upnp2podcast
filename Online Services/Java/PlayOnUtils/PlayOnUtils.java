@@ -2,15 +2,17 @@ package PlayOnForSageTV;
 
 public class PlayOnUtils 
 {
-    public static String HuluFileFormat = "Quicktime[H.264/50Kbps 480x368@24fps]";
+    public static String LegacyFileFormat = "MATROSKA[H.264 9:5 720x400@30fps]";
+	public static String HuluFileFormat = "Quicktime[H.264/50Kbps 480x368@24fps]";
     public static String NetflixFileFormat = "Quicktime[H.264/50Kbps 480x368@25fps]";
     public static int HULU_TYPE = 1;
     public static int NETFLIX_TYPE = 2;
+    public static int LEGACY_TYPE = 2;
     
     public static boolean IsPlayOnFile(Object MediaObject) 
     {
         String Type = sagex.api.MediaFileAPI.GetMediaFileFormatDescription(MediaObject);
-        if (Type.equals(HuluFileFormat) || Type.equals(NetflixFileFormat)) 
+        if (Type.equals(HuluFileFormat) || Type.equals(NetflixFileFormat) || Type.equals(LegacyFileFormat)) 
         {
             return true;
         }
@@ -45,10 +47,14 @@ public class PlayOnUtils
         {
             return HULU_TYPE;
         }
-        if (Type.equals(NetflixFileFormat)) 
+        else if (Type.equals(NetflixFileFormat)) 
         {
             return NETFLIX_TYPE;
         } 
+        else if (Type.equals(LegacyFileFormat)) 
+        {
+            return LEGACY_TYPE;
+        }
         return 0;
     }
     
