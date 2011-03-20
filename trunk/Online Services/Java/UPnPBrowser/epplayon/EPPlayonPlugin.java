@@ -80,16 +80,20 @@ public class EPPlayonPlugin extends AbstractPlugin
     	String NewProps = "";
     	if (!(CustomMetadata.contains("Copyright")))
     	{
-    		NewProps = NewProps + ";Copyright";
+    		NewProps = NewProps + "Copyright;";
     	}
 
     	if (!(CustomMetadata.contains("Comment")))
     	{
-    		NewProps = NewProps + ";Comment";
+    		NewProps = NewProps + "Comment;";
     	}
-    	
-    	if (!(CustomMetadata.equals("")))
+    	    	
+    	if (!(NewProps.equals("")))
     	{
+    		if (!(CustomMetadata.equals("")))
+    		{
+    			NewProps = ";" + NewProps;
+    		}
     		System.out.println("PLAYON: Adding Copyright and Comment metadata ("+CustomMetadata+NewProps+")");
     		sagex.api.Configuration.SetProperty("custom_metadata_properties",CustomMetadata+NewProps);
     	}    	
