@@ -1,62 +1,58 @@
-package PlayOnForSageTV;
+package playOnForSageTV;
 
 public class PlayOnUtils 
-{
-    public static String LegacyFileFormat = "MATROSKA[H.264 9:5 720x400@30fps]";
-	public static String HuluFileFormat = "Quicktime[H.264/50Kbps 480x368@24fps]";
-    public static String NetflixFileFormat = "Quicktime[H.264/50Kbps 480x368@25fps]";
-    public static int HULU_TYPE = 1;
-    public static int NETFLIX_TYPE = 2;
-    public static int LEGACY_TYPE = 2;
-    
-    public static boolean IsPlayOnFile(Object MediaObject) 
-    {
-        String Type = sagex.api.MediaFileAPI.GetMediaFileFormatDescription(MediaObject);
-        if (Type.equals(HuluFileFormat) || Type.equals(NetflixFileFormat) || Type.equals(LegacyFileFormat)) 
-        {
-            return true;
-        }
-        return false;
-    }
-    
-    public static boolean IsPlayOnNetflixFile(Object MediaObject) 
-    {
-        String Type = sagex.api.MediaFileAPI.GetMediaFileFormatDescription(MediaObject);
-        if (Type.equals(NetflixFileFormat)) 
-        {
-            return true;
-        }
-        return false;
+{   
+    public static boolean IsImportedNotPlayon(Object MediaObject) {
+        return !IsPlayonFile(MediaObject) && IsImportedTV(MediaObject);
     }
 
-    public static boolean IsPlayOnHuluFile(Object MediaObject) 
-    {
-        String Type = sagex.api.MediaFileAPI.GetMediaFileFormatDescription(MediaObject);
-        if (Type.equals(HuluFileFormat)) 
-        {
+    public static boolean IsPlayonFile(Object MediaObject) {
+    	if (sagex.api.MediaFileAPI.GetMediaFileMetadata(MediaObject, "Copyright").contains("PlayOn")) {
+        	return true;
+    	}
+    	return false;
+    }
+
+    public static String GetPlayonFilePath(Object MediaObject) {
+    	String Comment = sagex.api.MediaFileAPI.GetMediaFileMetadata(MediaObject, "Comment");
+    	String[] SplitString = Comment.split(",,,");
+    	if (SplitString.length == 2)
+    	{
+    		return SplitString[1];    		
+    	}
+        return "";
+    }
+    
+    public static String GetPlayonFileType(Object MediaObject) {
+    	String Comment = sagex.api.MediaFileAPI.GetMediaFileMetadata(MediaObject, "Copyright");
+    	String[] SplitString = Comment.split(",");
+    	if (SplitString.length == 2)
+    	{
+    		return SplitString[1];    		
+    	}
+        return "";
+    }
+    
+    public static String GetMediaType(Object MediaObject) {
+        return sagex.api.MediaFileAPI.GetMediaFileMetadata(MediaObject, "MediaType");
+    }
+
+    public static boolean IsMediaTypeTV(Object MediaObject) {
+        String Type = sagex.api.MediaFileAPI.GetMediaFileMetadata(MediaObject, "MediaType");
+        if (Type.contains("TV") || sagex.api.MediaFileAPI.IsTVFile(MediaObject)) {
             return true;
+        } else {
+
+            return false;
         }
-        return false;
     }
-    
-    
-    public static int GetPlayOnFileType(Object MediaObject) 
-    {
-        String Type = sagex.api.MediaFileAPI.GetMediaFileFormatDescription(MediaObject);
-        if (Type.equals(HuluFileFormat)) 
-        {
-            return HULU_TYPE;
+
+    public static boolean IsImportedTV(Object MediaObject) {
+
+        if (IsMediaTypeTV(MediaObject) && !sagex.api.MediaFileAPI.IsTVFile(MediaObject)) {
+            return true;
+        } else {
+            return false;
         }
-        else if (Type.equals(NetflixFileFormat)) 
-        {
-            return NETFLIX_TYPE;
-        } 
-        else if (Type.equals(LegacyFileFormat)) 
-        {
-            return LEGACY_TYPE;
-        }
-        return 0;
-    }
-    
-    
+    }   
 }
