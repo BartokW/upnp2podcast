@@ -1,12 +1,12 @@
-package playOnForSageTV;
+package PlayOnForSageTV;
 
 public class PlayOnUtils 
 {   
     public static boolean IsImportedNotPlayon(Object MediaObject) {
-        return !IsPlayonFile(MediaObject) && IsImportedTV(MediaObject);
+        return !IsPlayOnFile(MediaObject) && IsImportedTV(MediaObject);
     }
 
-    public static boolean IsPlayonFile(Object MediaObject) {
+    public static boolean IsPlayOnFile(Object MediaObject) {
     	if (sagex.api.MediaFileAPI.GetMediaFileMetadata(MediaObject, "Copyright").contains("PlayOn")) {
         	return true;
     	}
