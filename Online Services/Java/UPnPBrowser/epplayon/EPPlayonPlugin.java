@@ -61,6 +61,7 @@ public class EPPlayonPlugin extends AbstractPlugin
         System.out.println("PLAYON: Timer Starting.");
         System.out.println("PLAYON: Checking For Import Path Property");
         CheckForDefaultImportPath();
+        CheckForCustomMetadataProperty();
         if(Boolean.parseBoolean(sagex.api.Configuration.GetServerProperty(Prop_AutoUpdate,"false")))
         {
             StartTimerTask();
@@ -71,6 +72,27 @@ public class EPPlayonPlugin extends AbstractPlugin
         {
             System.out.println("PLAYON: Playon Timer setting off no timer started.");
         }
+    }
+    
+    public void CheckForCustomMetadataProperty()
+    {
+    	String CustomMetadata = sagex.api.Configuration.GetProperty("custom_metadata_properties","");
+    	String NewProps = "";
+    	if (!(CustomMetadata.contains("Copyright")))
+    	{
+    		NewProps = NewProps + ";Copyright";
+    	}
+
+    	if (!(CustomMetadata.contains("Comment")))
+    	{
+    		NewProps = NewProps + ";Comment";
+    	}
+    	
+    	if (!(CustomMetadata.equals("")))
+    	{
+    		System.out.println("PLAYON: Adding Copyright and Comment metadata ("+CustomMetadata+NewProps+")");
+    		sagex.api.Configuration.SetProperty("custom_metadata_properties",CustomMetadata+NewProps);
+    	}    	
     }
 
     public void stop()
