@@ -36,10 +36,12 @@
   $ua->timeout(25);    
 
   $FS = "\\";
+  $binPath = "win32";
   if ($^O =~ /linux/i)
   {
       $linux = 1;
       $FS = "/";
+      $binPath = "linux";
   }
 
   # Get the directory the script is being called from
@@ -47,6 +49,8 @@
   $executablePath = getPath($executable);
   $executableEXE  = getFile($executable);
   $workPath       = "$executablePath".$FS."$executableEXE";
+  
+  $atomicParsleyEXE = $executablePath.$FS."UPnPBrowser".$FS.$binPath.$FS."AtomicParsley.exe";
   
   $outputPathName = "";
    
@@ -663,23 +667,23 @@
                   echoPrint("      + mkdir : ($mkdirString)\n");
                   `$mkdirString`; 
               }
+                              
+              $baseVideo = "playon.m4v";
+              $playOnType  = "PlayOn,Hulu"; 
+              $playOnPath  = "PlayOn,,,".$playOnFileHashCopy{$newFile};
               
-              if (open(PROPERTIES,encode('ISO-8859-1', ">$newFile")))
-              { # Write .playon file
-                print PROPERTIES $playOnFileHashCopy{$newFile};
-                close PROPERTIES;
-                
-                my $baseVideo = "playon_hulu.m4v";
-                
-                if ($playOnFileHashCopy{$newFile} =~ /netflix/i)
-                {
-                    $baseVideo = "playon_netflix.m4v";
-                }
-            
-                $copyString = encode('ISO-8859-1', ($linux == 1 ? "cp" : "copy")." \"$executablePath".$FS."$executableEXE".$FS."$baseVideo\" \"".getFullFile($newFile)."\"");
-                #echoPrint("    - copying : ($copyString)\n");
-                `$copyString`;
-              } 
+              if ($playOnFileHashCopy{$newFile} =~ /netflix/i)
+              {
+                  $playOnType = "PlayOn,Netflix"; 
+              }
+          
+              $copyString = encode('ISO-8859-1', ($linux == 1 ? "cp" : "copy")." \"$executablePath".$FS."$executableEXE".$FS."$baseVideo\" \"".getFullFile($newFile)."\"");
+              #echoPrint("    - copying : ($copyString)\n");
+              `$copyString`;
+              
+              $tagString = encode('ISO-8859-1', ($linux == 1 ? "cp" : "\"$atomicParsleyEXE\"")." \"".getFullFile($newFile)."\" --overWrite --copyright \"$playOnType\" --comment \"$playOnPath\"");
+              #echoPrint("    - Tagging : ($tagString)\n");
+              `$tagString`;
           }                  
       }
       else
@@ -1378,7 +1382,7 @@ FEED_END
             $playONRegEx = $`."s0*".($1 + 0)."e0*".($2 + 0)."".$';
         }
         
-        my $path           = "/outputPath||/search||\"$playONPath\\$playONRegEx\\+1\"";
+        my $path           = "/outputPath||/search||$playONPath\\$playONRegEx\\+1";
         $path              =~ s/:/./gi;
         $path              =~ s/\\/:/gi;
         
@@ -1400,7 +1404,7 @@ FEED_END
         my $propertiesFile = "MediaType=$mediaType\n";
         $propertiesFile   .= "MediaTitle=$showTitle\n";
         $propertiesFile   .= "ReleaseDate=$airdate\n";
-        $propertiesFile   .= "Description=$description\n";  
+        $propertiesFile   .= "Description=$description\n";
   
         if ($mediaType eq "TV")
         {
@@ -1408,13 +1412,12 @@ FEED_END
             if (!($season eq ""))
             {
                 $folder           .= "".$FS."Season $season"; 
-                $fileName         .= " S".$season."E".sprintf("%02d",$episode) ." - ";
+                $fileName         .= " S".$season."E".sprintf("%02d",$episode);
             }
             else
             {
-                $fileName         .= " -- ";
+                $fileName         .= " -- $episodeTitle";
             }
-            $fileName         .= $episodeTitle;
             $propertiesFile   .= "EpisodeTitle=$episodeTitle\n";
             $propertiesFile   .= "SeasonNumber=$season\n";
             $propertiesFile   .= "EpisodeNumber=$episode\n";
