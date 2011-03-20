@@ -19,7 +19,7 @@ public class EPPlayonPlugin extends AbstractPlugin
 	 private IPropertyPersistence spbutton		= new EPButtonPersistance();
 	 
      Timer timer;
-	 private final String PlayONJarVersion 		= "PlayON Importer JAR v1.5 - 2/19/11";
+	 private final String PlayONJarVersion 		= "PlayON Importer JAR v1.5.1 - 2/19/11";
      private final long twentyFourHours 		= 86400000;
     
      // General Properties
