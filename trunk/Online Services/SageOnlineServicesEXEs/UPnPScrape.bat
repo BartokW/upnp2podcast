@@ -1,0 +1,2 @@
+"C:\Users\zadigian\Desktop\upnp2podcast\Online Services\SageOnlineServicesEXEs\UPnPBrowser.pl" /scrapeMode  /outputDir  "C:\Users\zadigian\Desktop\upnp2podcast\Online Services\SageOnlineServicesEXEs\UPnPBrowser\PlayOn"
+pause
