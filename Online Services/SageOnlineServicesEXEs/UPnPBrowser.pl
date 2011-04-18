@@ -23,17 +23,11 @@
   use Encode qw(encode decode);
   use utf8;
   use Digest::MD5 qw(md5 md5_hex md5_base64);
-  use LWP::UserAgent;
   use Net::UPnP::ControlPoint;
   use Net::UPnP::AV::MediaServer;
   
   my $obj = Net::UPnP::ControlPoint->new();
   my $mediaServer = Net::UPnP::AV::MediaServer->new();
-  
-  # Setup LWP user agent
-  $ua = LWP::UserAgent->new;
-  $ua->agent( 'Mozilla/4.0 (compatible; MSIE 5.12; Mac_PowerPC)' );
-  $ua->timeout(25);    
 
   $FS = "\\";
   $binPath = "win32";
@@ -1198,46 +1192,7 @@ FEED_END
     
     sub updatePresets
     {
-        my $serverPresetVersion = 0;
-        my $serverPresets = "";
-        my $presetVersion = -1;
-        my $presetsURL    = 'http://upnp2podcast.googlecode.com/svn/trunk/Online%20Services/SageOnlineServicesEXEs/UPnPBrowser.presets';  
-        
-        echoPrint("  + Checking for preset updates\n");
-        my $response  = $ua->get($presetsURL);  
-        if ($response->is_success)
-        {
-            $serverPresets = $response->decoded_content((charset => "ISO-8859-1"));
-            $serverPresets =~ s/\r//g;
-            $serverPresets =~ /Version=([0-9]+)/;
-            $serverPresetVersion = $1;
-            echoPrint("    - Downloaded $executableEXE.presets (Version: $serverPresetVersion)\n");
-        }
-        else
-        {
-            echoPrint("  ! Failed to download updates file ($presetsURL)\n");
-        }
-        
-        if (open(PRESETS,"$executablePath".$FS."$executableEXE".$FS."$executableEXE.presets"))
-        {   
-            <PRESETS> =~ /Version=([0-9]+)/i;
-            $presetVersion = $1;
-            echoPrint("    - Existing Presets Version ($presetVersion)\n");
-        }
-        else
-        {
-            echoPrint("  ! Couldn't open presets file ($executablePath".$FS."$executableEXE".$FS."$executableEXE.presets)\n");
-        }
-        close(PRESETS);
-        
-        # Check to see if file is most recent
-        if ($serverPresetVersion > $presetVersion && !($serverPresets eq ""))
-        {
-            echoPrint("      ! Updating Presets File ($serverPresetVersion > $presetVersion)\n");
-            open(PRESETS,">$executablePath".$FS."$executableEXE".$FS."$executableEXE.presets");
-            print PRESETS $serverPresets;
-            close(PRESETS);         
-        }      
+        echoPrint("Nothing to see here\n");   
     }
     
     sub cleanWorkPath
