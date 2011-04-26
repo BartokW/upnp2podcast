@@ -50,13 +50,13 @@ public class UPnPBrowser {
 		String UPnPDeviceRegEx = "playon";
 		
 		// Test #1: Get list of all UPnP Devices
+		System.out.println("====================   TEST #1 ====================");
 		returnHash = new HashMap<String, HashMap<String, String>>();
 		int SearchTime = 5;
 		getUPnPDeviceList(returnHash,SearchTime);
 		System.out.println("  + Found UPnP Servers");
 		for (String device:returnHash.keySet()){
-			System.out.println("    - (" + device + ")");
-			
+			System.out.println("    - (" + device + ")");			
 			// Set Device for next test
 			if (device.contains("PlayOn")){
 				UPnPDeviceRegEx = java.util.regex.Pattern.quote(device);
@@ -64,6 +64,8 @@ public class UPnPBrowser {
 		}
 		
 		// Test #2: Get all items at a given path w/o initial UID	
+		System.out.println("====================   TEST #2 ====================");
+		returnHash = new HashMap<String, HashMap<String, String>>();
 		String Path = "Netflix::Instant Queue::Queue Top 50";
 		int Depth = 1;
 		getUPnPDirectoryForPath(returnHash, UPnPDeviceRegEx, Path, Depth);
@@ -78,12 +80,15 @@ public class UPnPBrowser {
 		}
 		
 		 // Test #3: Get all items at a given path WITH initial UID 
+		System.out.println("====================   TEST #3 ====================");
 		 returnHash = new HashMap<String,HashMap<String,String>>(); 
 		 Depth = 2;
 		 getUPnPDirectoryForUID(returnHash, UPnPDeviceRegEx, UID, StaticPath, Depth);
 		 printSortedHash(returnHash);
 		
 		 // Test #4: Get Single Media Object
+		System.out.println("====================   TEST #4 ====================");
+		 returnHash = new HashMap<String, HashMap<String, String>>();
 		 String Fullpath = UPnPDeviceRegEx + "::Netflix::Instant Queue::Queue Top 50::Psych::Season 1::01: Pilot";
 		 returnHash = new HashMap<String,HashMap<String,String>>();
 		 getUPnPMediaForPath(returnHash, Fullpath);
@@ -111,7 +116,7 @@ public class UPnPBrowser {
 		
 		// Set the UPnPDevice
 		String UPnPDeviceRegEx = UPnPPath.poll();
-		String CurrentPath = UPnPDeviceRegEx;
+		String CurrentPath = "";
 		if (setUPnPDevice(UPnPDeviceRegEx)) {
 			while (UPnPPath.size() != 1 && CurrentUID != "") {
 				pathRegEx = UPnPPath.poll();
@@ -248,6 +253,9 @@ public class UPnPBrowser {
 		for (String deviceName : gUPnPDevices.keySet()) {
 			HashMap<String, String> KeyValue = new HashMap<String, String>();
 			KeyValue.put("UPnPDevice", deviceName);
+			KeyValue.put("Path", deviceName);
+			KeyValue.put("Directory", "0");
+			KeyValue.put("ParentUID", "0");
 			returnHash.put(deviceName, KeyValue);			
 		}
 
