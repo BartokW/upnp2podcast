@@ -78,15 +78,89 @@ public class UPnPBrowser {
 		}
 		
 		 // Test #3: Get all items at a given path WITH initial UID 
-		 returnHash = new HashMap<String,HashMap<String,String>>(); Depth = 2;
+		 returnHash = new HashMap<String,HashMap<String,String>>(); 
+		 Depth = 2;
 		 getUPnPDirectoryForUID(returnHash, UPnPDeviceRegEx, UID, StaticPath, Depth);
 		 printSortedHash(returnHash);
-		 
+		
+		 // Test #4: Get Single Media Object
+		 String Fullpath = UPnPDeviceRegEx + "::Netflix::Instant Queue::Queue Top 50::Psych::Season 1::01: Pilot";
+		 returnHash = new HashMap<String,HashMap<String,String>>();
+		 getUPnPMediaForPath(returnHash, Fullpath);
+		 printSortedHash(returnHash);		 
 	}
 
 	/*****************************
 	 * Public Functions
 	 *****************************/
+	// Start at root, navigate to path, store results in supplied hash
+	public static void getUPnPMediaForPath(
+			HashMap<String, HashMap<String, String>> returnHash, String Path)
+			throws InterruptedException {
+		long start = System.currentTimeMillis();
+		String pathRegEx = "";
+		String CurrentUID = "0"; // Always start at root for UPnPSearchByPath
+		Queue<String> UPnPPath = new LinkedList<String>();
+		System.out.println("Starting UPnPSearchByPath");
+		System.out.println("  + Checking Parameters");
+		// Split path and put in queue
+		for (String path : Path.split("::")) {
+			UPnPPath.offer(path);
+		}
+		System.out.println("    - Path        : (" + Path + ")(" + UPnPPath.size() + " elements)");
+		
+		// Set the UPnPDevice
+		String UPnPDeviceRegEx = UPnPPath.poll();
+		String CurrentPath = UPnPDeviceRegEx;
+		if (setUPnPDevice(UPnPDeviceRegEx)) {
+			while (UPnPPath.size() != 1 && CurrentUID != "") {
+				pathRegEx = UPnPPath.poll();
+				System.out.println("  + Searching for (" + pathRegEx + ") in (" + CurrentPath + ")(" + CurrentUID + ")");
+				CurrentUID = searchUIDForPath(CurrentUID, pathRegEx);
+				if (CurrentUID.equals("")) {
+					System.out.println("!!! Couldn't find Path (" + CurrentPath + "::" + pathRegEx + ")");
+					System.out.println("  + UPnPBrowser Finished! (" + (System.currentTimeMillis() - start) + " milliseconds)");
+					gUPnPService.shutdown();
+					return;
+				}
+				CurrentPath = CurrentPath + "::" + pathRegEx;
+			}
+			
+			String MediaFile = UPnPPath.poll();
+			System.out.println("    - Getting Items from : (" + CurrentPath + ")");
+			getContentForUID(CurrentUID);
+			List<Item> localItems = gCurrentItems;
+			
+			for (Item item : localItems) {
+				// Put in Path and ParentUID
+				HashMap<String, String> KeyValue = new HashMap<String, String>();
+				KeyValue.put("Path", CurrentPath);
+				KeyValue.put("ParentUID", CurrentUID);
+				KeyValue.put("UPnPDevice", gRemoteDeviceString);
+
+				for (Res metaData : item.getResources()) {
+					KeyValue.put("Media", metaData.getValue().toString());
+					KeyValue.put("Duration", metaData.getDuration());
+					KeyValue.put("Size", metaData.getSize().toString());
+				}
+				for (Property metaData : item.getProperties()) {
+					KeyValue.put(metaData.getDescriptorName(), metaData.getValue().toString());
+				}
+				if (item.getTitle().equalsIgnoreCase(MediaFile)) {
+					System.out.println("  + Found (" + CurrentPath + "::" + item.getTitle() + ")");
+					returnHash.put(item.getTitle(), KeyValue);	
+				}						
+			}			
+		} else {
+			System.out.println("! Couldn't Find UPnP Device (" + UPnPDeviceRegEx + ")");
+		}
+
+		gUPnPService.shutdown();
+		System.out.println("UPnPBrowser Finished! (" + (System.currentTimeMillis() - start) + " milliseconds)");
+		return;
+	}
+
+	
 	// Start at root, navigate to path, store results in supplied hash
 	public static void getUPnPDirectoryForPath(
 			HashMap<String, HashMap<String, String>> returnHash,
