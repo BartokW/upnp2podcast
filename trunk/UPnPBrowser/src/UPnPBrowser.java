@@ -1,6 +1,7 @@
-package playOnUtils;
+package PlayOnForSageTV;
 
 import java.util.*;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.teleal.cling.UpnpService;
@@ -59,14 +60,14 @@ public class UPnPBrowser {
 			System.out.println("    - (" + device + ")");			
 			// Set Device for next test
 			if (device.contains("PlayOn")){
-				UPnPDeviceRegEx = java.util.regex.Pattern.quote(device);
+				UPnPDeviceRegEx = device;
 			}				
 		}
 		
 		// Test #2: Get all items at a given path w/o initial UID	
 		System.out.println("====================   TEST #2 ====================");
 		returnHash = new HashMap<String, HashMap<String, String>>();
-		String Path = "Netflix::Instant Queue::Queue Top 50";
+		String Path = "Hulu::Popular::Popular Shows::30 Rock::Full Episodes";
 		int Depth = 1;
 		getUPnPDirectoryForPath(returnHash, UPnPDeviceRegEx, Path, Depth);
 		printSortedHash(returnHash);
@@ -98,6 +99,11 @@ public class UPnPBrowser {
 	/*****************************
 	 * Public Functions
 	 *****************************/
+	public static String version(){
+		System.out.println("UPnPBrowser: Version v3.0");
+		return "UPnPBrowser: Version v3.0";
+	}
+	
 	// Start at root, navigate to path, store results in supplied hash
 	public static void getUPnPMediaForPath(
 			HashMap<String, HashMap<String, String>> returnHash, String Path)
@@ -117,7 +123,7 @@ public class UPnPBrowser {
 		// Set the UPnPDevice
 		String UPnPDeviceRegEx = UPnPPath.poll();
 		String CurrentPath = "";
-		if (setUPnPDevice(UPnPDeviceRegEx)) {
+		if (setUPnPDevice(java.util.regex.Pattern.quote(UPnPDeviceRegEx))) {
 			while (UPnPPath.size() != 1 && CurrentUID != "") {
 				pathRegEx = UPnPPath.poll();
 				System.out.println("  + Searching for (" + pathRegEx + ") in (" + CurrentPath + ")(" + CurrentUID + ")");
@@ -187,8 +193,8 @@ public class UPnPBrowser {
 		System.out.println("    - Depth       : (" + Depth + ")");
 
 		// Set the UPnPDevice
-		if (setUPnPDevice(UPnPDeviceRegEx)) {
-			while (!UPnPPath.isEmpty() && CurrentUID != "") {
+		if (setUPnPDevice(java.util.regex.Pattern.quote(UPnPDeviceRegEx))) {
+			while (!UPnPPath.isEmpty() && !UPnPPath.peek().equals("")&& CurrentUID != "") {
 				pathRegEx = UPnPPath.poll();
 				System.out.println("  + Searching for (" + pathRegEx + ") in (" + CurrentPath + ")(" + CurrentUID + ")");
 				CurrentUID = searchUIDForPath(CurrentUID, pathRegEx);
@@ -224,7 +230,7 @@ public class UPnPBrowser {
 		System.out.println("    - Depth       : (" + Depth + ")");
 
 		// Set the UPnPDevice
-		if (setUPnPDevice(UPnPDeviceRegEx)) {
+		if (setUPnPDevice(java.util.regex.Pattern.quote(UPnPDeviceRegEx))) {
 			getContentForUID(returnHash, UID, Path, Depth);
 		} else {
 			System.out.println("! Couldn't Find UPnP Device (" + UPnPDeviceRegEx + ")");
@@ -309,7 +315,47 @@ public class UPnPBrowser {
 			KeyValue.put("Path", Path);
 			KeyValue.put("ParentUID", UID);
 			KeyValue.put("UPnPDevice", gRemoteDeviceString);
-
+			
+			
+			System.out.println("      + Checking For TV shows ("+Path+"::"+item.getTitle()+")");
+			// Hulu type #1
+			String SERegEx = "([^\\-]+) - s([0-9]+)e([0-9]+): (.*)$";
+			Pattern pattern = Pattern.compile(SERegEx);
+			Matcher matcher = pattern.matcher(Path+"::"+item.getTitle());
+			if (matcher.find()) {
+				System.out.println("      + Detected TV Show (Hulu type #1)!");
+				KeyValue.put("TV", "true");
+				KeyValue.put("ShowTitle", matcher.group(1));
+				KeyValue.put("Season", matcher.group(2));
+				KeyValue.put("Episode", matcher.group(3));
+				KeyValue.put("EpisodeTitle", matcher.group(4));
+			} else {
+				// Hulu type #2
+				SERegEx =  "([^:])::Full Episodes::s([0-9]+)e([0-9]+): (.*)";
+				pattern = Pattern.compile(SERegEx);
+				matcher = pattern.matcher(Path+"::"+item.getTitle());
+				if (matcher.find()){
+					System.out.println("      + Detected TV Show (Hulu type #2)!");
+					KeyValue.put("ShowTitle", matcher.group(1));
+					KeyValue.put("Season", matcher.group(2));
+					KeyValue.put("Episode", matcher.group(3));
+					KeyValue.put("EpisodeTitle", matcher.group(4));					
+				}
+				else {
+					// Netflix type #1
+					SERegEx =  "([^:])::Season ([0-9]+)::([0-9]+): (.*)";
+					pattern = Pattern.compile(SERegEx);
+					matcher = pattern.matcher(Path+"::"+item.getTitle());
+					if (matcher.find()){
+						System.out.println("      + Detected TV Show (Netflix type #1)!");
+						KeyValue.put("ShowTitle", matcher.group(1));
+						KeyValue.put("Season", matcher.group(2));
+						KeyValue.put("Episode", matcher.group(3));
+						KeyValue.put("EpisodeTitle", matcher.group(4));					
+					}
+				}
+			}
+			
 			for (Res metaData : item.getResources()) {
 				KeyValue.put("Media", metaData.getValue().toString());
 				KeyValue.put("Duration", metaData.getDuration());
@@ -470,15 +516,116 @@ public class UPnPBrowser {
 			}
 		}
 	}
+	// Check if hash entry is a Content folder
+	public static String getMetadata(HashMap<String, String> item, String Metadata) {
+		if (item != null){
+			return item.get(Metadata);
+		}
+		return "";
+	}
+
+	public static String getDuration(HashMap<String, String> item) {
+		if (item != null){
+			String DurRegEx = "([0-9]+):([0-9]+):([0-9]+)\\.";
+			Pattern pattern = Pattern.compile(DurRegEx);
+			Matcher matcher = pattern.matcher(item.get("Duration"));
+			if (matcher.find()){
+				int hours = Integer.parseInt(matcher.group(1)) * 60;
+				int minutes = Integer.parseInt(matcher.group(2)) * 60;
+				return (hours + minutes) + " mins";
+			}
+		}
+		return "";
+	}
+	
+	public static int getDurationPlayback(HashMap<String, String> item) {
+		if (item != null){
+			String DurRegEx = "([0-9]+):([0-9]+):([0-9]+)\\.";
+			Pattern pattern = Pattern.compile(DurRegEx);
+			Matcher matcher = pattern.matcher(item.get("Duration"));
+			if (matcher.find()){
+				int hours = Integer.parseInt(matcher.group(1)) * 60 * 60;
+				int minutes = Integer.parseInt(matcher.group(2)) * 60;
+				int seconds = Integer.parseInt(matcher.group(3));
+				return (hours + minutes + seconds) * 1000;
+			}
+		}
+		return 0;
+	}
+	
+	public static String getDate(HashMap<String, String> item) {
+		if (item != null){
+			String DateRegEx = "([0-9]+)-([0-9]+)-([0-9]+)";
+			Pattern pattern = Pattern.compile(DateRegEx);
+			Matcher matcher = pattern.matcher(item.get("date"));
+			if (matcher.find()){
+				return matcher.group(2) + "/" + matcher.group(3) + "/" + matcher.group(1); 
+			}
+		}
+		return "";
+	}
+	
+	public static String getDirectory(HashMap<String, String> item) {
+		if (item != null){
+			return item.get("Directory");
+		}
+		return "";
+	}
+	
+	// Check if hash entry is a Content folder
+	public static String getMedia(HashMap<String, String> item) {		
+		if (item != null){
+			return item.get("Media");
+		}
+		return "";
+	}
+	
+	// Check if hash entry is a Content folder
+	public static String getParentUID(HashMap<String, String> item) {
+		if (item != null){
+			return item.get("ParentUID");
+		}
+		return "";
+	}
+	
+	// Check if hash entry is a Content folder
+	public static String getPath(HashMap<String, String> item) {
+		if (item != null){
+			return item.get("Path");
+		}
+		return "";
+	}
+	
+	// Check if hash entry is a Content folder
+	public static String getAlbumArt(HashMap<String, String> item) {
+		if (item != null){
+			return item.get("AlbumArt");
+		}
+		return "";
+	}
 
 	// Check if hash entry is a Content folder
+	public static String getUPnPDevice(HashMap<String, String> item) {
+		if (item != null){
+			return item.get("UPnPDevice");
+		}
+		return "";
+	}
+	
+	// Check if hash entry is a Content folder
 	public static boolean isFolder(HashMap<String, String> item) {
-		return item.containsKey("Directory");
+		if (item != null){
+			return item.containsKey("Directory");
+		}
+		return false;
 	}
 
 	// Check if hash entry is a Media item
 	public static boolean isMedia(HashMap<String, String> item) {
-		return item.containsKey("Media");
+		if (item != null){
+			return item.containsKey("Media");
+		}
+		return false;
 	}
 
 }
