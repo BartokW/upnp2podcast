@@ -20,7 +20,7 @@
 #
   #use strict;
 ##### Import libraries
-  use Encode qw(encode decode);
+  use Encode;
   use utf8;
   use Digest::MD5 qw(md5 md5_hex md5_base64);
   use Net::UPnP::ControlPoint;
@@ -49,6 +49,10 @@
   $outputPathName = "";
    
   open(LOGFILE,">$executablePath/$executableEXE.log");
+  
+  binmode stderr, ":utf8";
+  binmode LOGFILE, ":utf8";
+  binmode STDOUT, ":utf8";
 
   # Get Start Time
   my ( $startSecond, $startMinute, $startHour, $dayOfMonth, $month, $yearOffset, $dayOfWeek, $dayOfYear, $daylightSavings ) = localtime();
@@ -60,7 +64,7 @@
   $dateXMLString = sprintf("%04d-%02d-%02d",$year,$month,$dayOfMonth);
 
   # Code version
-  my $codeVersion = "$executableEXE v1.2 (SNIP:BUILT)";
+  my $codeVersion = "$executableEXE v1.5 (SNIP:BUILT)";
   
   my $invalidMsg .= "\n$codeVersion\n";
   $invalidMsg .= "\tUSAGE:";
@@ -684,18 +688,19 @@
       {
           my $opening = $feed_begin;
           $opening =~ s/%%FEED_TITLE%%/$feedTitle/g;
-          $opening =~ s/%%FEED_DESCRIPTION%%/UPnP Browser ($lookingFor)/g;   
-          print encode('ISO-8859-1', $opening);
+          $opening =~ s/%%FEED_DESCRIPTION%%/UPnP Browser ($lookingFor)/g;
+          
+          binmode STDOUT, ":utf8";   
+          print $opening;   
           foreach (@items)
           {
               if (!($_ eq ""))
               {
                   $_ =~ s/EXE_TIME/$execTime/g;
-                  utf8::downgrade($_);
-                  print encode('ISO-8859-1', $_);
+                  print $_;
               }
           }  
-          print encode('ISO-8859-1', $feed_end);
+          print $feed_end;
       }
       #Exposé
       my $execTime = executionTime(@startTime);   
@@ -985,7 +990,6 @@ FEED_END
                 my $newItem = $feed_item;
                 my $content = $_;
                 my $id    = $content->getid();
-                my $title = $content->gettitle();
                 my $video = toXML($content->geturl());
                 my $size  = $content->getSize();
                 my $date  = $content->getdate();
@@ -993,8 +997,11 @@ FEED_END
                 my $userRating  = $content->getUserRating();
                 my $dur  = $content->getDur();
                 my $thumbnail  = toXML($content->getPicture());
-                my $description = $content->getDesc();
+
                 my $type = 'video/mpeg2';
+
+                my $description = decode_utf8($content->getDesc());
+                my $title = decode_utf8($content->gettitle());
                 
                 if ($scrapeMode)
                 {
@@ -1053,7 +1060,19 @@ FEED_END
                     my $durDisplay = sprintf("%02d:%02d:%02d", $durDisHour, $durDisMin, $durDisSec);       
                     
                     $date  =~ /^(.*)T/;
-                    $date  = $1;                    
+                    $date  = $1; 
+                    
+                    $description =~ s/\&amp;/&/g;
+                    $description =~ s/\&quot;/"/g; #"
+                    $description =~ s/\&lt;/</g;
+                    $description =~ s/\&gt;/>/g;
+                    $description =~ s/\&apos;/'/g;  #'              
+
+                    $title =~ s/\&amp;/&/g;
+                    $title =~ s/\&quot;/"/g; #"
+                    $title =~ s/\&lt;/</g;
+                    $title =~ s/\&gt;/>/g;
+                    $title =~ s/\&apos;/'/g;  #'  
                     
                     $newItem =~ s/%%ITEM_TITLE%%/$title/g;
                     $newItem =~ s/%%ITEM_DATE%%/$durForDate ($date)/g;
