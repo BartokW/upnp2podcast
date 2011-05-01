@@ -20,7 +20,7 @@
 #
   #use strict;
 ##### Import libraries
-  use Encode;
+  use Encode qw(encode decode);
   use utf8;
   use Digest::MD5 qw(md5 md5_hex md5_base64);
   use Net::UPnP::ControlPoint;
@@ -49,10 +49,6 @@
   $outputPathName = "";
    
   open(LOGFILE,">$executablePath/$executableEXE.log");
-  
-  binmode stderr, ":utf8";
-  binmode LOGFILE, ":utf8";
-  binmode STDOUT, ":utf8";
 
   # Get Start Time
   my ( $startSecond, $startMinute, $startHour, $dayOfMonth, $month, $yearOffset, $dayOfWeek, $dayOfYear, $daylightSavings ) = localtime();
@@ -176,7 +172,10 @@
           while(<TOSCRAPE>)
           {
               chomp;
-              @toScrape = (@toScrape,$_);
+              if (!($_ =~ /^#/))
+              {
+                  @toScrape = (@toScrape,$_);
+              }
           }
           close(TOSCRAPE);
       }  
@@ -537,16 +536,16 @@
       {
           if (exists $optionsHash{lc("scrapeMode")})
           {   # Pull depth off end of path for scrape mode
-              if ($playONPath =~ m#/\+([0-9]+)$#)
+              if ($playONPath =~ m#/\+([0-9]+) *$#)
               {
                   $playONPath = $`;
                   $optionsHash{lc("depth")} = $1;
-                  echoPrint("+ Setting depth: ($1)($playONPath)\n");
+                  echoPrint("  + Setting depth: ($1)($playONPath)\n");
               }
               else
               {
                   $optionsHash{lc("depth")} = 2;
-                  echoPrint("+ Setting depth: DEFAULT (2)($playONPath)\n");
+                  echoPrint("  + Setting depth: DEFAULT (2)($playONPath)\n");
               }
           }
           
@@ -620,9 +619,9 @@
           {   # Only add videos
               foreach $exitingFile (sort(keys %existingFilesHash))
               {                                           
-                  echoPrint("    - Missing : (".getFile($exitingFile)." (".(-s getFullFile($exitingFile)).")\n"); 
-                  if (-e encode('ISO-8859-1', "$exitingFile") && $exitingFile =~ /\.playon$/ && (-s getFullFile(encode('ISO-8859-1', $exitingFile))) < 6000)
-                  {   # never delete anything over 6 mb                 
+                  echoPrint("    - Missing : ($exitingFile)(".getFile($exitingFile)." (".(-s getFullFile($exitingFile)).")\n"); 
+                  if (-e $exitingFile && $exitingFile =~ /\.playon$/ && (-s getFullFile($exitingFile)) < 40000)
+                  {   # never delete *anything* over 400kb                 
                       $rmString = encode('ISO-8859-1', "del /Q \"$exitingFile\"");
                       #echoPrint("    - rm : ($rmString)\n");
                       `$rmString`;
@@ -664,7 +663,7 @@
           
           foreach $newFile (sort(keys %playOnFileHashCopy))
           {
-              echoPrint("    - Added : (".getFile($newFile)."\n");
+              echoPrint("    - Added : (".getFile($newFile).")\n");
               
               my $tempNewFile =  $newFile;
               my @pathsToMake = ();
@@ -682,9 +681,9 @@
                               
               $baseVideo = "playon.m4v";
 
-              $playOnPath  = "PlayOn,,,".$playOnFileHashCopy{$newFile};
-              
-              if ($playOnPath =~ /PlayON\\([^\\]*)\\/i)
+              $playOnPath  = "PlayOn,,,".$playOnFileHashCopy{$newFile};              
+              #echoPrint("    - PathString : ($playOnPath)\n");
+              if ($playOnPath =~ /PlayON:([^:]*):/i)
               {
                   $playOnType = "PlayOn,$1"; 
               }
@@ -692,42 +691,42 @@
               {
                   $playOnType  = "PlayOn,Other"; 
               }
-          
-              $copyString = encode('ISO-8859-1', ($linux == 1 ? "cp" : "copy")." \"$executablePath".$FS."$executableEXE".$FS."$baseVideo\" \"".getFullFile($newFile)."\"");
-              #echoPrint("    - copying : ($copyString)\n");
-              `$copyString`;
-              
-              if (open(PROPERTIES,">".getFullFile($newFile).".playon"))
-              {
-                  print PROPERTIES $path;
-                  close PROPERTIES;                  
-              }   
-              
-              # Strip path of any wierd chars
-              $playOnPath =~ s/[^a-zA-Z0-9 \\]/./;
-              
-              $tagString = encode('ISO-8859-1', ($linux == 1 ? "cp" : "\"$atomicParsleyEXE\"")." \"".getFullFile($newFile)."\" --overWrite --copyright \"$playOnType\" --comment \"$playOnPath\"");
-              #echoPrint("    - Tagging : ($tagString)\n");
-              `$tagString`;
+                            
+              if (!(-e $newFile))
+              {   # Only do it if the file doesn't already exist       
+                  $copyString = encode('ISO-8859-1', ($linux == 1 ? "cp" : "copy")." \"$executablePath".$FS."$executableEXE".$FS."$baseVideo\" \"".$newFile."\"");
+                  ##echoPrint("    - copying : ($copyString)\n");
+                  `$copyString`;
+                  
+                  if (open(PROPERTIES,">$newFile.playon"))
+                  {   # Make properties file   
+                      print PROPERTIES $playOnPath;
+                      close PROPERTIES;                  
+                  }   
+
+                  $tagString = encode('ISO-8859-1', ($linux == 1 ? "cp" : "\"$atomicParsleyEXE\"")." \"$newFile\" --overWrite --copyright \"$playOnType\" --comment \"$playOnPath\"");
+                  #echoPrint("    - Tagging : ($tagString)\n");
+                  `$tagString`;
+              }
           }                  
       }
       else
       {
           my $opening = $feed_begin;
           $opening =~ s/%%FEED_TITLE%%/$feedTitle/g;
-          $opening =~ s/%%FEED_DESCRIPTION%%/UPnP Browser ($lookingFor)/g;
-          
-          binmode STDOUT, ":utf8";   
-          print $opening;   
+          $opening =~ s/%%FEED_DESCRIPTION%%/UPnP Browser ($lookingFor)/g;   
+          print encode('ISO-8859-1', toANSII($opening));
           foreach (@items)
           {
               if (!($_ eq ""))
               {
                   $_ =~ s/EXE_TIME/$execTime/g;
-                  print $_;
+                  $_ = toANSII($_);
+                  utf8::downgrade($_);
+                  print encode('ISO-8859-1', toANSII($_));
               }
           }  
-          print $feed_end;
+          print encode('ISO-8859-1', toANSII($feed_end));
       }
       #Exposé
       my $execTime = executionTime(@startTime);   
@@ -1017,6 +1016,7 @@ FEED_END
                 my $newItem = $feed_item;
                 my $content = $_;
                 my $id    = $content->getid();
+                my $title = $content->gettitle();
                 my $video = toXML($content->geturl());
                 my $size  = $content->getSize();
                 my $date  = $content->getdate();
@@ -1024,11 +1024,8 @@ FEED_END
                 my $userRating  = $content->getUserRating();
                 my $dur  = $content->getDur();
                 my $thumbnail  = toXML($content->getPicture());
-
+                my $description = $content->getDesc();
                 my $type = 'video/mpeg2';
-
-                my $description = decode_utf8($content->getDesc());
-                my $title = decode_utf8($content->gettitle());
                 
                 if ($scrapeMode)
                 {
@@ -1199,6 +1196,13 @@ FEED_END
         my $rv = getPath(getPath($fileName));
         return $rv;
     }
+
+    sub toANSII
+    {
+        my $replaceString = shift;
+        $replaceString =~ s/\P{IsASCII}//g;
+        return $replaceString;
+    } 
     
     sub toWin32
     {
@@ -1307,6 +1311,8 @@ FEED_END
         my $mediaType;
         my $airdate;
         my $airYear;
+        my $playOnRegExPath = $playONPath . "\\" . $playONTitle; 
+        
         
         # Get Airdate
         if ($playONAirdate =~ /([0-9]{4})-[0-9]{2}-[0-9]{2}/)
@@ -1315,9 +1321,9 @@ FEED_END
             $airYear    = $1;
         }
         
-        if ($playONPath =~ /([^\\-]+) - s([0-9]+)e([0-9]+): (.*)$/i)
+        if ($playOnRegExPath =~ /([^\\-]+) - s([0-9]+)e([0-9]+): (.*)$/i)
         {     # Hulu TV Type 1
-              echoPrint("    - TV Type #1\n");
+              #echoPrint("    - TV Type #1 ($playOnRegExPath)\n");
               $showTitle    = $1;
               $season       = $2;
               $episode      = $3;
@@ -1325,9 +1331,9 @@ FEED_END
               $description  = $playONDescription;
               $mediaType = "TV";
         }
-        elsif ($playONPath =~ /([^\\])\\Full Episodes\\s([0-9]+)e([0-9]+): (.*)/i) 
+        elsif ($playOnRegExPath =~ /([^\\]+)\\Full Episodes\\s([0-9]+)e([0-9]+): (.*)/i) 
         {     # Hulu TV Type 2, also works for other paths
-              echoPrint("    - TV Type #2\n");
+              #echoPrint("    - TV Type #2 ($playOnRegExPath)\n");
               $showTitle    = $1;
               $season       = $2;
               $episode      = $3;
@@ -1335,25 +1341,25 @@ FEED_END
               $description  = $playONDescription;
               $mediaType = "TV";
         }
-        elsif ($playONPath =~ /([^\\])\\Full Episodes\\(.*)/i) 
+        elsif ($playOnRegExPath =~ /([^\\]+)\\Full Episodes\\(.*)/i) 
         {     # Episodes without S/E info
-              echoPrint("    - TV Type #3 ($playONPath)\n");
+              #echoPrint("    - TV Type #3 ($playOnRegExPath)\n");
               $showTitle    = $1;
               $episodeTitle = $2;
               $description  = $playONDescription;
               $mediaType = "TV";
         }
-        elsif ($playONPath =~ /([^\\]) .Season ([0-9]+).\\Full Episodes\\Ep. ([0-9]+) | '?(.*)'?/i) 
+        elsif ($playOnRegExPath =~ /([^\\]+) .Season ([0-9]+).\\Full Episodes\\Ep. ([0-9]+) . (.*)/i) 
         {     # For some MTV stuff
-              echoPrint("    - TV Type #4 ($playONPath)\n");
+             # echoPrint("    - TV Type #4 ($playOnRegExPath)\n");
               $showTitle    = $1;
               $episodeTitle = $2;
               $description  = $playONDescription;
               $mediaType = "TV";
         }
-        elsif ($playONPath =~ /([^:])::Season ([0-9]+)::([0-9]+): (.*)/i) 
+        elsif ($playOnRegExPath =~ /([^\\]+)\\Season ([0-9]+)\\([0-9]+): (.*)/i) 
         {     # Netflix TV type 1 - New Series format
-              echoPrint("    - TV Type #5 ($playONPath)\n");
+              #echoPrint("    - TV Type #5 ($playOnRegExPath)\n");
               $showTitle    = $1;
               $season       = $2;
               $episode      = $3;
@@ -1361,9 +1367,9 @@ FEED_END
               $description  = $playONDescription;
               $mediaType = "TV";
         }
-        elsif ($playONPath   =~ /\\([^\\]+): The Complete Series\\([0-9]+): (.*)/i) 
+        elsif ($playOnRegExPath   =~ /\\([^\\]+): The Complete Series\\([0-9]+): (.*)/i) 
         {     # Netflix TV type 2  - SOme shows that only have 1 season are wierd
-              echoPrint("    - TV Type #6 ($playONPath)\n");
+              #echoPrint("    - TV Type #6 ($playOnRegExPath)\n");
               $showTitle    = $1;
               $season       = 1; # Assume these shows only have 1 season
               $episode      = $2;
@@ -1371,17 +1377,27 @@ FEED_END
               $description  = $playONDescription;
               $mediaType = "TV";      
         }
-        elsif($playONPath   =~ /\\([^\\]+): (Volume|Collection) [0-9]+\\[0-9]+: (.*)/i)
+        elsif($playOnRegExPath   =~ /\\([^\\]+)\\(Volume|Collection) [0-9]+\\[0-9]+: (.*)/i)
         {   # Collections and Volumes don't have acurate season/episode info
-              echoPrint("    - TV Type #7 ($playONPath)\n");
+              #echoPrint("    - TV Type #7 ($playOnRegExPath)\n");
               $showTitle    = $1;
+              $episodeTitle = $3;
+              $description  = $playONDescription;
+              $mediaType = "TV";      
+        }
+        elsif($playOnRegExPath   =~ /\\([^\\]+)\\([0-9]+): (.*)/i)
+        {     #Probably a miniseries of some kind
+              #echoPrint("    - TV Type #7 ($playOnRegExPath)\n");
+              $showTitle    = $1;
+              $season       = 1; # Assume these shows only have 1 season
+              $episode      = $2;
               $episodeTitle = $3;
               $description  = $playONDescription;
               $mediaType = "TV";      
         }
         else
         {     # Treat like movie
-              echoPrint("    - Moive! ($playONPath)\n");
+              #echoPrint("    - Moive! ($playOnRegExPath)\n");
               $mediaType   = "Movie";
               $showTitle   = $playONTitle;
               $description = $playONDescription;            
@@ -1396,6 +1412,7 @@ FEED_END
         my $path           = "/outputPath||/search||$playONPath\\$playONRegEx\\+1";
         $path              =~ s/:/./gi;
         $path              =~ s/\\/:/gi;
+        $path              =~ s/\P{IsASCII}/./g;
         
         $showTitle =~ s/\&amp;/&/g;
         $showTitle =~ s/\&quot;/"/g; #"
@@ -1410,13 +1427,9 @@ FEED_END
         $episodeTitle =~ s/\&gt;/>/g;
         $episodeTitle =~ s/\&apos;/'/g;  #'
         $episodeTitle =~ s/ & / and /g;  
-
-        my $fileName       = $showTitle; 
-        my $propertiesFile = "MediaType=$mediaType\n";
-        $propertiesFile   .= "MediaTitle=$showTitle\n";
-        $propertiesFile   .= "ReleaseDate=$airdate\n";
-        $propertiesFile   .= "Description=$description\n";
-  
+        
+        my $fileName       = $showTitle;
+        my $folder         = "";  
         if ($mediaType eq "TV")
         {
             $folder = "TV".$FS."".toWin32($showTitle);
@@ -1429,9 +1442,6 @@ FEED_END
             {
                 $fileName         .= " -- $episodeTitle";
             }
-            $propertiesFile   .= "EpisodeTitle=$episodeTitle\n";
-            $propertiesFile   .= "SeasonNumber=$season\n";
-            $propertiesFile   .= "EpisodeNumber=$episode\n";
         }
         else
         {
@@ -1439,45 +1449,21 @@ FEED_END
             if (!($airYear eq ""))
             {
                 $fileName   .= " ($airYear)";    
-            }
-            
-            
+            }            
         }
-        $propertiesFile   .= "PlayOnPath=$path\n";
         
-        $fileName = toWin32($fileName);
-        #echoPrint("  + Generating : ($workPath".$FS."$folder".$FS."$fileName.m4v)\n");
-        #echoPrint($propertiesFile);
-        $fileName =~ s/mythbusters/MythBusters/gi;
-        $folder   =~ s/mythbusters/MythBusters/gi;
-                
+        $fileName = toANSII(toWin32($fileName));
+        $folder   = toANSII($folder);
         $fullFileName = "$workPath".$FS."$folder".$FS."$fileName.m4v";
         
-        if (!(-e $fullFileName))
-        {
-            $playOnFileHash{$fullFileName} = $path;
+        if (-e $fullFileName)
+        {   # If file already exists, ignore it.
+            delete $existingFilesHash{$fullFileName.".playon"};            
         }
         else
-        {
-            delete $existingFilesHash{$fullFileName};
-        }
-        
-        #if (!(-d "$workPath".$FS."$folder"))
-        #{           
-        #    $mkdirString = "mkdir \"$workPath".$FS."$folder\"";
-        #    echoPrint("    - mkdir : ($mkdirString)\n");
-        #    `$mkdirString`; 
-        #} 
-              
-        #if (open(PROPERTIES,">$workPath".$FS."$folder".$FS."$fileName.m4v.playon"))
-        #{
-        #    print PROPERTIES $path;
-        #    close PROPERTIES;
-        #    
-        #    $copyString = ($linux == 1 ? "cp" : "copy")." \"$executablePath".$FS."$executableEXE".$FS."base.m4v\" \"$workPath".$FS."$folder".$FS."$fileName.m4v\"";
-        #    echoPrint("    - copying : ($copyString)\n");
-        #    `$copyString`; 
-        #}       
+        {   # Else, add it to the list of files to create
+            $playOnFileHash{$fullFileName} = $path;
+        }    
     }
     
 ##### Scan a directory and return an array of the matching files
