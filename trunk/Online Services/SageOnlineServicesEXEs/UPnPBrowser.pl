@@ -138,11 +138,6 @@
   
   my @content_list = ();
   
-  if ((@parameters == 0 || int(rand(10)) > 5) || !(-s "$executablePath".$FS."$executableEXE".$FS."$executableEXE.presets"))  
-  {
-      updatePresets();
-  }
-  
   my %presets = ();
   if (-s "$executablePath".$FS."$executableEXE".$FS."$executableEXE.presets")
   {   # Read in Presets      
@@ -229,7 +224,7 @@
       else
       {
           echoPrint("  ! /cleanScrapeMode but /outputDir (".$optionsHash{lc("outputDir")}.") isn't valid, exiting!\n");
-          exit 1;
+          exit;
       }  
   }
   
@@ -250,14 +245,7 @@
 
       %existingFilesHash = scanDir($workPath,"playon");
   }
-  
-  if ($sageVersion =~ /SageTV V6/i)
-  {
-      #disabling subcats
-      $optionsHash{lc("disableSubcats")} = 1;
-      echoPrint("    - /disableSubcats\n");        
-  }    
-  
+
   my $serverWait = (exists $optionsHash{lc("serverSearchTimeout")} ? $optionsHash{lc("serverSearchTimeout")} : 1);
   echoPrint("  + /serverSearchTimeout : (".$serverWait.")\n");
   
@@ -1253,7 +1241,7 @@ FEED_END
         foreach $exitingFile (sort(keys %existingFilesHash))
         {
             echoPrint("    - Cleaning : (".getFile($exitingFile)." (".(-s getFullFile($exitingFile)).")\n"); 
-            if (-e encode('ISO-8859-1', "$exitingFile") && $exitingFile =~ /\.playon$/ && (-s getFullFile(encode('ISO-8859-1', $exitingFile))) < 60000)
+            if (-e $exitingFile && $exitingFile =~ /\.playon$/ && (-s $exitingFile) < 40000)
             {   # never delete anything over 60 mb                 
                 $rmString = encode('ISO-8859-1', "del /Q \"$exitingFile\" 2>1");
                 #echoPrint("    - rm : ($rmString)\n");
@@ -1295,8 +1283,7 @@ FEED_END
             }        
         }
         echoPrint("    - Folders Cleaned!\n");
-        exit 1;
-        
+        exit;   
     }    
     
     
@@ -1436,7 +1423,7 @@ FEED_END
             if (!($season eq ""))
             {
                 $folder           .= "".$FS."Season $season"; 
-                $fileName         .= " S".$season."E".sprintf("%02d",$episode);
+                $fileName         .= " S".$season."E".sprintf("%02d",$episode)." - $episodeTitle";
             }
             else
             {
