@@ -60,7 +60,7 @@
   $dateXMLString = sprintf("%04d-%02d-%02d",$year,$month,$dayOfMonth);
 
   # Code version
-  my $codeVersion = "$executableEXE v1.5 (SNIP:BUILT)";
+  my $codeVersion = "$executableEXE v1.6 (SNIP:BUILT)";
   
   my $invalidMsg .= "\n$codeVersion\n";
   $invalidMsg .= "\tUSAGE:";
