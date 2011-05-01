@@ -1,2 +1,12 @@
 PlayOn/Hulu/User Queue/Sort By Date/+2
 PlayOn/Netflix/Instant Queue/Alphabetical/+3
+# Notes:
+#   I did some upgrades the queue importer while I was fixing it and now you 
+# should be able to expand it *a* little bit.  Any TV Show that has the path
+# "Full Episodes" should work, for example...
+#
+#PlayOn/Nick/^Nick$/SpongeBob SquarePants/Full Episodes/+2  
+#
+# However, unless they have Season/Episode info also, BMT will have a hard time
+# Pulling down the proper metadata.  Also, anything that's not recognized as TV
+# will be assumed to be a movie.  Be careful :)
