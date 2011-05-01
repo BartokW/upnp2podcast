@@ -527,7 +527,6 @@
       if (exists $optionsHash{lc("scrapeMode")})
       {
           @PlayONPaths = (@toScrape);
-          $optionsHash{lc("depth")} = 2;
       }
       else
       {
@@ -536,6 +535,21 @@
       
       foreach $playONPath (@PlayONPaths)
       {
+          if (exists $optionsHash{lc("scrapeMode")})
+          {   # Pull depth off end of path for scrape mode
+              if ($playONPath =~ m#/\+([0-9]+)$#)
+              {
+                  $playONPath = $`;
+                  $optionsHash{lc("depth")} = $1;
+                  echoPrint("+ Setting depth: ($1)($playONPath)\n");
+              }
+              else
+              {
+                  $optionsHash{lc("depth")} = 2;
+                  echoPrint("+ Setting depth: DEFAULT (2)($playONPath)\n");
+              }
+          }
+          
           echoPrint("LOOPING: $playONPath\n");
           $feedTitle = $playONPath;
           $skipping = 0;
@@ -667,17 +681,30 @@
               }
                               
               $baseVideo = "playon.m4v";
-              $playOnType  = "PlayOn,Hulu"; 
+
               $playOnPath  = "PlayOn,,,".$playOnFileHashCopy{$newFile};
               
-              if ($playOnFileHashCopy{$newFile} =~ /netflix/i)
+              if ($playOnPath =~ /PlayON\\([^\\]*)\\/i)
               {
-                  $playOnType = "PlayOn,Netflix"; 
+                  $playOnType = "PlayOn,$1"; 
+              }
+              else
+              {
+                  $playOnType  = "PlayOn,Other"; 
               }
           
               $copyString = encode('ISO-8859-1', ($linux == 1 ? "cp" : "copy")." \"$executablePath".$FS."$executableEXE".$FS."$baseVideo\" \"".getFullFile($newFile)."\"");
               #echoPrint("    - copying : ($copyString)\n");
               `$copyString`;
+              
+              if (open(PROPERTIES,">".getFullFile($newFile).".playon"))
+              {
+                  print PROPERTIES $path;
+                  close PROPERTIES;                  
+              }   
+              
+              # Strip path of any wierd chars
+              $playOnPath =~ s/[^a-zA-Z0-9 \\]/./;
               
               $tagString = encode('ISO-8859-1', ($linux == 1 ? "cp" : "\"$atomicParsleyEXE\"")." \"".getFullFile($newFile)."\" --overWrite --copyright \"$playOnType\" --comment \"$playOnPath\"");
               #echoPrint("    - Tagging : ($tagString)\n");
@@ -1287,69 +1314,79 @@ FEED_END
             $airdate    = $&;
             $airYear    = $1;
         }
-  
-        if ($playONPath =~ /PlayON\\Hulu/i)
-        {  # Hulu
-           if ($playONTitle =~ /^s([0-9]+)e([0-9]+): (.*)/i)
-           {
-              $season       = $1;
-              $episode      = $2;
-              $episodeTitle = $3;
-              $description  = $playONDescription;
-              
-              # Grab show Title from path
-              $playONPath   =~ /\\([^\\]*)\\Full Episodes/i;
+        
+        if ($playONPath =~ /([^\\-]+) - s([0-9]+)e([0-9]+): (.*)$/i)
+        {     # Hulu TV Type 1
+              echoPrint("    - TV Type #1\n");
               $showTitle    = $1;
-              
-              $mediaType = "TV";
-           }
-           elsif ($playONTitle =~ /(.*) - s([0-9]+)e([0-9]+): (.*)/)
-           {
               $season       = $2;
               $episode      = $3;
               $episodeTitle = $4;
               $description  = $playONDescription;
-              $showTitle    = $1;
-              
               $mediaType = "TV";
-           }
-           else
-           {  # Treat like movie
+        }
+        elsif ($playONPath =~ /([^\\])\\Full Episodes\\s([0-9]+)e([0-9]+): (.*)/i) 
+        {     # Hulu TV Type 2, also works for other paths
+              echoPrint("    - TV Type #2\n");
+              $showTitle    = $1;
+              $season       = $2;
+              $episode      = $3;
+              $episodeTitle = $4;
+              $description  = $playONDescription;
+              $mediaType = "TV";
+        }
+        elsif ($playONPath =~ /([^\\])\\Full Episodes\\(.*)/i) 
+        {     # Episodes without S/E info
+              echoPrint("    - TV Type #3 ($playONPath)\n");
+              $showTitle    = $1;
+              $episodeTitle = $2;
+              $description  = $playONDescription;
+              $mediaType = "TV";
+        }
+        elsif ($playONPath =~ /([^\\]) .Season ([0-9]+).\\Full Episodes\\Ep. ([0-9]+) | '?(.*)'?/i) 
+        {     # For some MTV stuff
+              echoPrint("    - TV Type #4 ($playONPath)\n");
+              $showTitle    = $1;
+              $episodeTitle = $2;
+              $description  = $playONDescription;
+              $mediaType = "TV";
+        }
+        elsif ($playONPath =~ /([^:])::Season ([0-9]+)::([0-9]+): (.*)/i) 
+        {     # Netflix TV type 1 - New Series format
+              echoPrint("    - TV Type #5 ($playONPath)\n");
+              $showTitle    = $1;
+              $season       = $2;
+              $episode      = $3;
+              $episodeTitle = $4;
+              $description  = $playONDescription;
+              $mediaType = "TV";
+        }
+        elsif ($playONPath   =~ /\\([^\\]+): The Complete Series\\([0-9]+): (.*)/i) 
+        {     # Netflix TV type 2  - SOme shows that only have 1 season are wierd
+              echoPrint("    - TV Type #6 ($playONPath)\n");
+              $showTitle    = $1;
+              $season       = 1; # Assume these shows only have 1 season
+              $episode      = $2;
+              $episodeTitle = $3;
+              $description  = $playONDescription;
+              $mediaType = "TV";      
+        }
+        elsif($playONPath   =~ /\\([^\\]+): (Volume|Collection) [0-9]+\\[0-9]+: (.*)/i)
+        {   # Collections and Volumes don't have acurate season/episode info
+              echoPrint("    - TV Type #7 ($playONPath)\n");
+              $showTitle    = $1;
+              $episodeTitle = $3;
+              $description  = $playONDescription;
+              $mediaType = "TV";      
+        }
+        else
+        {     # Treat like movie
+              echoPrint("    - Moive! ($playONPath)\n");
               $mediaType   = "Movie";
               $showTitle   = $playONTitle;
-              $description = $playONDescription;          
-           }
+              $description = $playONDescription;            
         }
-        elsif ($playONPath =~ /PlayON\\Netflix/i)
-        {
-            if ($playONTitle =~ /^([0-9]+): (.*)/i)
-            {   # TV show
-                $mediaType   = "TV";
-                $episode      = $1;
-                $episodeTitle = $2;
-                $description  = $playONDescription;
-                if ($playONPath   =~ /\\([^\\]+): (Series|Season) ([0-9]+)/i)
-                {   # Full fledged TV show               
-                    $season       = $3;
-                    $showTitle    = $1;                        
-                }
-                elsif($playONPath   =~ /\\([^\\]+): (Collection|Vol\.) ([0-9]+)/i)
-                {   # Collections don't usually have seasons associated with them
-                    $showTitle    = $1;
-                }
-                elsif($playONPath   =~ /\\([^\\]+)$/i)
-                {   # Miniseries or something
-                    $showTitle    = $1;
-                }
-            }
-            else
-            {
-                $mediaType   = "Movie";
-                $showTitle   = $playONTitle;
-                $description = $playONDescription;   
-            }        
-        }
-        
+
         $playONRegEx =  $playONTitle;
         if ($playONTitle =~ /s([0-9]+)e([0-9]+)/)
         {
@@ -1414,7 +1451,7 @@ FEED_END
         $fileName =~ s/mythbusters/MythBusters/gi;
         $folder   =~ s/mythbusters/MythBusters/gi;
                 
-        $fullFileName = "$workPath".$FS."$folder".$FS."$fileName.m4v.playon";
+        $fullFileName = "$workPath".$FS."$folder".$FS."$fileName.m4v";
         
         if (!(-e $fullFileName))
         {
