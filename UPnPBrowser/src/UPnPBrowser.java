@@ -43,57 +43,59 @@ public class UPnPBrowser {
 	static HashMap<String, RemoteDevice> gUPnPDevices = new HashMap<String, RemoteDevice>();
 
 	// MAIN
+	@SuppressWarnings("unused")
 	public static void main(String[] args) throws Exception {
-		// Retrun Object
-		HashMap<String, HashMap<String, String>> returnHash = null;
+		// Return Object
+		Vector<HashMap<String, String>> returnList = null;
+		HashMap<String,HashMap<String, String>> returnHash = null; // Temp
 		String UID = "";
 		String StaticPath = "";
 		String UPnPDeviceRegEx = "playon";
 		
 		// Test #1: Get list of all UPnP Devices
 		System.out.println("====================   TEST #1 ====================");
-		returnHash = new HashMap<String, HashMap<String, String>>();
+		returnList = new Vector<HashMap<String, String>>();
 		int SearchTime = 5;
-		getUPnPDeviceList(returnHash,SearchTime);
+		getUPnPDeviceList(returnList,SearchTime);
 		System.out.println("  + Found UPnP Servers");
-		for (String device:returnHash.keySet()){
-			System.out.println("    - (" + device + ")");			
+		for (HashMap<String, String> device:returnList){
+			System.out.println("    - (" + device.get("UPnPDevice") + ")");			
 			// Set Device for next test
-			if (device.contains("PlayOn")){
-				UPnPDeviceRegEx = device;
+			if (device.get("UPnPDevice").contains("PlayOn")){
+				UPnPDeviceRegEx = device.get("UPnPDevice");
 			}				
 		}
-		
+	
 		// Test #2: Get all items at a given path w/o initial UID	
 		System.out.println("====================   TEST #2 ====================");
-		returnHash = new HashMap<String, HashMap<String, String>>();
-		String Path = "Hulu::Popular::Popular Shows::30 Rock::Full Episodes";
+		returnList = new Vector<HashMap<String, String>>();
+		String Path = "Netflix::Instant Queue::Queue Top 50";
 		int Depth = 1;
-		getUPnPDirectoryForPath(returnHash, UPnPDeviceRegEx, Path, Depth);
-		printSortedHash(returnHash);
+		getUPnPDirectoryForPath(returnList, UPnPDeviceRegEx, Path, Depth);
+		printSortedHash(returnList);
 
 		// Grab a UID and Static path for test #2
-		for (String key : returnHash.keySet()) {
-			if (isFolder(returnHash.get(key))) {
-				UID = returnHash.get(key).get("Directory");
-				StaticPath = returnHash.get(key).get("Path") + "::" + key;
+		for (HashMap<String, String> item:returnList){
+			if (isFolder(item)) {
+				UID = item.get("Directory");
+				StaticPath = item.get("Path") + "::" + item.get("Title");
 			}
 		}
 		
 		 // Test #3: Get all items at a given path WITH initial UID 
 		System.out.println("====================   TEST #3 ====================");
-		 returnHash = new HashMap<String,HashMap<String,String>>(); 
-		 Depth = 2;
-		 getUPnPDirectoryForUID(returnHash, UPnPDeviceRegEx, UID, StaticPath, Depth);
-		 printSortedHash(returnHash);
-		
+		returnList = new Vector<HashMap<String, String>>();
+		Depth = 2;
+		getUPnPDirectoryForUID(returnList, UPnPDeviceRegEx, UID, StaticPath, Depth);
+		printSortedHash(returnList);
+			
 		 // Test #4: Get Single Media Object
 		System.out.println("====================   TEST #4 ====================");
-		 returnHash = new HashMap<String, HashMap<String, String>>();
-		 String Fullpath = UPnPDeviceRegEx + "::Netflix::Instant Queue::Queue Top 50::Psych::Season 1::01: Pilot";
-		 returnHash = new HashMap<String,HashMap<String,String>>();
-		 getUPnPMediaForPath(returnHash, Fullpath);
-		 printSortedHash(returnHash);		 
+		returnHash = new HashMap<String, HashMap<String, String>>();
+		String Fullpath = UPnPDeviceRegEx + "::Netflix::Instant Queue::Queue Top 50::Psych::Season 1::01: Pilot";
+		returnList = new Vector<HashMap<String, String>>();
+		getUPnPMediaForPath(returnList, Fullpath);
+		printSortedHash(returnList);	
 	}
 
 	/*****************************
@@ -106,7 +108,7 @@ public class UPnPBrowser {
 	
 	// Start at root, navigate to path, store results in supplied hash
 	public static void getUPnPMediaForPath(
-			HashMap<String, HashMap<String, String>> returnHash, String Path)
+			Vector<HashMap<String, String>> returnList, String Path)
 			throws InterruptedException {
 		long start = System.currentTimeMillis();
 		String pathRegEx = "";
@@ -134,7 +136,12 @@ public class UPnPBrowser {
 					gUPnPService.shutdown();
 					return;
 				}
-				CurrentPath = CurrentPath + "::" + pathRegEx;
+				if (CurrentPath.equals("")) {
+					CurrentPath = pathRegEx;
+				} else {
+					CurrentPath = CurrentPath + "::" + pathRegEx;
+				}
+				
 			}
 			
 			String MediaFile = UPnPPath.poll();
@@ -146,6 +153,7 @@ public class UPnPBrowser {
 				// Put in Path and ParentUID
 				HashMap<String, String> KeyValue = new HashMap<String, String>();
 				KeyValue.put("Path", CurrentPath);
+				KeyValue.put("UIDTitle", item.getTitle());
 				KeyValue.put("ParentUID", CurrentUID);
 				KeyValue.put("UPnPDevice", gRemoteDeviceString);
 
@@ -159,7 +167,7 @@ public class UPnPBrowser {
 				}
 				if (item.getTitle().equalsIgnoreCase(MediaFile)) {
 					System.out.println("  + Found (" + CurrentPath + "::" + item.getTitle() + ")");
-					returnHash.put(item.getTitle(), KeyValue);	
+					returnList.add(KeyValue);	
 				}						
 			}			
 		} else {
@@ -174,7 +182,7 @@ public class UPnPBrowser {
 	
 	// Start at root, navigate to path, store results in supplied hash
 	public static void getUPnPDirectoryForPath(
-			HashMap<String, HashMap<String, String>> returnHash,
+			Vector<HashMap<String, String>> returnList,
 			String UPnPDeviceRegEx, String Path, int Depth)
 			throws InterruptedException {
 		long start = System.currentTimeMillis();
@@ -206,7 +214,7 @@ public class UPnPBrowser {
 				}
 				CurrentPath = CurrentPath + "::" + pathRegEx;
 			}
-			getContentForUID(returnHash, CurrentUID, Path, Depth);
+			getContentForUID(returnList, CurrentUID, Path, Depth);
 		} else {
 			System.out.println("! Couldn't Find UPnP Device (" + UPnPDeviceRegEx + ")");
 		}
@@ -218,7 +226,7 @@ public class UPnPBrowser {
 
 	// Get the UPnP Directory for a given UID and Server RegEx
 	public static void getUPnPDirectoryForUID(
-			HashMap<String, HashMap<String, String>> returnHash,
+			Vector<HashMap<String, String>> returnList,
 			String UPnPDeviceRegEx, String UID, String Path, int Depth)
 			throws InterruptedException {
 		long start = System.currentTimeMillis();
@@ -231,7 +239,7 @@ public class UPnPBrowser {
 
 		// Set the UPnPDevice
 		if (setUPnPDevice(java.util.regex.Pattern.quote(UPnPDeviceRegEx))) {
-			getContentForUID(returnHash, UID, Path, Depth);
+			getContentForUID(returnList, UID, Path, Depth);
 		} else {
 			System.out.println("! Couldn't Find UPnP Device (" + UPnPDeviceRegEx + ")");
 		}
@@ -243,7 +251,7 @@ public class UPnPBrowser {
 
 	// Get the UPnP Directory for a given UID and Server RegEx
 	public static void getUPnPDeviceList(
-			HashMap<String, HashMap<String, String>> returnHash,
+			Vector<HashMap<String, String>> returnList,
 			int SearchTimeInSec)
 			throws InterruptedException {
 		long start = System.currentTimeMillis();
@@ -262,7 +270,7 @@ public class UPnPBrowser {
 			KeyValue.put("Path", deviceName);
 			KeyValue.put("Directory", "0");
 			KeyValue.put("ParentUID", "0");
-			returnHash.put(deviceName, KeyValue);			
+			returnList.add(KeyValue);			
 		}
 
 		gUPnPService.shutdown();
@@ -302,7 +310,7 @@ public class UPnPBrowser {
 
 	// Recurive function for getting all UPnP items for a given UID and depth
 	private static void getContentForUID(
-			HashMap<String, HashMap<String, String>> returnHash, String UID,
+			Vector<HashMap<String, String>> returnList, String UID,
 			String Path, int Depth) {
 		System.out.println("    - Getting Items from : (" + Path + ")(" + Depth + ")(" + UID + ")");
 		getContentForUID(UID);
@@ -313,46 +321,52 @@ public class UPnPBrowser {
 			// Put in Path and ParentUID
 			HashMap<String, String> KeyValue = new HashMap<String, String>();
 			KeyValue.put("Path", Path);
+			KeyValue.put("UIDTitle", item.getTitle());
 			KeyValue.put("ParentUID", UID);
 			KeyValue.put("UPnPDevice", gRemoteDeviceString);
 			
 			
-			System.out.println("      + Checking For TV shows ("+Path+"::"+item.getTitle()+")");
+			//System.out.println("      + Checking For TV shows ("+Path+"::"+item.getTitle()+")");
 			// Hulu type #1
-			String SERegEx = "([^\\-]+) - s([0-9]+)e([0-9]+): (.*)$";
+			String SERegEx= "([^\\-]+) - s([0-9]+)e([0-9]+): (.*)$";
 			Pattern pattern = Pattern.compile(SERegEx);
 			Matcher matcher = pattern.matcher(Path+"::"+item.getTitle());
 			if (matcher.find()) {
-				System.out.println("      + Detected TV Show (Hulu type #1)!");
+				System.out.println("      + Detected TV Show (Hulu type #1)! ("+Path+"::"+item.getTitle()+")");
 				KeyValue.put("TV", "true");
-				KeyValue.put("ShowTitle", matcher.group(1));
+				KeyValue.put("Title", matcher.group(1));
 				KeyValue.put("Season", matcher.group(2));
 				KeyValue.put("Episode", matcher.group(3));
 				KeyValue.put("EpisodeTitle", matcher.group(4));
 			} else {
 				// Hulu type #2
-				SERegEx =  "([^:])::Full Episodes::s([0-9]+)e([0-9]+): (.*)";
+				SERegEx =  "([^:]+)::Full Episodes::s([0-9]+)e([0-9]+): (.*)";
 				pattern = Pattern.compile(SERegEx);
 				matcher = pattern.matcher(Path+"::"+item.getTitle());
 				if (matcher.find()){
-					System.out.println("      + Detected TV Show (Hulu type #2)!");
-					KeyValue.put("ShowTitle", matcher.group(1));
+					System.out.println("      + Detected TV Show (Hulu type #2)! ("+Path+"::"+item.getTitle()+")");
+					KeyValue.put("TV", "true");
+					KeyValue.put("Title", matcher.group(1));
 					KeyValue.put("Season", matcher.group(2));
 					KeyValue.put("Episode", matcher.group(3));
 					KeyValue.put("EpisodeTitle", matcher.group(4));					
 				}
 				else {
 					// Netflix type #1
-					SERegEx =  "([^:])::Season ([0-9]+)::([0-9]+): (.*)";
+					SERegEx =  "([^:]+)::Season ([0-9]+)::([0-9]+): (.*)";
 					pattern = Pattern.compile(SERegEx);
 					matcher = pattern.matcher(Path+"::"+item.getTitle());
 					if (matcher.find()){
-						System.out.println("      + Detected TV Show (Netflix type #1)!");
-						KeyValue.put("ShowTitle", matcher.group(1));
+						System.out.println("      + Detected TV Show (Netflix type #1)! ("+Path+"::"+item.getTitle()+")");
+						KeyValue.put("TV", "true");
+						KeyValue.put("Title", matcher.group(1));
 						KeyValue.put("Season", matcher.group(2));
 						KeyValue.put("Episode", matcher.group(3));
 						KeyValue.put("EpisodeTitle", matcher.group(4));					
+					} else {
+						KeyValue.put("Title", item.getTitle());
 					}
+						
 				}
 			}
 			
@@ -365,7 +379,7 @@ public class UPnPBrowser {
 				KeyValue.put(metaData.getDescriptorName(), metaData.getValue()
 						.toString());
 			}
-			returnHash.put(item.getTitle(), KeyValue);
+			returnList.add(KeyValue);
 		}
 
 		// Folders
@@ -373,12 +387,14 @@ public class UPnPBrowser {
 			if (Depth <= 1) {
 				HashMap<String, String> KeyValue = new HashMap<String, String>();
 				KeyValue.put("Path", Path);
+				KeyValue.put("UIDTitle", container.getTitle());
+				KeyValue.put("Title", container.getTitle());
 				KeyValue.put("ParentUID", UID);
 				KeyValue.put("Directory", container.getId());
 				KeyValue.put("UPnPDevice", gRemoteDeviceString);
-				returnHash.put(container.getTitle(), KeyValue);
+				returnList.add(KeyValue);
 			} else {
-				getContentForUID(returnHash, container.getId(), Path + "::"
+				getContentForUID(returnList, container.getId(), Path + "::"
 						+ container.getTitle(), Depth - 1);
 			}
 		}
@@ -450,38 +466,21 @@ public class UPnPBrowser {
 			}
 
 			@Override
-			public void remoteDeviceDiscoveryFailed(Registry arg0,
-					RemoteDevice arg1, Exception arg2) {
-			}
-
+			public void remoteDeviceDiscoveryFailed(Registry arg0, RemoteDevice arg1, Exception arg2) {}
 			@Override
-			public void remoteDeviceDiscoveryStarted(Registry arg0,
-					RemoteDevice arg1) {
-			}
-
+			public void remoteDeviceDiscoveryStarted(Registry arg0, RemoteDevice arg1) {}
 			@Override
-			public void afterShutdown() {
-			}
-
+			public void afterShutdown() {}
 			@Override
-			public void beforeShutdown(Registry arg0) {
-			}
-
+			public void beforeShutdown(Registry arg0) {}
 			@Override
-			public void localDeviceAdded(Registry arg0, LocalDevice arg1) {
-			}
-
+			public void localDeviceAdded(Registry arg0, LocalDevice arg1) {}
 			@Override
-			public void localDeviceRemoved(Registry arg0, LocalDevice arg1) {
-			}
-
+			public void localDeviceRemoved(Registry arg0, LocalDevice arg1) {}
 			@Override
-			public void remoteDeviceRemoved(Registry arg0, RemoteDevice arg1) {
-			}
-
+			public void remoteDeviceRemoved(Registry arg0, RemoteDevice arg1) {}
 			@Override
-			public void remoteDeviceUpdated(Registry arg0, RemoteDevice arg1) {
-			}
+			public void remoteDeviceUpdated(Registry arg0, RemoteDevice arg1) {}
 		});
 
 		// Search for All Devices
@@ -493,26 +492,16 @@ public class UPnPBrowser {
 	 *****************************/
 	// Print retrunHash sorted by Value
 	public static void printSortedHash(
-			HashMap<String, HashMap<String, String>> returnHash) {
-		List<String> mapKeys = new ArrayList<String>(returnHash.keySet());
-		List<String> mapValues = new ArrayList<String>();
-		for (String key : mapKeys) {
-			mapValues.add(returnHash.get(key).get("Path") + "::" + key);
-		}
-
-		TreeSet<String> sortedSet = new TreeSet<String>(mapValues);
-		Object[] sortedArray = sortedSet.toArray();
-		int size = sortedArray.length;
+			Vector<HashMap<String, String>> returnList) {
 
 		System.out.println("  + UPnP Content:");
-		for (int i = 0; i < size; i++) {
-			String key = mapKeys.get(mapValues.indexOf(sortedArray[i]));
-			if (isFolder(returnHash.get(key))) {
+		for (int i = 0; i < returnList.size(); i++) {
+			if (isFolder(returnList.elementAt(i))) {
 				System.out.println("    / ("
-						+ returnHash.get(key).get("Path") + "::" + key + ")");
+						+ returnList.elementAt(i).get("Path") + "::" + returnList.elementAt(i).get("Title") + ")");
 			} else {
 				System.out.println("    - ("
-						+ returnHash.get(key).get("Path") + "::" + key + ")");
+						+ returnList.elementAt(i).get("Path") + "::" + returnList.elementAt(i).get("UIDTitle")  + ")");
 			}
 		}
 	}
