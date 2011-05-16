@@ -1,19 +1,26 @@
 package PlayOnForSageTV;
 
-import java.util.*;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
+import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.Date;
 
 import org.teleal.cling.UpnpService;
 import org.teleal.cling.UpnpServiceImpl;
 import org.teleal.cling.model.action.ActionInvocation;
+import org.teleal.cling.model.message.UpnpResponse;
+import org.teleal.cling.model.message.header.STAllHeader;
 import org.teleal.cling.model.meta.LocalDevice;
 import org.teleal.cling.model.meta.RemoteDevice;
 import org.teleal.cling.model.meta.RemoteService;
-import org.teleal.cling.model.message.UpnpResponse;
-import org.teleal.cling.model.message.header.STAllHeader;
-import org.teleal.cling.registry.RegistryListener;
 import org.teleal.cling.registry.Registry;
+import org.teleal.cling.registry.RegistryListener;
 import org.teleal.cling.support.contentdirectory.callback.Browse;
 import org.teleal.cling.support.model.BrowseFlag;
 import org.teleal.cling.support.model.DIDLContent;
@@ -21,6 +28,15 @@ import org.teleal.cling.support.model.DIDLObject.Property;
 import org.teleal.cling.support.model.Res;
 import org.teleal.cling.support.model.container.Container;
 import org.teleal.cling.support.model.item.Item;
+
+import org.dom4j.Document;
+import org.dom4j.io.OutputFormat;
+import org.dom4j.io.XMLWriter;
+import org.dom4j.Document;
+import org.dom4j.DocumentException;
+import org.dom4j.DocumentHelper;
+import org.dom4j.Element;
+import org.dom4j.io.SAXReader;
 
 /**
  * Simple function for grabbing UPnP Media Server Paths
@@ -88,7 +104,8 @@ public class UPnPBrowser {
 		Depth = 2;
 		getUPnPDirectoryForUID(returnList, UPnPDeviceRegEx, UID, StaticPath, Depth);
 		printSortedHash(returnList);
-			
+
+		
 		 // Test #4: Get Single Media Object
 		System.out.println("====================   TEST #4 ====================");
 		returnHash = new HashMap<String, HashMap<String, String>>();
@@ -155,6 +172,7 @@ public class UPnPBrowser {
 				KeyValue.put("Path", CurrentPath);
 				KeyValue.put("UIDTitle", item.getTitle());
 				KeyValue.put("ParentUID", CurrentUID);
+				KeyValue.put("UID", item.getId());
 				KeyValue.put("UPnPDevice", gRemoteDeviceString);
 
 				for (Res metaData : item.getResources()) {
@@ -270,6 +288,8 @@ public class UPnPBrowser {
 			KeyValue.put("Path", deviceName);
 			KeyValue.put("Directory", "0");
 			KeyValue.put("ParentUID", "0");
+			KeyValue.put("UID", "0");
+			KeyValue.put("UIDTitle", deviceName);
 			returnList.add(KeyValue);			
 		}
 
@@ -323,6 +343,7 @@ public class UPnPBrowser {
 			KeyValue.put("Path", Path);
 			KeyValue.put("UIDTitle", item.getTitle());
 			KeyValue.put("ParentUID", UID);
+			KeyValue.put("UID", item.getId());
 			KeyValue.put("UPnPDevice", gRemoteDeviceString);
 			
 			
@@ -335,8 +356,8 @@ public class UPnPBrowser {
 				System.out.println("      + Detected TV Show (Hulu type #1)! ("+Path+"::"+item.getTitle()+")");
 				KeyValue.put("TV", "true");
 				KeyValue.put("Title", matcher.group(1));
-				KeyValue.put("Season", matcher.group(2));
-				KeyValue.put("Episode", matcher.group(3));
+				KeyValue.put("Season", Integer.parseInt(matcher.group(2)) + "");
+				KeyValue.put("Episode", Integer.parseInt(matcher.group(3)) + "");
 				KeyValue.put("EpisodeTitle", matcher.group(4));
 			} else {
 				// Hulu type #2
@@ -347,8 +368,8 @@ public class UPnPBrowser {
 					System.out.println("      + Detected TV Show (Hulu type #2)! ("+Path+"::"+item.getTitle()+")");
 					KeyValue.put("TV", "true");
 					KeyValue.put("Title", matcher.group(1));
-					KeyValue.put("Season", matcher.group(2));
-					KeyValue.put("Episode", matcher.group(3));
+					KeyValue.put("Season", Integer.parseInt(matcher.group(2)) + "");
+					KeyValue.put("Episode", Integer.parseInt(matcher.group(3))+ "");
 					KeyValue.put("EpisodeTitle", matcher.group(4));					
 				}
 				else {
@@ -360,8 +381,8 @@ public class UPnPBrowser {
 						System.out.println("      + Detected TV Show (Netflix type #1)! ("+Path+"::"+item.getTitle()+")");
 						KeyValue.put("TV", "true");
 						KeyValue.put("Title", matcher.group(1));
-						KeyValue.put("Season", matcher.group(2));
-						KeyValue.put("Episode", matcher.group(3));
+						KeyValue.put("Season", Integer.parseInt(matcher.group(2)) + "");
+						KeyValue.put("Episode", Integer.parseInt(matcher.group(3)) + "");
 						KeyValue.put("EpisodeTitle", matcher.group(4));					
 					} else {
 						KeyValue.put("Title", item.getTitle());
@@ -390,6 +411,7 @@ public class UPnPBrowser {
 				KeyValue.put("UIDTitle", container.getTitle());
 				KeyValue.put("Title", container.getTitle());
 				KeyValue.put("ParentUID", UID);
+				KeyValue.put("UID", container.getId());
 				KeyValue.put("Directory", container.getId());
 				KeyValue.put("UPnPDevice", gRemoteDeviceString);
 				returnList.add(KeyValue);
@@ -489,10 +511,12 @@ public class UPnPBrowser {
 
 	/*****************************
 	 * Utility Functions
+	 * @throws DocumentException 
+	 * @throws IOException 
 	 *****************************/
 	// Print retrunHash sorted by Value
 	public static void printSortedHash(
-			Vector<HashMap<String, String>> returnList) {
+			Vector<HashMap<String, String>> returnList) throws IOException, DocumentException {
 
 		System.out.println("  + UPnP Content:");
 		for (int i = 0; i < returnList.size(); i++) {
@@ -504,7 +528,48 @@ public class UPnPBrowser {
 						+ returnList.elementAt(i).get("Path") + "::" + returnList.elementAt(i).get("UIDTitle")  + ")");
 			}
 		}
+		updateCache(returnList);
 	}
+
+	/*****************************
+	 * Utility Functions
+	 *****************************/
+	// Print retrunHash sorted by Value
+	public static void updateCache(
+			Vector<HashMap<String, String>> returnList) {
+        // lets write to a file
+		Date date = new Date();
+		
+        SAXReader reader = new SAXReader();
+        Document cache = reader.read("cache.xml");
+		
+		XMLWriter writer = new XMLWriter(
+            new FileWriter( "cache.xml" )
+        );
+		
+        //Document cache = DocumentHelper.createDocument();
+        Element root = cache.addElement( "upnpcache" );
+        Element entry = root.addElement( "entry")
+        				    .addAttribute("uid", returnList.elementAt(0).get("ParentUID"))
+        				    .addAttribute("date", date.getTime() + "");
+
+        for (HashMap<String, String> item:returnList) {
+        	Element upnpItem = entry.addElement( "item")
+        	                        .addAttribute("uid", item.get("UID"));
+        	for (String key:item.keySet()) {
+        		upnpItem.addElement(key).addText(item.get(key));
+        	}     	
+        }     
+
+		writer.write(cache);
+		writer.close();
+	
+        // Pretty print the document to System.out
+        OutputFormat format = OutputFormat.createPrettyPrint();
+        writer = new XMLWriter( System.out, format );
+        writer.write( cache );		
+	}
+	
 	// Check if hash entry is a Content folder
 	public static String getMetadata(HashMap<String, String> item, String Metadata) {
 		if (item != null){
