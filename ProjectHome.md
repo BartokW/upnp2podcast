@@ -1,0 +1,1 @@
+Convert directory structure from UPnP media servers to podcast feeds.  Specifically designed for PlayON and SageTV but would work on any UPnP server.
